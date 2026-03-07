@@ -497,7 +497,8 @@
             const [isProcessing, setIsProcessing] = useState(false);
             const [analysisData, setAnalysisData] = useState(null);
             const [speciesDb, setSpeciesDb] = useState(null);
-            const toxicDB = speciesDb ? new Set(speciesDb.toxicDB) : new Set();
+            const toxicDB    = speciesDb ? new Set(speciesDb.toxicDB)    : new Set();
+            const gillHarmDB = speciesDb ? new Set(speciesDb.gillHarmDB) : new Set();
             
             // Import State
             const fileInputRef = useRef(null);
@@ -1917,28 +1918,50 @@
                 }
                 // ────────────────────────────────────────────────────────────────
 
-                // ── TOXIC SPECIES ANALYSIS ──────────────────────────────────────
-                let toxicCount = 0, totalWithDB = 0;
+                // ── TOXIC & GILL-HARM SPECIES ANALYSIS ─────────────────────────
+                let toxicCount = 0, gillCount = 0, totalWithDB = 0;
+                const detectedToxic = [], detectedGill = [];
                 s.forEach(sample => {
                     sample.taxa.forEach(t => {
+                        const name = t.name.trim();
                         totalWithDB++;
-                        if (toxicDB.has(t.name.trim())) toxicCount++;
+                        if (toxicDB.has(name)) { toxicCount++; if (!detectedToxic.includes(name)) detectedToxic.push(name); }
+                        if (gillHarmDB.has(name)) { gillCount++; if (!detectedGill.includes(name)) detectedGill.push(name); }
                     });
                 });
                 const toxicRatio = totalWithDB > 0 ? (toxicCount / totalWithDB) * 100 : 0;
+                const gillRatio  = totalWithDB > 0 ? (gillCount  / totalWithDB) * 100 : 0;
+
+                // Toxin assessment
                 let toxicDanger = '', toxicColor = '', toxicBg = '', toxicBorder = '';
                 if (toxicRatio === 0) {
-                    toxicDanger = 'Nem észlelhető toxikus faj a mintában.';
+                    toxicDanger = 'Nem észlelhető toxintermelő faj a mintában.';
                     toxicColor = 'text-green-900'; toxicBg = 'bg-green-50'; toxicBorder = 'border-green-300';
                 } else if (toxicRatio < 5) {
-                    toxicDanger = 'Minimális kockázat: toxikus fajok aránya alacsony (<5%). A környezetre gyakorolt hatás elhanyagolható.';
+                    toxicDanger = 'Minimális kockázat: toxintermelő fajok aránya alacsony (<5%). A potenciális humán/állati egészségügyi hatás elhanyagolható, de figyelemmel kísérés javasolt.';
                     toxicColor = 'text-yellow-900'; toxicBg = 'bg-yellow-50'; toxicBorder = 'border-yellow-300';
                 } else if (toxicRatio < 15) {
-                    toxicDanger = 'Közepes kockázat: toxikus fajok aránya mérsékelt (5–15%). A víztestben potenciális toxinterhelés áll fenn, rendszeres monitorozás javasolt.';
+                    toxicDanger = 'Közepes kockázat: toxintermelő fajok aránya mérsékelt (5–15%). A víztestben potenciális toxinterhelés (domoinsav/okadásav) áll fenn, rendszeres monitorozás és halvizsgálat javasolt.';
                     toxicColor = 'text-orange-900'; toxicBg = 'bg-orange-50'; toxicBorder = 'border-orange-400';
                 } else {
-                    toxicDanger = 'KIFEJEZETT KOCKÁZAT: toxikus fajok aránya magas (>15%). Azonnali vizsgálat és hatósági értesítés javasolt, halgazdálkodási és ivóvízkivételi tilalom mérlegelendő!';
+                    toxicDanger = 'KIFEJEZETT KOCKÁZAT: Toxintermelő fajok aránya magas (>15%). Azonnali vizsgálat és hatósági értesítés javasolt! Ivóvízkivételi és halfogyasztási tilalom mérlegelendő!';
                     toxicColor = 'text-red-900'; toxicBg = 'bg-red-50'; toxicBorder = 'border-red-500';
+                }
+
+                // Gill-harm assessment
+                let gillDanger = '', gillColor = '', gillBg = '', gillBorder = '';
+                if (gillRatio === 0) {
+                    gillDanger = 'Nem észlelhető kopoltyúkárosító faj a mintában.';
+                    gillColor = 'text-green-900'; gillBg = 'bg-green-50'; gillBorder = 'border-green-300';
+                } else if (gillRatio < 5) {
+                    gillDanger = 'Alacsony kopoltyúkockázat: kopoltyúkárosító fajok aránya alacsony (<5%). Intenzív haltenyésztési területen ajánlott megfigyelés.';
+                    gillColor = 'text-yellow-900'; gillBg = 'bg-yellow-50'; gillBorder = 'border-yellow-300';
+                } else if (gillRatio < 15) {
+                    gillDanger = 'Mérsékelt kopoltyúkockázat (5–15%): a jelenlévő tüskés/nyálkaburkos fajok mechanikai irritációt okozhatnak. Halgazdálkodási területen aktív megfigyelés és mortalitásellenőrzés javasolt.';
+                    gillColor = 'text-orange-900'; gillBg = 'bg-orange-50'; gillBorder = 'border-orange-400';
+                } else {
+                    gillDanger = 'MAGAS KOPOLTYÚKOCKÁZAT (>15%): A kopoltyúkárosító fajok dominanciája akut halpusztulást okozhat! Azonnali halakvakultúra-védelem, állomány kivonása vagy hálózás javasolt!';
+                    gillColor = 'text-red-900'; gillBg = 'bg-red-50'; gillBorder = 'border-red-500';
                 }
                 // ────────────────────────────────────────────────────────────────
                 return (
@@ -1998,16 +2021,37 @@
                             </div>
                         )}
 
-                        {toxicCount >= 0 && (
-                            <div className={`p-4 rounded border ${toxicBg} ${toxicBorder}`}>
-                                <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${toxicColor}`}>5. Toxikus fajok értékelése</h4>
-                                <p className={toxicColor}>
-                                    <strong>Toxikus fajok aránya: {toxicRatio.toFixed(1)}%</strong>
-                                    {toxicCount > 0 && <span> ({toxicCount} toxikus rekord / {totalWithDB} azonosított rekord)</span>}
+                        <div className={`p-4 rounded border ${toxicBg} ${toxicBorder}`}>
+                            <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${toxicColor}`}>
+                                5a. Toxintermelő fajok értékelése (domoinsav / okadásav / ASP / DSP)
+                            </h4>
+                            <p className={toxicColor}>
+                                <strong>Toxintermelő fajok aránya: {toxicRatio.toFixed(1)}%</strong>
+                                {toxicCount > 0 && <span> ({toxicCount} rekord / {totalWithDB} összesen)</span>}
+                            </p>
+                            <p className={`mt-1 ${toxicColor}`}>{toxicDanger}</p>
+                            {detectedToxic.length > 0 && (
+                                <p className={`mt-2 text-xs italic ${toxicColor}`}>
+                                    Azonosított fajok: {detectedToxic.sort().join(', ')}
                                 </p>
-                                <p className={`mt-1 ${toxicColor}`}>{toxicDanger}</p>
-                            </div>
-                        )}
+                            )}
+                        </div>
+
+                        <div className={`p-4 rounded border ${gillBg} ${gillBorder}`}>
+                            <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${gillColor}`}>
+                                5b. Kopoltyúkárosító fajok értékelése (mechanikai / mukusz / hipoxia)
+                            </h4>
+                            <p className={gillColor}>
+                                <strong>Kopoltyúkárosító fajok aránya: {gillRatio.toFixed(1)}%</strong>
+                                {gillCount > 0 && <span> ({gillCount} rekord / {totalWithDB} összesen)</span>}
+                            </p>
+                            <p className={`mt-1 ${gillColor}`}>{gillDanger}</p>
+                            {detectedGill.length > 0 && (
+                                <p className={`mt-2 text-xs italic ${gillColor}`}>
+                                    Azonosított fajok: {detectedGill.sort().join(', ')}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 );
             };
