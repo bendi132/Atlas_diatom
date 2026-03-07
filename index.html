@@ -1208,6 +1208,7 @@
                         siteId={selectedAnalysisSiteId} 
                         onBack={() => setView('input')} 
                         t={t}
+                        speciesDb={speciesDb}
                     />
                 );
             }
@@ -1474,7 +1475,11 @@
         };
 
         // --- REPORT COMPONENT ---
-        const ReportView = ({ data, siteId, onBack, t }) => {
+        const ReportView = ({ data, siteId, onBack, t, speciesDb }) => {
+
+            const toxicDB        = speciesDb ? new Set(speciesDb.toxicDB)        : new Set();
+            const gillPhysicalDB = speciesDb ? new Set(speciesDb.gillPhysicalDB) : new Set();
+            const gillBloomDB    = speciesDb ? new Set(speciesDb.gillBloomDB)    : new Set();
 
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
