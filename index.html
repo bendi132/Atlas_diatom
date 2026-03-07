@@ -44,7 +44,7 @@
     <div id="root"></div>
 
     <!-- WEB WORKER SCRIPT (Inline Blob) -->
-    <script id="worker-script" type="javascript/worker">
+    <script id="worker-script" type="text/plain">
         self.onmessage = function(e) {
             const { type, payload } = e.data;
             if (type === 'RUN_ANALYSIS') {
