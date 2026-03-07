@@ -440,8 +440,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // TOXIC SPECIES DATABASE – loaded from species.json
-        const toxicDB = speciesDb ? new Set(speciesDb.toxicDB) : new Set();
 
         // ── SUPABASE CONFIGURATION ────────────────────────────────────────────
         const SUPABASE_URL = "https://anubbtkyopjpuzacpryc.supabase.co";
@@ -891,6 +889,7 @@
             const [isProcessing, setIsProcessing] = useState(false);
             const [analysisData, setAnalysisData] = useState(null);
             const [speciesDb, setSpeciesDb] = useState(null);
+            const toxicDB = speciesDb ? new Set(speciesDb.toxicDB) : new Set();
             
             // Import State
             const fileInputRef = useRef(null);
