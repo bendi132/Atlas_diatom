@@ -44,398 +44,6 @@
     <div id="root"></div>
 
     <!-- WEB WORKER SCRIPT (Inline Blob) -->
-    <script id="worker-script" type="text/plain">
-        self.onmessage = function(e) {
-            const { type, payload } = e.data;
-            if (type === 'RUN_ANALYSIS') {
-                try {
-                    const results = runFullAnalysis(payload.samplings, payload.config, payload.speciesDb);
-                    self.postMessage({ type: 'ANALYSIS_COMPLETE', results });
-                } catch (err) {
-                    self.postMessage({ type: 'ERROR', error: err.message });
-                }
-            }
-        };
-
-        // --- STATISZTIKAI MOTOR (Worker Scope) ---
-
-        function runFullAnalysis(samplings, config, speciesDb) {
-            const n = samplings.length;
-            const isHypothesis = n < 5;
-            
-            // 1. Adat transzformáció és validálás
-            const processedSamples = samplings.map(s => ({
-                ...s,
-                totalAbundance: s.taxa.reduce((a,b) => a + b.count, 0)
-            }));
-
-            // 2. Index számítások mintánként
-            const samplesWithIndices = processedSamples.map(s => {
-                const indices = calculateIndices(s, speciesDb);
-                return { ...s, indices };
-            });
-
-            // 3. Faj-Környezet elemzés (csak ha n >= 3, különben nagyon instabil)
-            let speciesAnalysis = [];
-            if (n >= 3) {
-                speciesAnalysis = performSpeciesEnvironmentAnalysis(samplesWithIndices, config);
-            }
-
-            // 4. Aggregált statisztikák
-            const aggregatedStats = calculateAggregatedStats(samplesWithIndices);
-
-            // --- NEW: DOMINANT SPECIES EXTENDED ANALYSIS (v8.1.4 Extension) ---
-            // UPDATE: Returns both dominant (top 5) and all species stats
-            const fullEcologicalAnalysis = performDominantAnalysis(processedSamples, speciesDb);
-            const dominantAnalysis = fullEcologicalAnalysis.dominant;
-            const allSpeciesAnalysis = fullEcologicalAnalysis.all;
-
-            return {
-                n,
-                isHypothesis,
-                samples: samplesWithIndices,
-                speciesAnalysis,
-                aggregatedStats,
-                dominantAnalysis, 
-                allSpeciesAnalysis, // Added new field
-                timestamp: new Date().toISOString()
-            };
-        }
-
-        // --- NEW FUNCTION: DOMINANT ANALYSIS (v8.1.4) ---
-        function performDominantAnalysis(samples, speciesDb) {
-            const sensitivityDB = (speciesDb && speciesDb.sensitivityDB) ? speciesDb.sensitivityDB : {};
-
-            // 1. Identify Dominant Species (Top 5 by total abundance) AND All Species
-            const speciesSums = {};
-            let totalAbundanceAll = 0;
-            samples.forEach(s => {
-                totalAbundanceAll += s.totalAbundance;
-                s.taxa.forEach(t => {
-                    speciesSums[t.name] = (speciesSums[t.name] || 0) + t.count;
-                });
-            });
-
-            // 2. Env Stress Calculation (Normalized)
-            const params = ['nitrate_mg_L', 'phosphate_mg_L', 'conductivity_uS_cm'];
-            const bounds = {};
-            params.forEach(p => {
-                const vals = samples.map(s => parseFloat(s.env[p])).filter(v => !isNaN(v));
-                if (vals.length > 0) bounds[p] = { min: Math.min(...vals), max: Math.max(...vals) };
-            });
-
-            const getSampleStress = (s) => {
-                let sum = 0, count = 0;
-                params.forEach(p => {
-                    const val = parseFloat(s.env[p]);
-                    if (!isNaN(val) && bounds[p] && bounds[p].max > bounds[p].min) {
-                        sum += (val - bounds[p].min) / (bounds[p].max - bounds[p].min);
-                        count++;
-                    }
-                });
-                return count > 0 ? sum / count : 0.5;
-            };
-            
-            const avgStress = samples.reduce((acc, s) => acc + getSampleStress(s), 0) / (samples.length || 1);
-            const stressForCalc = Math.max(0.1, avgStress);
-
-            // 3. Analyze ALL species (Additive Change)
-            const allSpeciesKeys = Object.keys(speciesSums);
-            const allSpeciesAnalysis = allSpeciesKeys.map(spName => {
-                const totalCount = speciesSums[spName];
-                const relAbundance = totalCount / (totalAbundanceAll || 1);
-                
-                const entry = sensitivityDB[spName];
-                const sVal = entry ? entry.s : 3.0;
-                const vVal = entry ? entry.v : 1;
-                
-                // Note: VI is computationally expensive O(N^2), so we only calculate it fully for the Dominant subset below.
-                // For the "All Species" overview, we omit VI or set to 0.
-                
-                const tolFactor = Math.max(0.5, Math.min(2.0, 2.375 - (0.375 * sVal)));
-                const ösi = (relAbundance * tolFactor) / stressForCalc;
-
-                return {
-                    name: spName,
-                    s: sVal,
-                    v: vVal,
-                    relAbundance,
-                    ösi,
-                    tolFactor,
-                    avgStress
-                };
-            });
-
-            // Sort by abundance to get dominant
-            const sortedByAbundance = [...allSpeciesAnalysis].sort((a, b) => b.relAbundance - a.relAbundance);
-            const dominantSubset = sortedByAbundance.slice(0, 5);
-
-            // 4. Refine Dominant Analysis with Competition Index (VI)
-            // This maintains exact original logic for the dominant species output
-            const dominantAnalysis = dominantSubset.map(sp => {
-                let viSum = 0;
-                dominantSubset.forEach(other => {
-                    if (other.name === sp.name) return;
-                    const denom = sp.relAbundance + other.relAbundance;
-                    if (denom > 0) {
-                        viSum += Math.abs(sp.relAbundance - other.relAbundance) / denom;
-                    }
-                });
-                
-                return {
-                    ...sp,
-                    vi: viSum // Add the VI specifically for the dominant report
-                };
-            });
-
-            return {
-                dominant: dominantAnalysis,
-                all: allSpeciesAnalysis.sort((a,b) => b.relAbundance - a.relAbundance) // Return all, sorted
-            };
-        }
-
-
-
-
-        // --- INDICES ---
-        function calculateIndices(sample, speciesDb) {
-            const taxa = sample.taxa;
-            const N = sample.totalAbundance;
-            const S = taxa.length; 
-
-            // Shannon (H')
-            const shannon = -taxa.reduce((acc, t) => {
-                const p = t.count / N;
-                return acc + (p * Math.log(p));
-            }, 0);
-
-            // Simpson (D) & 1-D
-            const simpsonD = taxa.reduce((acc, t) => acc + (t.count/N)**2, 0);
-            
-            // Pielou Evenness (J')
-            const pielou = S > 1 ? shannon / Math.log(S) : 0;
-
-            // Margalef
-            const margalef = N > 1 ? (S - 1) / Math.log(N) : 0;
-
-            // IPS Proxy - Same DB as above for completeness (Simplified for length constraints in this view, assuming worker scope)
-            // (Note: The DB is identical to the one in performDominantAnalysis in practice)
-            const sensitivityDB = (speciesDb && speciesDb.sensitivityDB_ips) ? speciesDb.sensitivityDB_ips : {};
-            const diTpOptima = (speciesDb && speciesDb.diTpOptima) ? speciesDb.diTpOptima : {};
-            const diPhOptima = (speciesDb && speciesDb.diPhOptima) ? speciesDb.diPhOptima : {};
-            const spearSensitive = new Set((speciesDb && speciesDb.spearSensitive) ? speciesDb.spearSensitive : []);
-            
-            // Full DB access assumed for worker. Using partial list for brevity above, but logic remains.
-            
-            let ipsNum = 0, ipsDen = 0, tolerantCount = 0, sensitiveCount = 0;
-            let coveredAbundance = 0;
-            
-            taxa.forEach(t => {
-                const taxonName = t.name.trim();
-                const dbEntry = sensitivityDB[taxonName]; // Simplified lookup in this view
-                
-                if (dbEntry) {
-                    coveredAbundance += t.count;
-                    ipsNum += t.count * dbEntry.s * dbEntry.v;
-                    ipsDen += t.count * dbEntry.v;
-
-                    if (dbEntry.s < 2.5) tolerantCount += t.count;
-                    if (dbEntry.s > 4.0) sensitiveCount += t.count;
-                } else {
-                    // Fallback for logic consistency
-                    const vals = {s: 3.0, v: 1};
-                    ipsNum += t.count * vals.s * vals.v;
-                    ipsDen += t.count * vals.v;
-                }
-            });
-
-            const ips = ipsDen > 0 ? ipsNum / ipsDen : null;
-            const ipsCoverage = N > 0 ? (coveredAbundance / N) * 100 : 0;
-            
-            const env = sample.env;
-            const doSat = (env.dissolved_oxygen_mg_L && env.temperature_c) 
-                ? (env.dissolved_oxygen_mg_L / (14.6 - 0.4*env.temperature_c)) * 100
-                : null;
-            
-            const nutrientRatio = (env.nitrate_mg_L && env.phosphate_mg_L) 
-                ? env.nitrate_mg_L / env.phosphate_mg_L 
-                : null;
-
-
-            // ── Chao1 richness estimator ──────────────────────────────────────
-            const f1 = taxa.filter(t => t.count === 1).length; // singletons
-            const f2 = taxa.filter(t => t.count === 2).length; // doubletons
-            const chao1 = f2 > 0
-                ? S + (f1 * f1) / (2 * f2)
-                : S + (f1 * (f1 - 1)) / 2;
-
-            // ── DI-TP: Weighted-averaging inferred Total Phosphorus (µg/L) ────
-            let diTpNum = 0, diTpDen = 0;
-            taxa.forEach(t => {
-                const opt = diTpOptima[t.name.trim()];
-                if (opt !== undefined) { diTpNum += t.count * opt; diTpDen += t.count; }
-            });
-            const diTp = diTpDen > 0 ? diTpNum / diTpDen : null;
-
-            // ── DI-pH: Weighted-averaging inferred pH ─────────────────────────
-            let diPhNum = 0, diPhDen = 0;
-            taxa.forEach(t => {
-                const opt = diPhOptima[t.name.trim()];
-                if (opt !== undefined) { diPhNum += t.count * opt; diPhDen += t.count; }
-            });
-            const diPh = diPhDen > 0 ? diPhNum / diPhDen : null;
-
-            // ── SPEAR_diatoms: % sensitive species (pesticide indicator) ──────
-            let spearSens = 0;
-            taxa.forEach(t => { if (spearSensitive.has(t.name.trim())) spearSens += t.count; });
-            const spear = N > 0 ? (spearSens / N) * 100 : null;
-
-            return {
-                shannon, simpson1D: 1 - simpsonD, pielou, richness: S, margalef,
-                ips, ipsCoverage,
-                pctTolerant: (tolerantCount/N)*100,
-                pctSensitive: (sensitiveCount/N)*100,
-                doSat, nutrientRatio,
-                tdi: ips ? (5.5 - ips) * 20 : null,
-                chao1: chao1,
-                diTp: diTp,
-                diPh: diPh,
-                spear: spear,
-            };
-        }
-
-        function performSpeciesEnvironmentAnalysis(samples, config) {
-            const envKeys = [
-                'temperature_c', 'conductivity_uS_cm', 'pH', 'tds_mg_L', 
-                'dissolved_oxygen_mg_L', 'nitrate_mg_L', 'phosphate_mg_L',
-                'turbidity_NTU', 'ammonium_mg_L', 'silicate_mg_L'
-            ];
-
-            const allSpeciesMap = new Map();
-            samples.forEach(s => s.taxa.forEach(t => {
-                if(!allSpeciesMap.has(t.name)) allSpeciesMap.set(t.name, 0);
-                allSpeciesMap.set(t.name, allSpeciesMap.get(t.name) + 1);
-            }));
-
-            const minOccurrences = samples.length < 5 ? 2 : 3;
-            const targetSpecies = Array.from(allSpeciesMap.keys())
-                .filter(name => allSpeciesMap.get(name) >= minOccurrences);
-
-            const results = [];
-
-            targetSpecies.forEach(sp => {
-                envKeys.forEach(param => {
-                    const validSamples = samples.filter(s => s.env[param] != null && s.env[param] !== "");
-                    if (validSamples.length < 3) return;
-
-                    const x = validSamples.map(s => parseFloat(s.env[param]));
-                    const y = validSamples.map(s => {
-                        const t = s.taxa.find(tx => tx.name === sp);
-                        return t ? t.count / s.totalAbundance : 0;
-                    });
-
-                    const rho = calculateSpearman(x, y);
-
-                    let num = 0, den = 0;
-                    let values = [];
-                    for(let i=0; i<x.length; i++) {
-                        num += y[i] * x[i];
-                        den += y[i];
-                    }
-                    const optimum = den > 0 ? num / den : null;
-                    
-                    let tolerance = 0;
-                    if (optimum != null && den > 0) {
-                        let varSum = 0;
-                        for(let i=0; i<x.length; i++) {
-                            varSum += y[i] * ((x[i] - optimum) ** 2);
-                        }
-                        tolerance = Math.sqrt(varSum / den);
-                    }
-
-                    let stabilityCount = 0;
-                    const iterations = 1000;
-                    for(let k=0; k<iterations; k++) {
-                        const idxs = Array.from({length: x.length}, () => Math.floor(Math.random() * x.length));
-                        const rx = idxs.map(i => x[i]);
-                        const ry = idxs.map(i => y[i]);
-                        const rRho = calculateSpearman(rx, ry);
-                        if (Math.sign(rRho) === Math.sign(rho) && Math.abs(rRho) > 0.1) stabilityCount++;
-                    }
-                    const stability = stabilityCount / iterations;
-
-                    const effectSize = rho;
-                    
-                    const n_local = validSamples.length;
-                    const presentCount = validSamples.filter((s, i) => y[i] > 0).length;
-                    
-                    const dataCoverageScore = Math.min(1, presentCount / n_local);
-                    const effectSizeScore = Math.min(1, Math.abs(effectSize) / 1.0);
-                    const stabilityScore = stability;
-                    const modelFitScore = Math.abs(rho); 
-
-                    const rawConf = 0.30*dataCoverageScore + 0.30*effectSizeScore + 0.25*stabilityScore + 0.15*modelFitScore;
-                    const sampleFactor = Math.min(1, n_local / 20);
-                    const confidence = Math.round(100 * rawConf * sampleFactor);
-
-                    if (Math.abs(rho) > 0.3 || confidence > 20) {
-                        results.push({
-                            species: sp,
-                            parameter: param,
-                            n: n_local,
-                            present_n: presentCount,
-                            rho: rho,
-                            optimum: optimum,
-                            tolerance: tolerance,
-                            confidence: confidence,
-                            stability: stability
-                        });
-                    }
-                });
-            });
-
-            return results.sort((a,b) => b.confidence - a.confidence);
-        }
-
-        function calculateSpearman(x, y) {
-            const n = x.length;
-            if (n < 3) return 0;
-            const rank = (arr) => {
-                const sorted = arr.map((v, i) => ({v, i})).sort((a, b) => a.v - b.v);
-                const ranks = new Array(n).fill(0);
-                let i = 0;
-                while (i < n) {
-                    let j = i;
-                    while (j < n - 1 && sorted[j].v === sorted[j+1].v) j++;
-                    const r = (i + j + 2) / 2;
-                    for (let k = i; k <= j; k++) ranks[sorted[k].i] = r;
-                    i = j + 1;
-                }
-                return ranks;
-            };
-            const rx = rank(x);
-            const ry = rank(y);
-            let dSum = 0;
-            for(let i=0; i<n; i++) dSum += (rx[i] - ry[i])**2;
-            return 1 - ((6 * dSum) / (n * (n**2 - 1)));
-        }
-
-        function calculateAggregatedStats(samples) {
-            const stats = {};
-            const keys = Object.keys(samples[0].env);
-            keys.forEach(k => {
-                const vals = samples.map(s => parseFloat(s.env[k])).filter(v => !isNaN(v));
-                if (vals.length > 0) {
-                    const sum = vals.reduce((a,b)=>a+b,0);
-                    const mean = sum/vals.length;
-                    const variance = vals.reduce((a,b)=>a+(b-mean)**2,0) / vals.length;
-                    stats[k] = { mean, sd: Math.sqrt(variance), min: Math.min(...vals), max: Math.max(...vals) };
-                }
-            });
-            return stats;
-        }
-
-    </script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
@@ -989,7 +597,397 @@
                 initLoad();
 
                 // Initialize Worker from Script Tag
-                const blob = new Blob([document.querySelector('#worker-script').textContent], { type: "text/javascript" });
+                const WORKER_CODE = `        self.onmessage = function(e) {
+            const { type, payload } = e.data;
+            if (type === 'RUN_ANALYSIS') {
+                try {
+                    const results = runFullAnalysis(payload.samplings, payload.config, payload.speciesDb);
+                    self.postMessage({ type: 'ANALYSIS_COMPLETE', results });
+                } catch (err) {
+                    self.postMessage({ type: 'ERROR', error: err.message });
+                }
+            }
+        };
+
+        // --- STATISZTIKAI MOTOR (Worker Scope) ---
+
+        function runFullAnalysis(samplings, config, speciesDb) {
+            const n = samplings.length;
+            const isHypothesis = n < 5;
+            
+            // 1. Adat transzformáció és validálás
+            const processedSamples = samplings.map(s => ({
+                ...s,
+                totalAbundance: s.taxa.reduce((a,b) => a + b.count, 0)
+            }));
+
+            // 2. Index számítások mintánként
+            const samplesWithIndices = processedSamples.map(s => {
+                const indices = calculateIndices(s, speciesDb);
+                return { ...s, indices };
+            });
+
+            // 3. Faj-Környezet elemzés (csak ha n >= 3, különben nagyon instabil)
+            let speciesAnalysis = [];
+            if (n >= 3) {
+                speciesAnalysis = performSpeciesEnvironmentAnalysis(samplesWithIndices, config);
+            }
+
+            // 4. Aggregált statisztikák
+            const aggregatedStats = calculateAggregatedStats(samplesWithIndices);
+
+            // --- NEW: DOMINANT SPECIES EXTENDED ANALYSIS (v8.1.4 Extension) ---
+            // UPDATE: Returns both dominant (top 5) and all species stats
+            const fullEcologicalAnalysis = performDominantAnalysis(processedSamples, speciesDb);
+            const dominantAnalysis = fullEcologicalAnalysis.dominant;
+            const allSpeciesAnalysis = fullEcologicalAnalysis.all;
+
+            return {
+                n,
+                isHypothesis,
+                samples: samplesWithIndices,
+                speciesAnalysis,
+                aggregatedStats,
+                dominantAnalysis, 
+                allSpeciesAnalysis, // Added new field
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        // --- NEW FUNCTION: DOMINANT ANALYSIS (v8.1.4) ---
+        function performDominantAnalysis(samples, speciesDb) {
+            const sensitivityDB = (speciesDb && speciesDb.sensitivityDB) ? speciesDb.sensitivityDB : {};
+
+            // 1. Identify Dominant Species (Top 5 by total abundance) AND All Species
+            const speciesSums = {};
+            let totalAbundanceAll = 0;
+            samples.forEach(s => {
+                totalAbundanceAll += s.totalAbundance;
+                s.taxa.forEach(t => {
+                    speciesSums[t.name] = (speciesSums[t.name] || 0) + t.count;
+                });
+            });
+
+            // 2. Env Stress Calculation (Normalized)
+            const params = ['nitrate_mg_L', 'phosphate_mg_L', 'conductivity_uS_cm'];
+            const bounds = {};
+            params.forEach(p => {
+                const vals = samples.map(s => parseFloat(s.env[p])).filter(v => !isNaN(v));
+                if (vals.length > 0) bounds[p] = { min: Math.min(...vals), max: Math.max(...vals) };
+            });
+
+            const getSampleStress = (s) => {
+                let sum = 0, count = 0;
+                params.forEach(p => {
+                    const val = parseFloat(s.env[p]);
+                    if (!isNaN(val) && bounds[p] && bounds[p].max > bounds[p].min) {
+                        sum += (val - bounds[p].min) / (bounds[p].max - bounds[p].min);
+                        count++;
+                    }
+                });
+                return count > 0 ? sum / count : 0.5;
+            };
+            
+            const avgStress = samples.reduce((acc, s) => acc + getSampleStress(s), 0) / (samples.length || 1);
+            const stressForCalc = Math.max(0.1, avgStress);
+
+            // 3. Analyze ALL species (Additive Change)
+            const allSpeciesKeys = Object.keys(speciesSums);
+            const allSpeciesAnalysis = allSpeciesKeys.map(spName => {
+                const totalCount = speciesSums[spName];
+                const relAbundance = totalCount / (totalAbundanceAll || 1);
+                
+                const entry = sensitivityDB[spName];
+                const sVal = entry ? entry.s : 3.0;
+                const vVal = entry ? entry.v : 1;
+                
+                // Note: VI is computationally expensive O(N^2), so we only calculate it fully for the Dominant subset below.
+                // For the "All Species" overview, we omit VI or set to 0.
+                
+                const tolFactor = Math.max(0.5, Math.min(2.0, 2.375 - (0.375 * sVal)));
+                const ösi = (relAbundance * tolFactor) / stressForCalc;
+
+                return {
+                    name: spName,
+                    s: sVal,
+                    v: vVal,
+                    relAbundance,
+                    ösi,
+                    tolFactor,
+                    avgStress
+                };
+            });
+
+            // Sort by abundance to get dominant
+            const sortedByAbundance = [...allSpeciesAnalysis].sort((a, b) => b.relAbundance - a.relAbundance);
+            const dominantSubset = sortedByAbundance.slice(0, 5);
+
+            // 4. Refine Dominant Analysis with Competition Index (VI)
+            // This maintains exact original logic for the dominant species output
+            const dominantAnalysis = dominantSubset.map(sp => {
+                let viSum = 0;
+                dominantSubset.forEach(other => {
+                    if (other.name === sp.name) return;
+                    const denom = sp.relAbundance + other.relAbundance;
+                    if (denom > 0) {
+                        viSum += Math.abs(sp.relAbundance - other.relAbundance) / denom;
+                    }
+                });
+                
+                return {
+                    ...sp,
+                    vi: viSum // Add the VI specifically for the dominant report
+                };
+            });
+
+            return {
+                dominant: dominantAnalysis,
+                all: allSpeciesAnalysis.sort((a,b) => b.relAbundance - a.relAbundance) // Return all, sorted
+            };
+        }
+
+
+
+
+        // --- INDICES ---
+        function calculateIndices(sample, speciesDb) {
+            const taxa = sample.taxa;
+            const N = sample.totalAbundance;
+            const S = taxa.length; 
+
+            // Shannon (H')
+            const shannon = -taxa.reduce((acc, t) => {
+                const p = t.count / N;
+                return acc + (p * Math.log(p));
+            }, 0);
+
+            // Simpson (D) & 1-D
+            const simpsonD = taxa.reduce((acc, t) => acc + (t.count/N)**2, 0);
+            
+            // Pielou Evenness (J')
+            const pielou = S > 1 ? shannon / Math.log(S) : 0;
+
+            // Margalef
+            const margalef = N > 1 ? (S - 1) / Math.log(N) : 0;
+
+            // IPS Proxy - Same DB as above for completeness (Simplified for length constraints in this view, assuming worker scope)
+            // (Note: The DB is identical to the one in performDominantAnalysis in practice)
+            const sensitivityDB = (speciesDb && speciesDb.sensitivityDB_ips) ? speciesDb.sensitivityDB_ips : {};
+            const diTpOptima = (speciesDb && speciesDb.diTpOptima) ? speciesDb.diTpOptima : {};
+            const diPhOptima = (speciesDb && speciesDb.diPhOptima) ? speciesDb.diPhOptima : {};
+            const spearSensitive = new Set((speciesDb && speciesDb.spearSensitive) ? speciesDb.spearSensitive : []);
+            
+            // Full DB access assumed for worker. Using partial list for brevity above, but logic remains.
+            
+            let ipsNum = 0, ipsDen = 0, tolerantCount = 0, sensitiveCount = 0;
+            let coveredAbundance = 0;
+            
+            taxa.forEach(t => {
+                const taxonName = t.name.trim();
+                const dbEntry = sensitivityDB[taxonName]; // Simplified lookup in this view
+                
+                if (dbEntry) {
+                    coveredAbundance += t.count;
+                    ipsNum += t.count * dbEntry.s * dbEntry.v;
+                    ipsDen += t.count * dbEntry.v;
+
+                    if (dbEntry.s < 2.5) tolerantCount += t.count;
+                    if (dbEntry.s > 4.0) sensitiveCount += t.count;
+                } else {
+                    // Fallback for logic consistency
+                    const vals = {s: 3.0, v: 1};
+                    ipsNum += t.count * vals.s * vals.v;
+                    ipsDen += t.count * vals.v;
+                }
+            });
+
+            const ips = ipsDen > 0 ? ipsNum / ipsDen : null;
+            const ipsCoverage = N > 0 ? (coveredAbundance / N) * 100 : 0;
+            
+            const env = sample.env;
+            const doSat = (env.dissolved_oxygen_mg_L && env.temperature_c) 
+                ? (env.dissolved_oxygen_mg_L / (14.6 - 0.4*env.temperature_c)) * 100
+                : null;
+            
+            const nutrientRatio = (env.nitrate_mg_L && env.phosphate_mg_L) 
+                ? env.nitrate_mg_L / env.phosphate_mg_L 
+                : null;
+
+
+            // ── Chao1 richness estimator ──────────────────────────────────────
+            const f1 = taxa.filter(t => t.count === 1).length; // singletons
+            const f2 = taxa.filter(t => t.count === 2).length; // doubletons
+            const chao1 = f2 > 0
+                ? S + (f1 * f1) / (2 * f2)
+                : S + (f1 * (f1 - 1)) / 2;
+
+            // ── DI-TP: Weighted-averaging inferred Total Phosphorus (µg/L) ────
+            let diTpNum = 0, diTpDen = 0;
+            taxa.forEach(t => {
+                const opt = diTpOptima[t.name.trim()];
+                if (opt !== undefined) { diTpNum += t.count * opt; diTpDen += t.count; }
+            });
+            const diTp = diTpDen > 0 ? diTpNum / diTpDen : null;
+
+            // ── DI-pH: Weighted-averaging inferred pH ─────────────────────────
+            let diPhNum = 0, diPhDen = 0;
+            taxa.forEach(t => {
+                const opt = diPhOptima[t.name.trim()];
+                if (opt !== undefined) { diPhNum += t.count * opt; diPhDen += t.count; }
+            });
+            const diPh = diPhDen > 0 ? diPhNum / diPhDen : null;
+
+            // ── SPEAR_diatoms: % sensitive species (pesticide indicator) ──────
+            let spearSens = 0;
+            taxa.forEach(t => { if (spearSensitive.has(t.name.trim())) spearSens += t.count; });
+            const spear = N > 0 ? (spearSens / N) * 100 : null;
+
+            return {
+                shannon, simpson1D: 1 - simpsonD, pielou, richness: S, margalef,
+                ips, ipsCoverage,
+                pctTolerant: (tolerantCount/N)*100,
+                pctSensitive: (sensitiveCount/N)*100,
+                doSat, nutrientRatio,
+                tdi: ips ? (5.5 - ips) * 20 : null,
+                chao1: chao1,
+                diTp: diTp,
+                diPh: diPh,
+                spear: spear,
+            };
+        }
+
+        function performSpeciesEnvironmentAnalysis(samples, config) {
+            const envKeys = [
+                'temperature_c', 'conductivity_uS_cm', 'pH', 'tds_mg_L', 
+                'dissolved_oxygen_mg_L', 'nitrate_mg_L', 'phosphate_mg_L',
+                'turbidity_NTU', 'ammonium_mg_L', 'silicate_mg_L'
+            ];
+
+            const allSpeciesMap = new Map();
+            samples.forEach(s => s.taxa.forEach(t => {
+                if(!allSpeciesMap.has(t.name)) allSpeciesMap.set(t.name, 0);
+                allSpeciesMap.set(t.name, allSpeciesMap.get(t.name) + 1);
+            }));
+
+            const minOccurrences = samples.length < 5 ? 2 : 3;
+            const targetSpecies = Array.from(allSpeciesMap.keys())
+                .filter(name => allSpeciesMap.get(name) >= minOccurrences);
+
+            const results = [];
+
+            targetSpecies.forEach(sp => {
+                envKeys.forEach(param => {
+                    const validSamples = samples.filter(s => s.env[param] != null && s.env[param] !== "");
+                    if (validSamples.length < 3) return;
+
+                    const x = validSamples.map(s => parseFloat(s.env[param]));
+                    const y = validSamples.map(s => {
+                        const t = s.taxa.find(tx => tx.name === sp);
+                        return t ? t.count / s.totalAbundance : 0;
+                    });
+
+                    const rho = calculateSpearman(x, y);
+
+                    let num = 0, den = 0;
+                    let values = [];
+                    for(let i=0; i<x.length; i++) {
+                        num += y[i] * x[i];
+                        den += y[i];
+                    }
+                    const optimum = den > 0 ? num / den : null;
+                    
+                    let tolerance = 0;
+                    if (optimum != null && den > 0) {
+                        let varSum = 0;
+                        for(let i=0; i<x.length; i++) {
+                            varSum += y[i] * ((x[i] - optimum) ** 2);
+                        }
+                        tolerance = Math.sqrt(varSum / den);
+                    }
+
+                    let stabilityCount = 0;
+                    const iterations = 1000;
+                    for(let k=0; k<iterations; k++) {
+                        const idxs = Array.from({length: x.length}, () => Math.floor(Math.random() * x.length));
+                        const rx = idxs.map(i => x[i]);
+                        const ry = idxs.map(i => y[i]);
+                        const rRho = calculateSpearman(rx, ry);
+                        if (Math.sign(rRho) === Math.sign(rho) && Math.abs(rRho) > 0.1) stabilityCount++;
+                    }
+                    const stability = stabilityCount / iterations;
+
+                    const effectSize = rho;
+                    
+                    const n_local = validSamples.length;
+                    const presentCount = validSamples.filter((s, i) => y[i] > 0).length;
+                    
+                    const dataCoverageScore = Math.min(1, presentCount / n_local);
+                    const effectSizeScore = Math.min(1, Math.abs(effectSize) / 1.0);
+                    const stabilityScore = stability;
+                    const modelFitScore = Math.abs(rho); 
+
+                    const rawConf = 0.30*dataCoverageScore + 0.30*effectSizeScore + 0.25*stabilityScore + 0.15*modelFitScore;
+                    const sampleFactor = Math.min(1, n_local / 20);
+                    const confidence = Math.round(100 * rawConf * sampleFactor);
+
+                    if (Math.abs(rho) > 0.3 || confidence > 20) {
+                        results.push({
+                            species: sp,
+                            parameter: param,
+                            n: n_local,
+                            present_n: presentCount,
+                            rho: rho,
+                            optimum: optimum,
+                            tolerance: tolerance,
+                            confidence: confidence,
+                            stability: stability
+                        });
+                    }
+                });
+            });
+
+            return results.sort((a,b) => b.confidence - a.confidence);
+        }
+
+        function calculateSpearman(x, y) {
+            const n = x.length;
+            if (n < 3) return 0;
+            const rank = (arr) => {
+                const sorted = arr.map((v, i) => ({v, i})).sort((a, b) => a.v - b.v);
+                const ranks = new Array(n).fill(0);
+                let i = 0;
+                while (i < n) {
+                    let j = i;
+                    while (j < n - 1 && sorted[j].v === sorted[j+1].v) j++;
+                    const r = (i + j + 2) / 2;
+                    for (let k = i; k <= j; k++) ranks[sorted[k].i] = r;
+                    i = j + 1;
+                }
+                return ranks;
+            };
+            const rx = rank(x);
+            const ry = rank(y);
+            let dSum = 0;
+            for(let i=0; i<n; i++) dSum += (rx[i] - ry[i])**2;
+            return 1 - ((6 * dSum) / (n * (n**2 - 1)));
+        }
+
+        function calculateAggregatedStats(samples) {
+            const stats = {};
+            const keys = Object.keys(samples[0].env);
+            keys.forEach(k => {
+                const vals = samples.map(s => parseFloat(s.env[k])).filter(v => !isNaN(v));
+                if (vals.length > 0) {
+                    const sum = vals.reduce((a,b)=>a+b,0);
+                    const mean = sum/vals.length;
+                    const variance = vals.reduce((a,b)=>a+(b-mean)**2,0) / vals.length;
+                    stats[k] = { mean, sd: Math.sqrt(variance), min: Math.min(...vals), max: Math.max(...vals) };
+                }
+            });
+            return stats;
+        }
+`;
+                const blob = new Blob([WORKER_CODE], { type: "text/javascript" });
                 workerRef.current = new Worker(window.URL.createObjectURL(blob));
                 
                 workerRef.current.onmessage = (e) => {
