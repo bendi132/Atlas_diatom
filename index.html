@@ -498,7 +498,8 @@
             const [analysisData, setAnalysisData] = useState(null);
             const [speciesDb, setSpeciesDb] = useState(null);
             const toxicDB    = speciesDb ? new Set(speciesDb.toxicDB)    : new Set();
-            const gillHarmDB = speciesDb ? new Set(speciesDb.gillHarmDB) : new Set();
+            const gillPhysicalDB = speciesDb ? new Set(speciesDb.gillPhysicalDB) : new Set();
+            const gillBloomDB    = speciesDb ? new Set(speciesDb.gillBloomDB)    : new Set();
             
             // Import State
             const fileInputRef = useRef(null);
@@ -1919,18 +1920,20 @@
                 // ────────────────────────────────────────────────────────────────
 
                 // ── TOXIC & GILL-HARM SPECIES ANALYSIS ─────────────────────────
-                let toxicCount = 0, gillCount = 0, totalWithDB = 0;
-                const detectedToxic = [], detectedGill = [];
+                let toxicCount = 0, gillPhysCount = 0, gillBloomCount = 0, totalWithDB = 0;
+                const detectedToxic = [], detectedGillPhys = [], detectedGillBloom = [];
                 s.forEach(sample => {
                     sample.taxa.forEach(t => {
                         const name = t.name.trim();
                         totalWithDB++;
-                        if (toxicDB.has(name)) { toxicCount++; if (!detectedToxic.includes(name)) detectedToxic.push(name); }
-                        if (gillHarmDB.has(name)) { gillCount++; if (!detectedGill.includes(name)) detectedGill.push(name); }
+                        if (toxicDB.has(name))        { toxicCount++;     if (!detectedToxic.includes(name))     detectedToxic.push(name); }
+                        if (gillPhysicalDB.has(name)) { gillPhysCount++;  if (!detectedGillPhys.includes(name))  detectedGillPhys.push(name); }
+                        if (gillBloomDB.has(name))    { gillBloomCount++; if (!detectedGillBloom.includes(name)) detectedGillBloom.push(name); }
                     });
                 });
-                const toxicRatio = totalWithDB > 0 ? (toxicCount / totalWithDB) * 100 : 0;
-                const gillRatio  = totalWithDB > 0 ? (gillCount  / totalWithDB) * 100 : 0;
+                const toxicRatio    = totalWithDB > 0 ? (toxicCount    / totalWithDB) * 100 : 0;
+                const gillPhysRatio = totalWithDB > 0 ? (gillPhysCount / totalWithDB) * 100 : 0;
+                const gillBloomRatio= totalWithDB > 0 ? (gillBloomCount/ totalWithDB) * 100 : 0;
 
                 // Toxin assessment
                 let toxicDanger = '', toxicColor = '', toxicBg = '', toxicBorder = '';
@@ -1938,30 +1941,46 @@
                     toxicDanger = 'Nem észlelhető toxintermelő faj a mintában.';
                     toxicColor = 'text-green-900'; toxicBg = 'bg-green-50'; toxicBorder = 'border-green-300';
                 } else if (toxicRatio < 5) {
-                    toxicDanger = 'Minimális kockázat: toxintermelő fajok aránya alacsony (<5%). A potenciális humán/állati egészségügyi hatás elhanyagolható, de figyelemmel kísérés javasolt.';
+                    toxicDanger = 'Minimális kockázat: toxintermelő fajok aránya alacsony (<5%). Potenciális domoinsav/okadásav terhelés figyelemmel kísérése javasolt.';
                     toxicColor = 'text-yellow-900'; toxicBg = 'bg-yellow-50'; toxicBorder = 'border-yellow-300';
                 } else if (toxicRatio < 15) {
-                    toxicDanger = 'Közepes kockázat: toxintermelő fajok aránya mérsékelt (5–15%). A víztestben potenciális toxinterhelés (domoinsav/okadásav) áll fenn, rendszeres monitorozás és halvizsgálat javasolt.';
+                    toxicDanger = 'Közepes kockázat: toxintermelő fajok aránya mérsékelt (5–15%). Rendszeres monitorozás és halvizsgálat javasolt.';
                     toxicColor = 'text-orange-900'; toxicBg = 'bg-orange-50'; toxicBorder = 'border-orange-400';
                 } else {
                     toxicDanger = 'KIFEJEZETT KOCKÁZAT: Toxintermelő fajok aránya magas (>15%). Azonnali vizsgálat és hatósági értesítés javasolt! Ivóvízkivételi és halfogyasztási tilalom mérlegelendő!';
                     toxicColor = 'text-red-900'; toxicBg = 'bg-red-50'; toxicBorder = 'border-red-500';
                 }
 
-                // Gill-harm assessment
-                let gillDanger = '', gillColor = '', gillBg = '', gillBorder = '';
-                if (gillRatio === 0) {
-                    gillDanger = 'Nem észlelhető kopoltyúkárosító faj a mintában.';
-                    gillColor = 'text-green-900'; gillBg = 'bg-green-50'; gillBorder = 'border-green-300';
-                } else if (gillRatio < 5) {
-                    gillDanger = 'Alacsony kopoltyúkockázat: kopoltyúkárosító fajok aránya alacsony (<5%). Intenzív haltenyésztési területen ajánlott megfigyelés.';
-                    gillColor = 'text-yellow-900'; gillBg = 'bg-yellow-50'; gillBorder = 'border-yellow-300';
-                } else if (gillRatio < 15) {
-                    gillDanger = 'Mérsékelt kopoltyúkockázat (5–15%): a jelenlévő tüskés/nyálkaburkos fajok mechanikai irritációt okozhatnak. Halgazdálkodási területen aktív megfigyelés és mortalitásellenőrzés javasolt.';
-                    gillColor = 'text-orange-900'; gillBg = 'bg-orange-50'; gillBorder = 'border-orange-400';
+                // Physical gill injury – LOW threshold (even 1–3% is dangerous)
+                let gillPhysDanger = '', gillPhysColor = '', gillPhysBg = '', gillPhysBorder = '';
+                if (gillPhysRatio === 0) {
+                    gillPhysDanger = 'Nem észlelhető fizikai kopoltyúkárosító faj.';
+                    gillPhysColor = 'text-green-900'; gillPhysBg = 'bg-green-50'; gillPhysBorder = 'border-green-300';
+                } else if (gillPhysRatio < 1) {
+                    gillPhysDanger = 'Minimális fizikai kockázat (<1%): tüskés/lándzsás fajok jelen vannak, de igen alacsony arányban. Haltenyésztési területen fokozott megfigyelés ajánlott.';
+                    gillPhysColor = 'text-yellow-900'; gillPhysBg = 'bg-yellow-50'; gillPhysBorder = 'border-yellow-300';
+                } else if (gillPhysRatio < 3) {
+                    gillPhysDanger = 'KÖZEPES FIZIKAI KOCKÁZAT (1–3%): Tüskés/lándzsás fajok már kis sejtszámnál is kopoltyúvérzést, laceratiot okozhatnak! Haltenyésztési területen azonnali megfigyelés és mortalitásellenőrzés szükséges.';
+                    gillPhysColor = 'text-orange-900'; gillPhysBg = 'bg-orange-50'; gillPhysBorder = 'border-orange-400';
                 } else {
-                    gillDanger = 'MAGAS KOPOLTYÚKOCKÁZAT (>15%): A kopoltyúkárosító fajok dominanciája akut halpusztulást okozhat! Azonnali halakvakultúra-védelem, állomány kivonása vagy hálózás javasolt!';
-                    gillColor = 'text-red-900'; gillBg = 'bg-red-50'; gillBorder = 'border-red-500';
+                    gillPhysDanger = 'MAGAS FIZIKAI KOPOLTYÚKOCKÁZAT (>3%): Akut halpusztulás kockázata fennáll! A tüskés/lándzsás fajok közvetlenül roncsolják a kopoltyúszövetet. Halállomány azonnali védelme, esetleges kivonása javasolt!';
+                    gillPhysColor = 'text-red-900'; gillPhysBg = 'bg-red-50'; gillPhysBorder = 'border-red-500';
+                }
+
+                // Bloom gill harm – HIGH threshold (dangerous only when dominant)
+                let gillBloomDanger = '', gillBloomColor = '', gillBloomBg = '', gillBloomBorder = '';
+                if (gillBloomRatio === 0) {
+                    gillBloomDanger = 'Nem észlelhető bloom-kockázatú faj a mintában.';
+                    gillBloomColor = 'text-green-900'; gillBloomBg = 'bg-green-50'; gillBloomBorder = 'border-green-300';
+                } else if (gillBloomRatio < 15) {
+                    gillBloomDanger = `Alacsony bloom-kockázat (<15%): A fajok kis arányban vannak jelen, virágzás esetén azonban O₂-depléció és nyálka-elzáródás veszélyével kell számolni. Tápanyagterhelés csökkentése javasolt.`;
+                    gillBloomColor = 'text-yellow-900'; gillBloomBg = 'bg-yellow-50'; gillBloomBorder = 'border-yellow-300';
+                } else if (gillBloomRatio < 30) {
+                    gillBloomDanger = 'MÉRSÉKELT BLOOM-KOCKÁZAT (15–30%): A fajok közepes dominanciája esetén tömeges elszaporodásuk oxigénhiányt, kopoltyú-nyálkaelzáródást okozhat. Aktív monitoring és tápanyagkezelés szükséges.';
+                    gillBloomColor = 'text-orange-900'; gillBloomBg = 'bg-orange-50'; gillBloomBorder = 'border-orange-400';
+                } else {
+                    gillBloomDanger = 'MAGAS BLOOM-KOCKÁZAT (>30%): A fajok dominálják a közösséget. Aktuális vagy közelgő virágzás esetén súlyos oxigénhiány és kopoltyú-elzáródás miatti halpusztulás várható! Azonnali beavatkozás indokolt.';
+                    gillBloomColor = 'text-red-900'; gillBloomBg = 'bg-red-50'; gillBloomBorder = 'border-red-500';
                 }
                 // ────────────────────────────────────────────────────────────────
                 return (
@@ -2037,18 +2056,40 @@
                             )}
                         </div>
 
-                        <div className={`p-4 rounded border ${gillBg} ${gillBorder}`}>
-                            <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${gillColor}`}>
-                                5b. Kopoltyúkárosító fajok értékelése (mechanikai / mukusz / hipoxia)
+                        <div className={`p-4 rounded border ${gillPhysBg} ${gillPhysBorder}`}>
+                            <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${gillPhysColor}`}>
+                                5b. Fizikai kopoltyúkárosítók (tüskés setae / lándzsás sejtek)
                             </h4>
-                            <p className={gillColor}>
-                                <strong>Kopoltyúkárosító fajok aránya: {gillRatio.toFixed(1)}%</strong>
-                                {gillCount > 0 && <span> ({gillCount} rekord / {totalWithDB} összesen)</span>}
+                            <p className={`text-xs mb-2 opacity-75 ${gillPhysColor}`}>
+                                ⚠ Ezek a fajok már kis sejtszámnál is közvetlenül roncsolják a kopoltyúszövetet. Küszöb: &gt;1% = közepes; &gt;3% = magas kockázat.
                             </p>
-                            <p className={`mt-1 ${gillColor}`}>{gillDanger}</p>
-                            {detectedGill.length > 0 && (
-                                <p className={`mt-2 text-xs italic ${gillColor}`}>
-                                    Azonosított fajok: {detectedGill.sort().join(', ')}
+                            <p className={gillPhysColor}>
+                                <strong>Fizikai károsítók aránya: {gillPhysRatio.toFixed(2)}%</strong>
+                                {gillPhysCount > 0 && <span> ({gillPhysCount} rekord / {totalWithDB} összesen)</span>}
+                            </p>
+                            <p className={`mt-1 ${gillPhysColor}`}>{gillPhysDanger}</p>
+                            {detectedGillPhys.length > 0 && (
+                                <p className={`mt-2 text-xs italic ${gillPhysColor}`}>
+                                    Azonosított fajok: {detectedGillPhys.sort().join(', ')}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className={`p-4 rounded border ${gillBloomBg} ${gillBloomBorder}`}>
+                            <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${gillBloomColor}`}>
+                                5c. Bloom-kockázatú kopoltyúkárosítók (O₂-depléció / nyálka / hipoxia)
+                            </h4>
+                            <p className={`text-xs mb-2 opacity-75 ${gillBloomColor}`}>
+                                ℹ Ezek a fajok csak tömeges elszaporodáskor veszélyesek. Küszöb: &gt;15% = mérsékelt; &gt;30% = magas kockázat.
+                            </p>
+                            <p className={gillBloomColor}>
+                                <strong>Bloom-kockázatú fajok aránya: {gillBloomRatio.toFixed(1)}%</strong>
+                                {gillBloomCount > 0 && <span> ({gillBloomCount} rekord / {totalWithDB} összesen)</span>}
+                            </p>
+                            <p className={`mt-1 ${gillBloomColor}`}>{gillBloomDanger}</p>
+                            {detectedGillBloom.length > 0 && (
+                                <p className={`mt-2 text-xs italic ${gillBloomColor}`}>
+                                    Azonosított fajok: {detectedGillBloom.sort().join(', ')}
                                 </p>
                             )}
                         </div>
