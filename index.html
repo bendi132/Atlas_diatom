@@ -644,6 +644,35 @@
             const dominantAnalysis = fullEcologicalAnalysis.dominant;
             const allSpeciesAnalysis = fullEcologicalAnalysis.all;
 
+            // 5. Harmful species analysis (toxic / gill-damaging)
+            // Computed here in the worker where speciesDb is available
+            const _toxicSet     = new Set((speciesDb && speciesDb.toxicDB)        ? speciesDb.toxicDB        : []);
+            const _gillPhysSet  = new Set((speciesDb && speciesDb.gillPhysicalDB) ? speciesDb.gillPhysicalDB : []);
+            const _gillBloomSet = new Set((speciesDb && speciesDb.gillBloomDB)    ? speciesDb.gillBloomDB    : []);
+            let _toxicCount = 0, _gillPhysCount = 0, _gillBloomCount = 0, _totalWithDB = 0;
+            const _detectedToxic = [], _detectedGillPhys = [], _detectedGillBloom = [];
+            samplesWithIndices.forEach(function(sample) {
+                sample.taxa.forEach(function(t) {
+                    var name = t.name.trim();
+                    _totalWithDB++;
+                    if (_toxicSet.has(name))     { _toxicCount++;     if (_detectedToxic.indexOf(name) === -1)     _detectedToxic.push(name); }
+                    if (_gillPhysSet.has(name))  { _gillPhysCount++;  if (_detectedGillPhys.indexOf(name) === -1)  _detectedGillPhys.push(name); }
+                    if (_gillBloomSet.has(name)) { _gillBloomCount++; if (_detectedGillBloom.indexOf(name) === -1) _detectedGillBloom.push(name); }
+                });
+            });
+            const harmfulSpecies = {
+                toxicCount:       _toxicCount,
+                gillPhysCount:    _gillPhysCount,
+                gillBloomCount:   _gillBloomCount,
+                totalWithDB:      _totalWithDB,
+                detectedToxic:    _detectedToxic,
+                detectedGillPhys: _detectedGillPhys,
+                detectedGillBloom:_detectedGillBloom,
+                toxicRatio:    _totalWithDB > 0 ? (_toxicCount    / _totalWithDB) * 100 : 0,
+                gillPhysRatio: _totalWithDB > 0 ? (_gillPhysCount / _totalWithDB) * 100 : 0,
+                gillBloomRatio:_totalWithDB > 0 ? (_gillBloomCount/ _totalWithDB) * 100 : 0
+            };
+
             return {
                 n,
                 isHypothesis,
@@ -651,7 +680,8 @@
                 speciesAnalysis,
                 aggregatedStats,
                 dominantAnalysis, 
-                allSpeciesAnalysis, // Added new field
+                allSpeciesAnalysis,
+                harmfulSpecies,
                 timestamp: new Date().toISOString()
             };
         }
@@ -1208,7 +1238,6 @@
                         siteId={selectedAnalysisSiteId} 
                         onBack={() => setView('input')} 
                         t={t}
-                        speciesDb={speciesDb}
                     />
                 );
             }
@@ -1475,11 +1504,7 @@
         };
 
         // --- REPORT COMPONENT ---
-        const ReportView = ({ data, siteId, onBack, t, speciesDb }) => {
-
-            const toxicDB        = speciesDb ? new Set(speciesDb.toxicDB)        : new Set();
-            const gillPhysicalDB = speciesDb ? new Set(speciesDb.gillPhysicalDB) : new Set();
-            const gillBloomDB    = speciesDb ? new Set(speciesDb.gillBloomDB)    : new Set();
+        const ReportView = ({ data, siteId, onBack, t }) => {
 
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
@@ -1925,20 +1950,18 @@
                 // ────────────────────────────────────────────────────────────────
 
                 // ── TOXIC & GILL-HARM SPECIES ANALYSIS ─────────────────────────
-                let toxicCount = 0, gillPhysCount = 0, gillBloomCount = 0, totalWithDB = 0;
-                const detectedToxic = [], detectedGillPhys = [], detectedGillBloom = [];
-                s.forEach(sample => {
-                    sample.taxa.forEach(t => {
-                        const name = t.name.trim();
-                        totalWithDB++;
-                        if (toxicDB.has(name))        { toxicCount++;     if (!detectedToxic.includes(name))     detectedToxic.push(name); }
-                        if (gillPhysicalDB.has(name)) { gillPhysCount++;  if (!detectedGillPhys.includes(name))  detectedGillPhys.push(name); }
-                        if (gillBloomDB.has(name))    { gillBloomCount++; if (!detectedGillBloom.includes(name)) detectedGillBloom.push(name); }
-                    });
-                });
-                const toxicRatio    = totalWithDB > 0 ? (toxicCount    / totalWithDB) * 100 : 0;
-                const gillPhysRatio = totalWithDB > 0 ? (gillPhysCount / totalWithDB) * 100 : 0;
-                const gillBloomRatio= totalWithDB > 0 ? (gillBloomCount/ totalWithDB) * 100 : 0;
+                // Results are pre-computed in the worker where speciesDb is available
+                const hs = data.harmfulSpecies || {};
+                const toxicCount     = hs.toxicCount     || 0;
+                const gillPhysCount  = hs.gillPhysCount  || 0;
+                const gillBloomCount = hs.gillBloomCount || 0;
+                const totalWithDB    = hs.totalWithDB    || 0;
+                const detectedToxic     = hs.detectedToxic     || [];
+                const detectedGillPhys  = hs.detectedGillPhys  || [];
+                const detectedGillBloom = hs.detectedGillBloom || [];
+                const toxicRatio     = hs.toxicRatio     || 0;
+                const gillPhysRatio  = hs.gillPhysRatio  || 0;
+                const gillBloomRatio = hs.gillBloomRatio || 0;
 
                 // Toxin assessment
                 let toxicDanger = '', toxicColor = '', toxicBg = '', toxicBorder = '';
