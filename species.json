@@ -437,7 +437,7 @@
       "v": 2
     },
     "Cymbella parva": {
-      "s": 4.2,
+      "s": 4.0,
       "v": 2
     },
     "Cymbella tumida": {
@@ -469,7 +469,7 @@
       "v": 2
     },
     "Eunotia circumborealis": {
-      "s": 4.2,
+      "s": 5.0,
       "v": 2
     },
     "Fragilaria arcus": {
@@ -481,7 +481,7 @@
       "v": 1
     },
     "Fragilaria mesolepta": {
-      "s": 4.0,
+      "s": 3.5,
       "v": 2
     },
     "Gomphonema gracile": {
@@ -493,8 +493,8 @@
       "v": 1
     },
     "Gyrosigma acuminatum": {
-      "s": 3.6,
-      "v": 1
+      "s": 3.0,
+      "v": 2
     },
     "Hannaea arcus": {
       "s": 4.4,
@@ -517,8 +517,8 @@
       "v": 2
     },
     "Navicula cincta": {
-      "s": 3.6,
-      "v": 1
+      "s": 3.0,
+      "v": 2
     },
     "Navicula rhynchocephala": {
       "s": 3.8,
@@ -529,19 +529,19 @@
       "v": 1
     },
     "Nitzschia angustata": {
-      "s": 3.8,
-      "v": 1
+      "s": 2.5,
+      "v": 2
     },
     "Nitzschia recta": {
       "s": 3.8,
       "v": 1
     },
     "Nitzschia vermicularis": {
-      "s": 3.6,
-      "v": 1
+      "s": 2.5,
+      "v": 2
     },
     "Placoneis gastrum": {
-      "s": 4.0,
+      "s": 3.5,
       "v": 2
     },
     "Planothidium dubium": {
@@ -549,7 +549,7 @@
       "v": 1
     },
     "Psammothidium chlidanos": {
-      "s": 4.2,
+      "s": 4.5,
       "v": 2
     },
     "Reimeria uniseriata": {
@@ -557,8 +557,8 @@
       "v": 2
     },
     "Rhopalodia gibba": {
-      "s": 4.0,
-      "v": 1
+      "s": 3.5,
+      "v": 2
     },
     "Sellaphora bacillum": {
       "s": 4.0,
@@ -713,20 +713,20 @@
       "v": 2
     },
     "Epithemia sorex": {
-      "s": 3.4,
-      "v": 1
+      "s": 3.5,
+      "v": 2
     },
     "Epithemia turgida": {
-      "s": 3.4,
-      "v": 1
+      "s": 3.5,
+      "v": 2
     },
     "Fragilaria bidens": {
-      "s": 3.2,
+      "s": 4.0,
       "v": 2
     },
     "Fragilaria capucina var. vaucheriae": {
-      "s": 3.4,
-      "v": 1
+      "s": 3.5,
+      "v": 2
     },
     "Gomphonema augur": {
       "s": 3.0,
@@ -738,14 +738,14 @@
     },
     "Gyrosigma scalproides": {
       "s": 3.0,
-      "v": 1
+      "v": 2
     },
     "Hippodonta capitata": {
-      "s": 3.2,
-      "v": 1
+      "s": 3.0,
+      "v": 2
     },
     "Hippodonta hungarica": {
-      "s": 3.0,
+      "s": 3.5,
       "v": 2
     },
     "Melosira nummuloides": {
@@ -773,7 +773,7 @@
       "v": 1
     },
     "Navicula pygmaea": {
-      "s": 2.6,
+      "s": 2.5,
       "v": 2
     },
     "Navicula recens": {
@@ -782,19 +782,19 @@
     },
     "Navicula rostellata": {
       "s": 3.0,
-      "v": 1
+      "v": 2
     },
     "Navicula trivialis": {
-      "s": 2.8,
+      "s": 3.0,
       "v": 2
     },
     "Neidium dubium": {
-      "s": 3.4,
-      "v": 1
+      "s": 4.5,
+      "v": 2
     },
     "Nitzschia constricta": {
-      "s": 2.8,
-      "v": 1
+      "s": 2.5,
+      "v": 2
     },
     "Nitzschia dubia": {
       "s": 2.8,
@@ -805,8 +805,8 @@
       "v": 1
     },
     "Nitzschia levidensis": {
-      "s": 2.8,
-      "v": 1
+      "s": 2.0,
+      "v": 2
     },
     "Nitzschia subacicularis": {
       "s": 2.6,
@@ -849,8 +849,8 @@
       "v": 1
     },
     "Surirella capronii": {
-      "s": 3.2,
-      "v": 1
+      "s": 3.5,
+      "v": 2
     },
     "Surirella linearis": {
       "s": 3.4,
@@ -861,23 +861,23 @@
       "v": 1
     },
     "Surirella splendida": {
-      "s": 3.4,
-      "v": 1
+      "s": 4.0,
+      "v": 2
     },
     "Thalassiosira weissflogii": {
       "s": 2.5,
       "v": 2
     },
     "Tryblionella apiculata": {
-      "s": 2.8,
-      "v": 1
+      "s": 2.0,
+      "v": 2
     },
     "Tryblionella gracilis": {
       "s": 3.0,
       "v": 1
     },
     "Tryblionella hungarica": {
-      "s": 2.6,
+      "s": 2.0,
       "v": 2
     },
     "Ulnaria capitata": {
@@ -8454,6 +8454,1222 @@
     },
     "Sellaphora joubaudii": {
       "s": 3.0,
+      "v": 2
+    },
+    "Achnanthes clevei": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthes conspicua": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Achnanthes exigua": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Achnanthes minutissima": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Achnanthes saxonica": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthes subhudsonis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium affine": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthidium altaicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium cf. minutissimum": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Achnanthidium duthiei": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium japanicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium lusitanicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium minutissimum var. minutissimum": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Achnanthidium sibiricum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium standeri": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium titanium": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Amphora copulata var. copulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Amphora eulensteinii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Amphora normannii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Aulacoseira ambigua f. ambigua": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Aulacoseira granulata var. angustissima": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Aulacoseira nygaardii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Caloneis limosa": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Cocconeis placentula var. pseudolineata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Craticula cf. buderi": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Cyclotella atomus var. atomus": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Cyclotella cf. meneghiniana": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Cyclotella cf. ocellata": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cyclotella cf. radiosa": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cyclotella iris": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Cyclotella meduanae": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cyclotella ornata": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cyclotella polymorpha": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella amphicephala": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella ehrenbergii": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Cymbella hantzschiana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella heteropleura": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella lange-bertalotii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella lata": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cymbella per-aspera": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella silesiaca": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella subhimalayensis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella tridentina": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbopleura anglica": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbopleura tynnii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Diatoma cf. vulgare": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Diploneis cf. elliptica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Diploneis domblittensis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Encyonema bolacino": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Encyonema cf. silesiacum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Encyonema leibleinii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Encyonema norvegicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Encyonema triangulum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia ambivalens": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia angularis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia cf. bilunaris": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia cf. exigua": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia cf. minor": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia cisalpina": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia faba var. faba": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia glacialis var. mesoleia": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia muscicola var. tridentula": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia novaesiberica": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia pectinalis var. ventralis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia sudetica var. sudetica": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia sylvaeducatula": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia triodon": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia veneris": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Fragilaria amphicephala": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Fragilaria bicapitata": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Fragilaria capucina var. gracilis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria cf. crotonensis": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Fragilaria exiguiformis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria cf. nanana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Fragilaria regelothrix": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria reicheltii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Frustulia cf. rhomboides": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Frustulia creuzburgensis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Frustulia neomundana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Frustulia pseudoromboides": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Frustulia saxonica var. capitata": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Frustulia zickendratii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema coronatum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Gomphonema lippertii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema longilineare": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema minusculum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Gomphonema minutum f. syriacum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Gomphonema pseudosphaerophorum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema septentrionale": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema tenellum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema tergestinum var. acuminatum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema vibrio": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Hippodonta arcula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Hippodonta cf. capitata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Luticola cf. goeppertiana": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Luticola grupcei": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Luticola hustedtiana": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Mayamaea cf. permitis": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Melosira cf. varians": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Meridion constrictum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Navicula aegyptiacella": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula aquaedurae": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula bacillum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula begeri": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula cf. gregaria": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula cf. lanceolata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula cf. reichardtiana": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula cf. veneta": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula explanata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula lange-bertalotii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Navicula lutea": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula microdigitoradiata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula obsoleta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula paramutica": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula phylleptosoma": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula pusilla": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula reichardtiana var. lancettula": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula suplhuraria": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula terrestris": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula tuscula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula ventralis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula vilaplanii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula whitfordii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Neidium cf. iridis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium diatomeaceum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium hitchcockii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium iridis var. amphirhynchus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Nitzschia acicularis var. acicularis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia bacillum": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia biacrula": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia cf. acicularis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia cf. palea": {
+      "s": 1.0,
+      "v": 2
+    },
+    "Nitzschia denticola": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia microscopica": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia minuta": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia modesta": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia palea var. palea": {
+      "s": 1.0,
+      "v": 2
+    },
+    "Nitzschia paleaeformis": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Nitzschia rostrata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia sp.": {
+      "s": 2.5,
+      "v": 1
+    },
+    "Nitzschia stagnorum": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia woltereckii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pinnularia boralis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pinnularia cf. viridis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia decrescens": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia hilseana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia schoenfelderi": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia truncata": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis anglophila": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis exigua": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis exigua var. exigua": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis islandica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis jaernefeltii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis opportuna": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Placoneis paraplacentula": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis pseudanglophila": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis pseudoelginensis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Planothidium apiculatum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planothidium cf. frequentissimum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planothidium daonense": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Planothidium reichardtianum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Planothidium subatomoides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Psammothidium curtissimum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Psammothidium lacus-vulcani": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Psammothidium rechtensis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Psammothidium rossii": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Rhopalodia brevissonii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhopalodia gibba var. gibba": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Sellaphora atomus": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Sellaphora cf. pupula": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Sellaphora pseudoventralis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Sellaphora rectangularis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Sellaphora ventraloides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Stauroneis cf. anceps": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Stauroneis lacustris": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Staurosira cf. construens": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Staurosira microstriata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Staurosirella cf. leptostauron": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Tetracyclus ellipticus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Tetracyclus emarginatus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Tryblionella circularlis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella granulata": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella littoralis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella salinarum": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Ulnaria cf. ulna": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Ulnaria delicatissima var. angustissima": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Amphicocconeis acutior": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Amphicocconeis discrepans": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Bacteriastrum comosum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Bacteriastrum solitarium": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Bacteriastrum varians": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Biddulphia pulchella": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Biddulphia regia": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Biddulphia rhombus": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Biddulphia sinensis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Biddulphia tridens": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Cerataulina bicornis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cerataulina compacta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cerataulina daemon": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Chaetoceros brevis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros calcitrans": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros castracanei": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cf. affinis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cf. decipiens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cf. lorenzianus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cinctus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros contortus": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Chaetoceros coronatus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros costatus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros decipiens var. decipiens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros lauderi": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros perpusillus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros protuberans": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros simplex": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Corethron pennatum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Coscinodiscus curvatulus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus excentricus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus gigas": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Coscinodiscus lacustris": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus marginatus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus nitidus": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Coscinodiscus subtilis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cyclotella gamma": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Cyclotella marina": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Cyclotella striata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Dactyliosolen tenuijunctus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Detonula schroederi": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Eucampia cornuta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Eucampia groenlandica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Grammatophora macilenta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Guinardia cylindrus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Gyrosigma spenceri": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Hemiaulus antarcticus": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Hemiaulus indicus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Hemiaulus nanus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Lauderia annulata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Leptocylindrus aporus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Licmophora dalmatica": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Licmophora lyngbyei": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Licmophora paradoxa": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Mastogloia articulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Mastogloia danseii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Mastogloia lanceolata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Minidiscus chilensis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula perminuta var. marina": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia salina": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia seriata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Odontella granulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella mobiliensis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella obtusa": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella regia": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Odontella rhombus": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella weissflogii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Paralia fenestrata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planktoniella muriformis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Pleurosigma nicobaricum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Proboscia alata f. curvirostris": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Proboscia eumorpha": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Proboscia inermis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Pseudo-nitzschia cf. multistriata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pseudo-nitzschia multistriata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pseudo-nitzschia turgiduloides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Rhizosolenia bergonii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia borealis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia castracanei": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia clevei": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia curvata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia formosa": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia hyalina": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia pungens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia robusta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia simplex": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia stolterfothii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia temperei": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Skeletonema cf. costatum": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Skeletonema menzellii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Stephanopyxis nipponica": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Striatella interrupta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassionema bacillare": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassionema elegans": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassionema javanicum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassionema pseudonitzschioides": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiosira angste": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira baltica": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Thalassiosira binata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira cedarkeyensis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Thalassiosira cf. nordenskioeldii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiosira cf. rotula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira concaviuscula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira delicatula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira fluviatilis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Thalassiosira lactustris": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiosira lineata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira mala": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Thalassiosira nana": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira oestrupii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira partheneia": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira tenera": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira visurgis": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Thalassiosira vitrea": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiothrix antarctica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiothrix mediterranea": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Triceratium alternans": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Triceratium dubium": {
+      "s": 3.5,
       "v": 2
     }
   },
@@ -16669,6 +17885,1334 @@
     "Ulnaria capitata": {
       "s": 3.5,
       "v": 2
+    },
+    "Achnanthes clevei": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthes conspicua": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Achnanthes exigua": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Achnanthes minutissima": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Achnanthes saxonica": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthes subhudsonis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium affine": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthidium altaicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium cf. minutissimum": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Achnanthidium duthiei": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium japanicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium lusitanicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium minutissimum var. minutissimum": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Achnanthidium sibiricum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium standeri": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium titanium": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Amphora copulata var. copulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Amphora eulensteinii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Amphora normannii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Aulacoseira ambigua f. ambigua": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Aulacoseira granulata var. angustissima": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Aulacoseira nygaardii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Caloneis limosa": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Cocconeis placentula var. pseudolineata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Craticula cf. buderi": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Cyclotella atomus var. atomus": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Cyclotella cf. meneghiniana": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Cyclotella cf. ocellata": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cyclotella cf. radiosa": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cyclotella iris": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Cyclotella meduanae": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cyclotella ornata": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cyclotella polymorpha": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella amphicephala": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella ehrenbergii": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Cymbella hantzschiana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella heteropleura": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella lange-bertalotii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella lata": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cymbella parva": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cymbella per-aspera": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella proxima": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cymbella silesiaca": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella subhimalayensis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella tridentina": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbopleura anglica": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbopleura tynnii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Diatoma cf. vulgare": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Diploneis cf. elliptica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Diploneis domblittensis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Encyonema bolacino": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Encyonema cf. silesiacum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Encyonema leibleinii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Encyonema norvegicum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Encyonema triangulum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Epithemia sorex": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Epithemia turgida": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Eunotia ambivalens": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia angularis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia cf. bilunaris": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia cf. exigua": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia cf. minor": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia cisalpina": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia circumborealis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia faba var. faba": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia glacialis var. mesoleia": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia muscicola var. tridentula": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia novaesiberica": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia pectinalis var. ventralis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia sudetica var. sudetica": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia sylvaeducatula": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia triodon": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Eunotia veneris": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Fragilaria amphicephala": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Fragilaria bicapitata": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Fragilaria bidens": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria capucina var. gracilis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria capucina var. vaucheriae": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Fragilaria cf. crotonensis": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Fragilaria exiguiformis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria cf. nanana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Fragilaria mesolepta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Fragilaria regelothrix": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Fragilaria reicheltii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Frustulia cf. rhomboides": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Frustulia creuzburgensis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Frustulia neomundana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Frustulia pseudoromboides": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Frustulia saxonica var. capitata": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Frustulia zickendratii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema coronatum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Gomphonema lippertii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema longilineare": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema minusculum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Gomphonema minutum f. syriacum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Gomphonema pseudosphaerophorum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema septentrionale": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema tenellum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema tergestinum var. acuminatum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Gomphonema vibrio": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Hippodonta arcula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Hippodonta capitata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Hippodonta cf. capitata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Hippodonta hungarica": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Luticola cf. goeppertiana": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Luticola grupcei": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Luticola hustedtiana": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Mayamaea cf. permitis": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Melosira cf. varians": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Meridion constrictum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Navicula aegyptiacella": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula aquaedurae": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula bacillum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula begeri": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula cf. gregaria": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula cf. lanceolata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula cf. reichardtiana": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula cf. veneta": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula cincta": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula explanata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula lange-bertalotii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Navicula lutea": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula microdigitoradiata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula obsoleta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula paramutica": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula phylleptosoma": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula pusilla": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula pygmaea": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula reichardtiana var. lancettula": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula rostellata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula suplhuraria": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula terrestris": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula trivialis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula tuscula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula ventralis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula vilaplanii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula whitfordii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Neidium cf. iridis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium diatomeaceum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium dubium": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium hitchcockii": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Neidium iridis var. amphirhynchus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Nitzschia acicularis var. acicularis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia angustata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia bacillum": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia biacrula": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia cf. acicularis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia cf. palea": {
+      "s": 1.0,
+      "v": 2
+    },
+    "Nitzschia constricta": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia denticola": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia levidensis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia microscopica": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia minuta": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia modesta": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia palea var. palea": {
+      "s": 1.0,
+      "v": 2
+    },
+    "Nitzschia paleaeformis": {
+      "s": 1.5,
+      "v": 2
+    },
+    "Nitzschia rostrata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia sp.": {
+      "s": 2.5,
+      "v": 1
+    },
+    "Nitzschia stagnorum": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia vermicularis": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia woltereckii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pinnularia boralis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pinnularia cf. viridis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia decrescens": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia hilseana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia schoenfelderi": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Pinnularia truncata": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis anglophila": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis exigua": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis exigua var. exigua": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis gastrum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis islandica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis jaernefeltii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis opportuna": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Placoneis paraplacentula": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Placoneis pseudanglophila": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Placoneis pseudoelginensis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Planothidium apiculatum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planothidium cf. frequentissimum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planothidium daonense": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Planothidium reichardtianum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Planothidium subatomoides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Psammothidium chlidanos": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Psammothidium curtissimum": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Psammothidium lacus-vulcani": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Psammothidium rechtensis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Psammothidium rossii": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Rhopalodia brevissonii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhopalodia gibba": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhopalodia gibba var. gibba": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Sellaphora atomus": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Sellaphora cf. pupula": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Sellaphora pseudoventralis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Sellaphora rectangularis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Sellaphora ventraloides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Stauroneis cf. anceps": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Stauroneis lacustris": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Staurosira cf. construens": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Staurosira microstriata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Staurosirella cf. leptostauron": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Surirella capronii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Surirella splendida": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Tetracyclus ellipticus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Tetracyclus emarginatus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Tryblionella apiculata": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella circularlis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella granulata": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella hungarica": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella littoralis": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Tryblionella salinarum": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Ulnaria cf. ulna": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Ulnaria delicatissima var. angustissima": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Amphicocconeis acutior": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Amphicocconeis discrepans": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Bacteriastrum comosum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Bacteriastrum solitarium": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Bacteriastrum varians": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Biddulphia pulchella": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Biddulphia regia": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Biddulphia rhombus": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Biddulphia sinensis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Biddulphia tridens": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Cerataulina bicornis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cerataulina compacta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cerataulina daemon": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Chaetoceros brevis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros calcitrans": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros castracanei": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cf. affinis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cf. decipiens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cf. lorenzianus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros cinctus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros contortus": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Chaetoceros coronatus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros costatus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros decipiens var. decipiens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros lauderi": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros perpusillus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros protuberans": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Chaetoceros simplex": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Corethron pennatum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Coscinodiscus curvatulus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus excentricus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus gigas": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Coscinodiscus lacustris": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus marginatus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Coscinodiscus nitidus": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Coscinodiscus subtilis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cyclotella gamma": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Cyclotella marina": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Cyclotella striata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Dactyliosolen tenuijunctus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Detonula schroederi": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Eucampia cornuta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Eucampia groenlandica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Grammatophora macilenta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Guinardia cylindrus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Gyrosigma acuminatum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Gyrosigma scalproides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Gyrosigma spenceri": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Hemiaulus antarcticus": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Hemiaulus indicus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Hemiaulus nanus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Lauderia annulata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Leptocylindrus aporus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Licmophora dalmatica": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Licmophora lyngbyei": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Licmophora paradoxa": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Mastogloia articulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Mastogloia danseii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Mastogloia lanceolata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Minidiscus chilensis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula perminuta var. marina": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia salina": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia seriata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Odontella granulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella mobiliensis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella obtusa": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella regia": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Odontella rhombus": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Odontella weissflogii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Paralia fenestrata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planktoniella muriformis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Pleurosigma nicobaricum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Proboscia alata f. curvirostris": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Proboscia eumorpha": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Proboscia inermis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Pseudo-nitzschia cf. multistriata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pseudo-nitzschia multistriata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Pseudo-nitzschia turgiduloides": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Rhizosolenia bergonii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia borealis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia castracanei": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia clevei": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia curvata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia formosa": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia hyalina": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia pungens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia robusta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia simplex": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Rhizosolenia stolterfothii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Rhizosolenia temperei": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Skeletonema cf. costatum": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Skeletonema menzellii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Stephanopyxis nipponica": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Striatella interrupta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassionema bacillare": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassionema elegans": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassionema javanicum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassionema pseudonitzschioides": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiosira angste": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira baltica": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Thalassiosira binata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira cedarkeyensis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Thalassiosira cf. nordenskioeldii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiosira cf. rotula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira concaviuscula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira delicatula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira fluviatilis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Thalassiosira lactustris": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiosira lineata": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira mala": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Thalassiosira nana": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira oestrupii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira partheneia": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira tenera": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiosira visurgis": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Thalassiosira vitrea": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Thalassiothrix antarctica": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Thalassiothrix mediterranea": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Triceratium alternans": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Triceratium dubium": {
+      "s": 3.5,
+      "v": 2
     }
   },
   "diTpOptima": {
@@ -16776,7 +19320,269 @@
     "Navicula rhynchocephala": 28.0,
     "Nitzschia gracilis": 22.0,
     "Pinnularia maior": 12.0,
-    "Stephanodiscus minutulus": 50.0
+    "Stephanodiscus minutulus": 50.0,
+    "Achnanthes clevei": 16.0,
+    "Achnanthes lanceolata": 28.0,
+    "Achnanthidium affine": 18.0,
+    "Achnanthidium atomus": 22.0,
+    "Achnanthidium catenatum": 12.0,
+    "Achnanthidium dolomiticum": 8.0,
+    "Achnanthidium druartii": 14.0,
+    "Achnanthidium eutrophilum": 35.0,
+    "Achnanthidium gracillimum": 10.0,
+    "Achnanthidium kranzii": 8.0,
+    "Achnanthidium latecephalum": 20.0,
+    "Achnanthidium lineare": 12.0,
+    "Achnanthidium microcephalum": 18.0,
+    "Achnanthidium nanum": 12.0,
+    "Achnanthidium petersenii": 10.0,
+    "Achnanthidium rostratum": 20.0,
+    "Achnanthidium saprophilum": 80.0,
+    "Amphora affinis": 40.0,
+    "Amphora commutata": 35.0,
+    "Amphora copulata": 40.0,
+    "Amphora eulensteinii": 30.0,
+    "Amphora libyca": 60.0,
+    "Amphora veneta": 65.0,
+    "Aulacoseira crenulata": 50.0,
+    "Aulacoseira italica": 35.0,
+    "Aulacoseira lirata": 18.0,
+    "Aulacoseira muzzanensis": 25.0,
+    "Caloneis amphisbaena": 30.0,
+    "Caloneis bacillum": 28.0,
+    "Caloneis silicula": 25.0,
+    "Caloneis fasciata": 28.0,
+    "Chamaepinnularia soehrensis": 20.0,
+    "Cocconeis disculus": 20.0,
+    "Cocconeis euglypta": 25.0,
+    "Cocconeis neodiminuta": 22.0,
+    "Cocconeis placentula var. euglypta": 28.0,
+    "Cocconeis placentula var. lineata": 35.0,
+    "Craticula buderi": 120.0,
+    "Craticula cuspidata": 80.0,
+    "Craticula halophila": 100.0,
+    "Craticula molestiformis": 110.0,
+    "Cyclotella bodanica": 8.0,
+    "Cyclotella delicatula": 10.0,
+    "Cyclotella glomerata": 20.0,
+    "Cyclotella iris": 7.0,
+    "Cyclotella krammeri": 18.0,
+    "Cyclotella kuetzingiana": 22.0,
+    "Cyclotella meduanae": 25.0,
+    "Cyclotella michiganiana": 6.0,
+    "Cyclotella pseudostelligera": 15.0,
+    "Cyclotella rossii": 5.0,
+    "Cyclotella stelligera": 10.0,
+    "Cyclotella tripartita": 6.0,
+    "Cymbella amphicephala": 12.0,
+    "Cymbella caespitosa": 18.0,
+    "Cymbella cf. affinis": 22.0,
+    "Cymbella ehrenbergii": 10.0,
+    "Cymbella excisa": 22.0,
+    "Cymbella gaeumannii": 12.0,
+    "Cymbella helvetica": 15.0,
+    "Cymbella heteropleura": 12.0,
+    "Cymbella lata": 18.0,
+    "Cymbella neocistula": 14.0,
+    "Cymbella neoleptoceros": 18.0,
+    "Cymbella proxima": 20.0,
+    "Cymbella rupicola": 10.0,
+    "Cymbella silesiaca": 12.0,
+    "Cymbella sinuata": 28.0,
+    "Cymbella subcistula": 20.0,
+    "Cymbella tumida": 20.0,
+    "Cymbopleura anglica": 12.0,
+    "Cymbopleura cuspidata": 18.0,
+    "Cymbopleura inaequalis": 16.0,
+    "Cymbopleura incerta": 14.0,
+    "Cymbopleura naviculiformis": 14.0,
+    "Denticula elegans": 12.0,
+    "Denticula kuetzingii": 18.0,
+    "Denticula tenuis": 15.0,
+    "Diatoma anceps": 12.0,
+    "Diatoma ehrenbergii": 25.0,
+    "Diatoma hyemalis": 10.0,
+    "Diatoma moniliformis": 28.0,
+    "Diploneis calcilacustris": 18.0,
+    "Diploneis elliptica": 15.0,
+    "Diploneis finnica": 12.0,
+    "Diploneis marginestriata": 20.0,
+    "Diploneis oblongella": 18.0,
+    "Diploneis ovalis": 16.0,
+    "Diploneis parma": 22.0,
+    "Diploneis petersenii": 18.0,
+    "Diploneis subovalis": 12.0,
+    "Encyonema auerswaldii": 20.0,
+    "Encyonema cf. silesiacum": 25.0,
+    "Encyonema gracile": 18.0,
+    "Encyonema leibleinii": 20.0,
+    "Encyonema neogracile": 12.0,
+    "Encyonema triangulum": 14.0,
+    "Encyonema ventricosum": 18.0,
+    "Encyonopsis cesatii": 10.0,
+    "Encyonopsis falaisensis": 10.0,
+    "Encyonopsis krammeri": 10.0,
+    "Encyonopsis microcephala": 10.0,
+    "Encyonopsis subminuta": 10.0,
+    "Epithemia adnata": 22.0,
+    "Epithemia argus": 20.0,
+    "Epithemia sorex": 28.0,
+    "Epithemia turgida": 25.0,
+    "Eunotia alpina": 4.0,
+    "Eunotia cf. bilunaris": 5.0,
+    "Eunotia cf. exigua": 4.0,
+    "Eunotia cf. minor": 6.0,
+    "Eunotia cisalpina": 4.0,
+    "Eunotia denticulata": 4.0,
+    "Eunotia diodon": 8.0,
+    "Eunotia elegans": 4.0,
+    "Eunotia formica": 7.0,
+    "Eunotia glacialis": 4.0,
+    "Eunotia implicata": 8.0,
+    "Eunotia meisterei": 4.0,
+    "Eunotia muscicola": 4.0,
+    "Eunotia naegelii": 6.0,
+    "Eunotia paludosa": 5.0,
+    "Eunotia praerupta": 10.0,
+    "Eunotia rhomboidea": 6.0,
+    "Eunotia serra": 4.0,
+    "Eunotia septentrionalis": 4.0,
+    "Eunotia soleirolii": 4.0,
+    "Eunotia sudetica": 6.0,
+    "Eunotia tenella": 4.0,
+    "Eunotia triodon": 8.0,
+    "Fragilaria amphicephaloides": 30.0,
+    "Fragilaria austriaca": 10.0,
+    "Fragilaria bicapitata": 10.0,
+    "Fragilaria brevistriata": 20.0,
+    "Fragilaria capucina var. capitellata": 25.0,
+    "Fragilaria capucina var. gracilis": 15.0,
+    "Fragilaria capucina var. vaucheriae": 30.0,
+    "Fragilaria cf. crotonensis": 45.0,
+    "Fragilaria delicatissima": 10.0,
+    "Fragilaria exiguiformis": 18.0,
+    "Fragilaria famelica": 22.0,
+    "Fragilaria mesolepta": 28.0,
+    "Fragilaria pararumpens": 22.0,
+    "Fragilaria pinnata": 22.0,
+    "Fragilaria radians": 22.0,
+    "Fragilaria rumpens": 22.0,
+    "Fragilaria virescens": 10.0,
+    "Frustulia cf. rhomboides": 6.0,
+    "Frustulia crassinervia": 5.0,
+    "Frustulia krammeri": 5.0,
+    "Frustulia saxonica": 5.0,
+    "Frustulia vulgaris": 20.0,
+    "Gomphonema auritum": 22.0,
+    "Gomphonema brebissonii": 18.0,
+    "Gomphonema calcifugum": 6.0,
+    "Gomphonema capitatum": 18.0,
+    "Gomphonema clavatum": 18.0,
+    "Gomphonema clevei": 14.0,
+    "Gomphonema coronatum": 18.0,
+    "Gomphonema cymbelliclinum": 12.0,
+    "Gomphonema exilissimum": 10.0,
+    "Gomphonema grovei": 18.0,
+    "Gomphonema hebridense": 10.0,
+    "Gomphonema kobayasii": 18.0,
+    "Gomphonema lagenula": 15.0,
+    "Gomphonema lateripunctatum": 12.0,
+    "Gomphonema lanceolatum": 18.0,
+    "Gomphonema longilineare": 12.0,
+    "Gomphonema micropus": 25.0,
+    "Gomphonema parvulius": 22.0,
+    "Gomphonema procerum": 18.0,
+    "Gomphonema pseudoaugur": 18.0,
+    "Gomphonema pseudosphaerophorum": 10.0,
+    "Gomphonema rhombicum": 14.0,
+    "Gomphonema sarcophagus": 10.0,
+    "Gomphonema subclavatum": 25.0,
+    "Gomphonema tenellum": 12.0,
+    "Hannaea arcus var. linearis": 7.0,
+    "Navicula angusta": 25.0,
+    "Navicula capitatoradiata": 55.0,
+    "Navicula cf. cryptotenella": 28.0,
+    "Navicula cincta": 35.0,
+    "Navicula concentrica": 28.0,
+    "Navicula cryptotenelloides": 28.0,
+    "Navicula difficillima": 8.0,
+    "Navicula erifuga": 35.0,
+    "Navicula lange-bertalotii": 14.0,
+    "Navicula laterostrata": 28.0,
+    "Navicula meniscus": 25.0,
+    "Navicula oligotraphenta": 10.0,
+    "Navicula perminuta": 30.0,
+    "Navicula phyllepta": 55.0,
+    "Navicula recens": 35.0,
+    "Navicula slesvicensis": 35.0,
+    "Navicula soehrensis": 25.0,
+    "Navicula stroemii": 25.0,
+    "Navicula upsaliensis": 25.0,
+    "Navicula vandamii": 25.0,
+    "Navicula wildii": 18.0,
+    "Neidium affine": 12.0,
+    "Neidium alpinum": 8.0,
+    "Neidium ampliatum": 10.0,
+    "Neidium bisulcatum": 8.0,
+    "Neidium hercynicum": 8.0,
+    "Neidium iridis": 10.0,
+    "Neidium productum": 8.0,
+    "Nitzschia capitellata": 70.0,
+    "Nitzschia cf. fonticola": 40.0,
+    "Nitzschia filiformis": 50.0,
+    "Nitzschia hantzschiana": 25.0,
+    "Nitzschia lacuum": 25.0,
+    "Nitzschia nana": 35.0,
+    "Nitzschia palea var. debilis": 80.0,
+    "Nitzschia perminuta": 28.0,
+    "Nitzschia sociabilis": 25.0,
+    "Nitzschia tubicola": 35.0,
+    "Pinnularia acrosphaeria": 15.0,
+    "Pinnularia biceps": 10.0,
+    "Pinnularia divergens": 10.0,
+    "Pinnularia gentilis": 10.0,
+    "Pinnularia mesolepta": 15.0,
+    "Pinnularia nobilis": 12.0,
+    "Planothidium biporomum": 22.0,
+    "Planothidium dubium": 20.0,
+    "Planothidium granum": 18.0,
+    "Planothidium hauckianum": 30.0,
+    "Planothidium rostratum": 22.0,
+    "Psammothidium grischunum": 4.0,
+    "Psammothidium rechtensis": 4.0,
+    "Psammothidium rossii": 4.0,
+    "Rhopalodia gibba": 20.0,
+    "Rossithidium petersenii": 12.0,
+    "Sellaphora bacillum": 30.0,
+    "Sellaphora blackfordensis": 10.0,
+    "Sellaphora joubaudii": 30.0,
+    "Sellaphora laevissima": 22.0,
+    "Stauroneis anceps": 15.0,
+    "Stauroneis phoenicenteron": 18.0,
+    "Staurosira construens var. venter": 28.0,
+    "Staurosira elliptica": 20.0,
+    "Staurosira pinnata": 20.0,
+    "Staurosirella leptostauron": 20.0,
+    "Staurosirella martyi": 20.0,
+    "Staurosirella pinnata": 20.0,
+    "Stephanodiscus alpinus": 30.0,
+    "Stephanodiscus binderanus": 80.0,
+    "Stephanodiscus medius": 60.0,
+    "Stephanodiscus neoastraea": 90.0,
+    "Surirella elegans": 22.0,
+    "Surirella linearis": 18.0,
+    "Surirella minuta": 28.0,
+    "Surirella ovata": 30.0,
+    "Surirella spiralis": 12.0,
+    "Surirella tenera": 18.0,
+    "Tetracyclus ellipticus": 8.0,
+    "Tetracyclus lacustris": 8.0,
+    "Ulnaria biceps": 22.0,
+    "Ulnaria capitata": 28.0,
+    "Ulnaria contracta": 25.0,
+    "Ulnaria danica": 30.0,
+    "Ulnaria delicatissima": 18.0,
+    "Ulnaria oxyrhynchus": 30.0
   },
   "diPhOptima": {
     "Achnanthidium minutissimum": 7.0,
@@ -16877,16 +19683,278 @@
     "Navicula rhynchocephala": 7.3,
     "Nitzschia gracilis": 7.1,
     "Pinnularia maior": 6.5,
-    "Stephanodiscus minutulus": 7.3
+    "Stephanodiscus minutulus": 7.3,
+    "Achnanthes clevei": 7.0,
+    "Achnanthidium affine": 6.8,
+    "Achnanthidium atomus": 7.1,
+    "Achnanthidium catenatum": 6.9,
+    "Achnanthidium dolomiticum": 7.8,
+    "Achnanthidium druartii": 7.0,
+    "Achnanthidium eutrophilum": 7.3,
+    "Achnanthidium gracillimum": 6.8,
+    "Achnanthidium kranzii": 7.2,
+    "Achnanthidium latecephalum": 7.0,
+    "Achnanthidium lineare": 7.0,
+    "Achnanthidium microcephalum": 7.0,
+    "Achnanthidium nanum": 6.9,
+    "Achnanthidium petersenii": 6.9,
+    "Achnanthidium rostratum": 7.1,
+    "Achnanthidium saprophilum": 7.2,
+    "Amphora affinis": 7.3,
+    "Amphora commutata": 7.4,
+    "Amphora copulata": 7.3,
+    "Amphora eulensteinii": 7.3,
+    "Amphora libyca": 7.4,
+    "Amphora veneta": 7.4,
+    "Aulacoseira crenulata": 6.8,
+    "Aulacoseira italica": 6.9,
+    "Aulacoseira lirata": 6.5,
+    "Aulacoseira muzzanensis": 6.8,
+    "Brachysira zellensis": 5.5,
+    "Caloneis amphisbaena": 7.3,
+    "Caloneis bacillum": 7.2,
+    "Caloneis silicula": 7.3,
+    "Chamaepinnularia soehrensis": 6.5,
+    "Cocconeis disculus": 7.0,
+    "Cocconeis euglypta": 7.2,
+    "Cocconeis neodiminuta": 7.0,
+    "Cocconeis pediculus": 7.3,
+    "Cocconeis placentula var. euglypta": 7.2,
+    "Cocconeis placentula var. lineata": 7.3,
+    "Craticula buderi": 7.2,
+    "Craticula cuspidata": 7.3,
+    "Craticula halophila": 7.5,
+    "Craticula molestiformis": 7.3,
+    "Cyclotella bodanica": 7.0,
+    "Cyclotella delicatula": 7.0,
+    "Cyclotella glomerata": 7.2,
+    "Cyclotella iris": 7.2,
+    "Cyclotella krammeri": 7.1,
+    "Cyclotella kuetzingiana": 7.1,
+    "Cyclotella michiganiana": 7.0,
+    "Cyclotella pseudostelligera": 7.1,
+    "Cyclotella rossii": 6.8,
+    "Cyclotella stelligera": 7.0,
+    "Cyclotella tripartita": 6.8,
+    "Cymbella amphicephala": 7.2,
+    "Cymbella caespitosa": 7.2,
+    "Cymbella ehrenbergii": 7.3,
+    "Cymbella excisa": 7.1,
+    "Cymbella gaeumannii": 7.2,
+    "Cymbella helvetica": 7.2,
+    "Cymbella heteropleura": 7.2,
+    "Cymbella lata": 7.2,
+    "Cymbella neocistula": 7.2,
+    "Cymbella neoleptoceros": 7.1,
+    "Cymbella proxima": 7.1,
+    "Cymbella rupicola": 7.3,
+    "Cymbella silesiaca": 7.2,
+    "Cymbella sinuata": 7.2,
+    "Cymbella subcistula": 7.1,
+    "Cymbella tumida": 7.2,
+    "Cymbopleura anglica": 7.2,
+    "Cymbopleura cuspidata": 7.2,
+    "Cymbopleura incerta": 7.2,
+    "Cymbopleura naviculiformis": 7.2,
+    "Denticula elegans": 7.5,
+    "Denticula kuetzingii": 7.4,
+    "Denticula tenuis": 7.4,
+    "Diatoma anceps": 7.3,
+    "Diatoma ehrenbergii": 7.4,
+    "Diatoma hyemalis": 7.3,
+    "Diatoma moniliformis": 7.3,
+    "Diploneis elliptica": 6.8,
+    "Diploneis finnica": 6.8,
+    "Diploneis marginestriata": 7.0,
+    "Diploneis oblongella": 7.0,
+    "Diploneis ovalis": 6.9,
+    "Diploneis parma": 7.0,
+    "Diploneis subovalis": 6.9,
+    "Encyonema auerswaldii": 7.2,
+    "Encyonema gracile": 7.1,
+    "Encyonema leibleinii": 7.1,
+    "Encyonema neogracile": 6.9,
+    "Encyonema triangulum": 7.0,
+    "Encyonema ventricosum": 7.1,
+    "Encyonopsis cesatii": 6.9,
+    "Encyonopsis krammeri": 6.9,
+    "Encyonopsis microcephala": 7.0,
+    "Encyonopsis subminuta": 7.0,
+    "Epithemia adnata": 7.6,
+    "Epithemia argus": 7.5,
+    "Epithemia sorex": 7.5,
+    "Epithemia turgida": 7.5,
+    "Eunotia alpina": 4.5,
+    "Eunotia cf. bilunaris": 5.5,
+    "Eunotia cf. exigua": 4.5,
+    "Eunotia cf. minor": 5.2,
+    "Eunotia cisalpina": 4.5,
+    "Eunotia denticulata": 4.5,
+    "Eunotia diodon": 5.8,
+    "Eunotia elegans": 4.5,
+    "Eunotia formica": 5.6,
+    "Eunotia glacialis": 4.5,
+    "Eunotia implicata": 5.5,
+    "Eunotia meisterei": 4.5,
+    "Eunotia muscicola": 4.5,
+    "Eunotia naegelii": 5.5,
+    "Eunotia praerupta": 5.8,
+    "Eunotia serra": 4.5,
+    "Eunotia septentrionalis": 4.5,
+    "Eunotia soleirolii": 4.5,
+    "Eunotia sudetica": 5.0,
+    "Eunotia triodon": 5.5,
+    "Fragilaria austriaca": 7.2,
+    "Fragilaria bicapitata": 7.2,
+    "Fragilaria brevistriata": 7.3,
+    "Fragilaria capucina var. capitellata": 7.2,
+    "Fragilaria capucina var. gracilis": 7.0,
+    "Fragilaria capucina var. rumpens": 7.2,
+    "Fragilaria capucina var. vaucheriae": 7.3,
+    "Fragilaria delicatissima": 7.0,
+    "Fragilaria exiguiformis": 7.2,
+    "Fragilaria mesolepta": 7.2,
+    "Fragilaria pararumpens": 7.2,
+    "Fragilaria pinnata": 7.2,
+    "Fragilaria radians": 7.2,
+    "Fragilaria rumpens": 7.2,
+    "Fragilaria virescens": 6.5,
+    "Frustulia crassinervia": 5.0,
+    "Frustulia krammeri": 5.0,
+    "Frustulia vulgaris": 7.0,
+    "Gomphonema auritum": 7.2,
+    "Gomphonema calcifugum": 5.5,
+    "Gomphonema capitatum": 7.2,
+    "Gomphonema clavatum": 7.1,
+    "Gomphonema clevei": 7.1,
+    "Gomphonema coronatum": 7.2,
+    "Gomphonema cymbelliclinum": 7.1,
+    "Gomphonema exilissimum": 7.0,
+    "Gomphonema kobayasii": 7.1,
+    "Gomphonema lagenula": 7.0,
+    "Gomphonema lanceolatum": 7.2,
+    "Gomphonema longilineare": 7.0,
+    "Gomphonema micropus": 7.2,
+    "Gomphonema parvulius": 7.1,
+    "Gomphonema procerum": 7.1,
+    "Gomphonema pseudoaugur": 7.1,
+    "Gomphonema pseudosphaerophorum": 7.0,
+    "Gomphonema rhombicum": 7.0,
+    "Gomphonema sarcophagus": 7.0,
+    "Gomphonema subclavatum": 7.2,
+    "Gomphonema tenellum": 7.0,
+    "Gomphonema truncatum": 7.2,
+    "Hannaea arcus var. linearis": 6.8,
+    "Meridion circulare var. constrictum": 7.1,
+    "Navicula angusta": 7.2,
+    "Navicula capitatoradiata": 7.4,
+    "Navicula cf. cryptotenella": 7.3,
+    "Navicula cincta": 7.3,
+    "Navicula concentrica": 7.3,
+    "Navicula cryptotenelloides": 7.3,
+    "Navicula difficillima": 6.5,
+    "Navicula erifuga": 7.3,
+    "Navicula lange-bertalotii": 6.8,
+    "Navicula laterostrata": 7.3,
+    "Navicula meniscus": 7.3,
+    "Navicula oligotraphenta": 6.8,
+    "Navicula perminuta": 7.2,
+    "Navicula phyllepta": 7.4,
+    "Navicula recens": 7.3,
+    "Navicula slesvicensis": 7.3,
+    "Navicula soehrensis": 7.1,
+    "Navicula stroemii": 7.1,
+    "Navicula upsaliensis": 7.1,
+    "Navicula vandamii": 7.1,
+    "Navicula viridula": 7.3,
+    "Navicula wildii": 7.0,
+    "Neidium affine": 6.5,
+    "Neidium alpinum": 6.0,
+    "Neidium ampliatum": 6.2,
+    "Neidium bisulcatum": 5.8,
+    "Neidium hercynicum": 6.0,
+    "Neidium iridis": 6.5,
+    "Neidium productum": 6.2,
+    "Nitzschia capitellata": 7.3,
+    "Nitzschia cf. fonticola": 7.3,
+    "Nitzschia filiformis": 7.3,
+    "Nitzschia hantzschiana": 7.1,
+    "Nitzschia inconspicua": 7.3,
+    "Nitzschia lacuum": 7.1,
+    "Nitzschia palea var. debilis": 7.3,
+    "Nitzschia perminuta": 7.2,
+    "Nitzschia recta": 7.3,
+    "Nitzschia sociabilis": 7.1,
+    "Nitzschia tubicola": 7.3,
+    "Pinnularia acrosphaeria": 6.5,
+    "Pinnularia biceps": 6.0,
+    "Pinnularia divergens": 6.2,
+    "Pinnularia gentilis": 6.5,
+    "Pinnularia mesolepta": 6.5,
+    "Pinnularia nobilis": 6.8,
+    "Planothidium biporomum": 7.2,
+    "Planothidium dubium": 7.2,
+    "Planothidium granum": 7.0,
+    "Planothidium hauckianum": 7.3,
+    "Planothidium rostratum": 7.2,
+    "Psammothidium grischunum": 5.2,
+    "Psammothidium rechtensis": 5.5,
+    "Psammothidium rossii": 5.5,
+    "Rhopalodia gibba": 7.5,
+    "Rossithidium petersenii": 7.0,
+    "Sellaphora bacillum": 7.2,
+    "Sellaphora blackfordensis": 6.8,
+    "Sellaphora joubaudii": 7.2,
+    "Sellaphora laevissima": 7.2,
+    "Sellaphora seminulum": 7.2,
+    "Stauroneis anceps": 6.5,
+    "Stauroneis phoenicenteron": 6.5,
+    "Staurosira construens var. venter": 7.2,
+    "Staurosira elliptica": 7.2,
+    "Staurosira pinnata": 7.2,
+    "Staurosirella leptostauron": 7.2,
+    "Staurosirella pinnata": 7.2,
+    "Stephanodiscus alpinus": 7.0,
+    "Stephanodiscus binderanus": 7.3,
+    "Stephanodiscus neoastraea": 7.4,
+    "Surirella brebissonii": 7.2,
+    "Surirella elegans": 7.3,
+    "Surirella linearis": 7.0,
+    "Surirella minuta": 7.2,
+    "Surirella ovata": 7.3,
+    "Surirella spiralis": 6.8,
+    "Surirella tenera": 6.9,
+    "Tetracyclus ellipticus": 6.5,
+    "Tetracyclus lacustris": 6.5,
+    "Ulnaria biceps": 7.2,
+    "Ulnaria capitata": 7.3,
+    "Ulnaria contracta": 7.2,
+    "Ulnaria danica": 7.3,
+    "Ulnaria delicatissima": 7.0,
+    "Ulnaria oxyrhynchus": 7.2
   },
   "spearSensitive": [
     "Achnanthidium biasolettianum",
+    "Achnanthidium catenatum",
+    "Achnanthidium dolomiticum",
     "Achnanthidium exile",
+    "Achnanthidium gracillimum",
+    "Achnanthidium helveticum",
     "Achnanthidium jackii",
+    "Achnanthidium kranzii",
+    "Achnanthidium lineare",
+    "Achnanthidium maximum",
     "Achnanthidium minutissimum",
+    "Achnanthidium petersenii",
     "Achnanthidium pyrenaicum",
     "Achnanthidium rivulare",
+    "Achnanthidium standeri",
+    "Achnanthidium titanium",
+    "Aulacoseira alpigena",
+    "Aulacoseira distans",
     "Brachysira brebissonii",
+    "Brachysira microcephala",
+    "Brachysira neglecta",
     "Brachysira neoexilis",
     "Brachysira serians",
     "Brachysira styriaca",
@@ -16900,76 +19968,136 @@
     "Cymbella lanceolata",
     "Cymbella neocistula",
     "Cymbella tumida",
+    "Cymbopleura anglica",
     "Cymbopleura cuspidata",
     "Cymbopleura hercynica",
+    "Cymbopleura incerta",
     "Cymbopleura naviculiformis",
     "Delicata delicatula",
+    "Denticula elegans",
+    "Denticula kuetzingii",
+    "Denticula tenuis",
     "Didymosphenia geminata",
     "Diploneis elliptica",
     "Diploneis ovalis",
+    "Encyonema auerswaldii",
     "Encyonema gracile",
     "Encyonema hebridicum",
+    "Encyonema leibleinii",
     "Encyonema minutum",
+    "Encyonema neogracile",
     "Encyonema perpusillum",
     "Encyonema prostratum",
     "Encyonema silesiacum",
+    "Encyonema triangulum",
     "Encyonema ventricosum",
     "Encyonopsis cesatii",
     "Encyonopsis descripta",
     "Encyonopsis falaisensis",
+    "Encyonopsis hustedtii",
     "Encyonopsis krammeri",
     "Encyonopsis microcephala",
     "Encyonopsis minuta",
+    "Encyonopsis montana",
     "Eucocconeis flexella",
     "Eunotia alpina",
+    "Eunotia angularis",
     "Eunotia arcus",
     "Eunotia bilunaris",
+    "Eunotia boreoalpina",
     "Eunotia botuliformis",
+    "Eunotia circumborealis",
+    "Eunotia cisalpina",
     "Eunotia curvata",
+    "Eunotia denticulata",
+    "Eunotia diodon",
+    "Eunotia elegans",
     "Eunotia exigua",
     "Eunotia exiguua",
     "Eunotia faba",
     "Eunotia formica",
+    "Eunotia glacialis",
     "Eunotia implicata",
     "Eunotia incisa",
+    "Eunotia islandica",
+    "Eunotia lapponica",
+    "Eunotia meisterei",
+    "Eunotia meisteri",
     "Eunotia minor",
     "Eunotia muscicola",
+    "Eunotia naegelii",
+    "Eunotia novaesiberica",
     "Eunotia paludosa",
     "Eunotia pectinalis",
+    "Eunotia pirla",
     "Eunotia rhomboidea",
     "Eunotia septentrionalis",
+    "Eunotia serra",
+    "Eunotia steineckii",
+    "Eunotia sylvaeducatula",
     "Eunotia tenella",
+    "Eunotia triodon",
+    "Eunotia veneris",
+    "Fragilaria austriaca",
+    "Fragilaria bicapitata",
+    "Fragilaria delicatissima",
     "Fragilaria gracilis",
+    "Fragilaria lapponica",
     "Fragilaria nanana",
+    "Fragilaria perminuta",
+    "Fragilaria virescens",
     "Frustulia crassinervia",
+    "Frustulia creuzburgensis",
+    "Frustulia erifuga",
     "Frustulia krammeri",
+    "Frustulia magaliesmontana",
+    "Frustulia neomundana",
     "Frustulia rhomboides",
     "Frustulia saxonica",
+    "Frustulia weinholdii",
+    "Frustulia zickendratii",
     "Gomphonema acuminatum",
     "Gomphonema calcifugum",
     "Gomphonema exilissimum",
     "Gomphonema hebridense",
     "Gomphonema helveticum",
+    "Gomphonema lateripunctatum",
+    "Gomphonema longilineare",
+    "Gomphonema mustela",
+    "Gomphonema pseudosphaerophorum",
     "Gomphonema pumilum",
+    "Gomphonema sarcophagus",
+    "Gomphonema septentrionale",
     "Gomphonema subtile",
+    "Gomphonema tenellum",
     "Hannaea arcus",
+    "Hannaea arcus var. linearis",
     "Hannaea arcus var. recta",
     "Karayevia clevei",
     "Karayevia oblongella",
     "Karayevia ploenensis",
     "Kobayasiella subtilissima",
     "Meridion circulare",
+    "Navicula alpina",
+    "Navicula difficillima",
     "Navicula harderi",
+    "Navicula lange-bertalotii",
     "Navicula leptostriata",
+    "Navicula oligotraphenta",
     "Navicula radiosa",
     "Navicula subtilissima",
+    "Navicula wildii",
     "Neidium affine",
     "Neidium alpinum",
     "Neidium ampliatum",
     "Neidium bisulcatum",
+    "Neidium diatomeaceum",
+    "Neidium dubium",
     "Neidium hercynicum",
     "Neidium iridis",
+    "Neidium ladogense",
     "Neidium longiceps",
+    "Neidium maximum",
     "Neidium productum",
     "Orthoseira roseana",
     "Peronia fibula",
@@ -16977,33 +20105,67 @@
     "Pinnularia biceps",
     "Pinnularia borealis",
     "Pinnularia braunii",
+    "Pinnularia brevicostata",
+    "Pinnularia decrescens",
     "Pinnularia divergens",
+    "Pinnularia divergentissima",
+    "Pinnularia episcopalis",
     "Pinnularia gibba",
+    "Pinnularia hilseana",
+    "Pinnularia intermedia",
+    "Pinnularia lata",
+    "Pinnularia latevittata",
     "Pinnularia maior",
     "Pinnularia microstauron",
+    "Pinnularia nobilis",
+    "Pinnularia nodosa",
+    "Pinnularia polyonca",
     "Pinnularia rupestris",
+    "Pinnularia stomatophora",
     "Pinnularia subcapitata",
+    "Pinnularia sudetica",
     "Pinnularia viridis",
     "Platessa zassocheana",
+    "Psammothidium altaicum",
     "Psammothidium bioretii",
+    "Psammothidium chlidanos",
+    "Psammothidium curtissimum",
+    "Psammothidium grischunum",
     "Psammothidium helveticum",
+    "Psammothidium lacus-vulcani",
     "Psammothidium lauenburgianum",
+    "Psammothidium marginulatum",
+    "Psammothidium oblongellum",
+    "Psammothidium rechtensis",
+    "Psammothidium rossii",
     "Psammothidium scoticum",
     "Psammothidium subatomoides",
+    "Psammothidium ventralis",
     "Rossithidium lineare",
     "Rossithidium nodosum",
+    "Rossithidium petersenii",
     "Rossithidium pusillum",
+    "Sellaphora blackfordensis",
     "Stauroneis agrestis",
     "Stauroneis anceps",
     "Stauroneis gracilis",
     "Stauroneis kriegeri",
+    "Stauroneis lacustris",
     "Stauroneis thermicola",
     "Surirella angusta",
+    "Surirella elegans",
+    "Surirella helvetica",
+    "Surirella linearis",
     "Surirella spiralis",
+    "Surirella splendida",
+    "Surirella tenera",
     "Tabellaria fenestrata",
     "Tabellaria flocculosa",
     "Tabellaria quadriseptata",
-    "Tetracyclus lacustris"
+    "Tetracyclus ellipticus",
+    "Tetracyclus emarginatus",
+    "Tetracyclus lacustris",
+    "Ulnaria delicatissima"
   ],
   "toxicDB": [
     "Amphora cf. coffeaeformis",
@@ -17368,6 +20530,8 @@
     "Fragilaria crotonensis",
     "Gomphonema parvulum",
     "Hannaea arcus",
+    "Lauderia annulata",
+    "Leptocylindrus danicus",
     "Mayamaea atomus",
     "Mayamaea permitis",
     "Melosira nummuloides",
