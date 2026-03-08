@@ -8315,6 +8315,146 @@
     "Staurosira leptostauron": {
       "s": 3.4,
       "v": 2
+    },
+    "Achnanthidium helianticola": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium maximum": {
+      "s": 5.0,
+      "v": 3
+    },
+    "Achnanthidium microcephalum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthidium obliquum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthidium subatomus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium thermalis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Achnanthidium trinode": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cyclotella stelligera": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella neoleptoceros": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Delicata nylanderi": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Diatoma vulgaris": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Eunotia exigua": {
+      "s": 5.0,
+      "v": 3
+    },
+    "Eunotia meisterei": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia nymanniana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Fragilaria solea": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Gomphonema ulviphilum": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Hannaea arcus var. linearis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Halamphora acutiuscula": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Halamphora montana": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Halamphora normanii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Halamphora veneta": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Navicula cf. antonii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula cf. cryptotenella": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula meniscus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula platystoma": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula pseudoanglica": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula stroemii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula vandamii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula wildii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Nitzschia cf. fonticola": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Nitzschia sinuata var. tabellaria": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia valdecostata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Pinnularia gentilis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Planothidium hauckianum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Sellaphora joubaudii": {
+      "s": 3.0,
+      "v": 2
     }
   },
   "sensitivityDB_ips": {
@@ -16233,6 +16373,302 @@
     "Staurosira leptostauron": {
       "s": 3.4,
       "v": 2
+    },
+    "Achnanthidium helianticola": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium maximum": {
+      "s": 5.0,
+      "v": 3
+    },
+    "Achnanthidium microcephalum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthidium obliquum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Achnanthidium subatomus": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Achnanthidium thermalis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Achnanthidium trinode": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Amphora copulata": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Amphora inariensis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Aulacoseira granulata": {
+      "s": 2.0,
+      "v": 3
+    },
+    "Caloneis bacillum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Caloneis silicula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cocconeis euglypta": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cyclotella comensis": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Cyclotella ocellata": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Cyclotella pseudostelligera": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cyclotella stelligera": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Cymbella excisa": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Cymbella neoleptoceros": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Cymbella tumida": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Delicata nylanderi": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Diatoma mesodon": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Diatoma tenuis": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Diatoma vulgaris": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Encyonema caespitosum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Encyonema silesiacum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Eunotia exigua": {
+      "s": 5.0,
+      "v": 3
+    },
+    "Eunotia meisterei": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Eunotia nymanniana": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Fragilaria capucina var. rumpens": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Fragilaria solea": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Gomphonema gracile": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Gomphonema micropus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Gomphonema pseudoaugur": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Gomphonema truncatum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Gomphonema ulviphilum": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Hannaea arcus": {
+      "s": 4.5,
+      "v": 3
+    },
+    "Hannaea arcus var. linearis": {
+      "s": 5.0,
+      "v": 2
+    },
+    "Halamphora acutiuscula": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Halamphora montana": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Halamphora normanii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Halamphora veneta": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Meridion circulare var. constrictum": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Navicula angusta": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula cari": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula cf. antonii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula cf. cryptotenella": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula meniscus": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula phyllepta": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula platystoma": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula pseudoanglica": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Navicula recens": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula rhynchocephala": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Navicula stroemii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula vandamii": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula viridula": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Navicula wildii": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Nitzschia cf. fonticola": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Nitzschia gracilis": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Nitzschia recta": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Nitzschia sinuata var. tabellaria": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia subacicularis": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Nitzschia supralitorea": {
+      "s": 2.0,
+      "v": 2
+    },
+    "Nitzschia valdecostata": {
+      "s": 2.5,
+      "v": 2
+    },
+    "Pinnularia gentilis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Planothidium dubium": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Planothidium hauckianum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Planothidium rostratum": {
+      "s": 3.5,
+      "v": 2
+    },
+    "Sellaphora bacillum": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Sellaphora joubaudii": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Staurosira construens var. venter": {
+      "s": 3.0,
+      "v": 2
+    },
+    "Surirella linearis": {
+      "s": 4.0,
+      "v": 2
+    },
+    "Surirella spiralis": {
+      "s": 4.5,
+      "v": 2
+    },
+    "Ulnaria capitata": {
+      "s": 3.5,
+      "v": 2
     }
   },
   "diTpOptima": {
@@ -16328,7 +16764,19 @@
     "Craticula accomodata": 150,
     "Fistulifera saprophila": 280,
     "Mayamaea atomus": 170,
-    "Eolimna minima": 140
+    "Eolimna minima": 140,
+    "Aulacoseira granulata": 55.0,
+    "Cymbella lanceolata": 15.0,
+    "Diatoma vulgaris": 30.0,
+    "Eunotia exigua": 5.0,
+    "Fragilaria tenera": 14.0,
+    "Frustulia rhomboides": 6.0,
+    "Gomphonema minutum": 22.0,
+    "Navicula cryptotenella": 25.0,
+    "Navicula rhynchocephala": 28.0,
+    "Nitzschia gracilis": 22.0,
+    "Pinnularia maior": 12.0,
+    "Stephanodiscus minutulus": 50.0
   },
   "diPhOptima": {
     "Achnanthidium minutissimum": 7.0,
@@ -16417,140 +16865,171 @@
     "Fistulifera saprophila": 7.4,
     "Mayamaea atomus": 7.5,
     "Eolimna minima": 7.3,
-    "Didymosphenia geminata": 7.2
+    "Didymosphenia geminata": 7.2,
+    "Aulacoseira granulata": 7.2,
+    "Cymbella lanceolata": 7.1,
+    "Diatoma vulgaris": 7.4,
+    "Eunotia exigua": 4.8,
+    "Fragilaria tenera": 7.0,
+    "Gomphonema minutum": 7.1,
+    "Hannaea arcus": 7.0,
+    "Navicula cryptotenella": 7.3,
+    "Navicula rhynchocephala": 7.3,
+    "Nitzschia gracilis": 7.1,
+    "Pinnularia maior": 6.5,
+    "Stephanodiscus minutulus": 7.3
   },
   "spearSensitive": [
-    "Achnanthidium minutissimum",
     "Achnanthidium biasolettianum",
-    "Achnanthidium pyrenaicum",
-    "Achnanthidium jackii",
-    "Achnanthidium rivulare",
     "Achnanthidium exile",
-    "Brachysira vitrea",
-    "Brachysira neoexilis",
+    "Achnanthidium jackii",
+    "Achnanthidium minutissimum",
+    "Achnanthidium pyrenaicum",
+    "Achnanthidium rivulare",
     "Brachysira brebissonii",
+    "Brachysira neoexilis",
     "Brachysira serians",
     "Brachysira styriaca",
+    "Brachysira vitrea",
     "Brachysira zellensis",
     "Cymbella affinis",
+    "Cymbella alpina",
     "Cymbella cistula",
     "Cymbella cymbiformis",
-    "Cymbella alpina",
     "Cymbella helvetica",
-    "Cymbella neocistula",
     "Cymbella lanceolata",
-    "Cymbopleura naviculiformis",
-    "Cymbopleura hercynica",
+    "Cymbella neocistula",
+    "Cymbella tumida",
     "Cymbopleura cuspidata",
-    "Encyonema minutum",
+    "Cymbopleura hercynica",
+    "Cymbopleura naviculiformis",
+    "Delicata delicatula",
+    "Didymosphenia geminata",
+    "Diploneis elliptica",
+    "Diploneis ovalis",
     "Encyonema gracile",
     "Encyonema hebridicum",
+    "Encyonema minutum",
     "Encyonema perpusillum",
     "Encyonema prostratum",
+    "Encyonema silesiacum",
     "Encyonema ventricosum",
-    "Encyonopsis microcephala",
     "Encyonopsis cesatii",
-    "Encyonopsis krammeri",
-    "Encyonopsis minuta",
     "Encyonopsis descripta",
     "Encyonopsis falaisensis",
-    "Eunotia bilunaris",
-    "Eunotia exiguua",
-    "Eunotia incisa",
-    "Eunotia arcus",
-    "Eunotia minor",
-    "Eunotia pectinalis",
-    "Eunotia formica",
-    "Eunotia faba",
-    "Eunotia rhomboidea",
-    "Eunotia tenella",
-    "Eunotia paludosa",
+    "Encyonopsis krammeri",
+    "Encyonopsis microcephala",
+    "Encyonopsis minuta",
+    "Eucocconeis flexella",
     "Eunotia alpina",
+    "Eunotia arcus",
+    "Eunotia bilunaris",
     "Eunotia botuliformis",
     "Eunotia curvata",
+    "Eunotia exigua",
+    "Eunotia exiguua",
+    "Eunotia faba",
+    "Eunotia formica",
     "Eunotia implicata",
+    "Eunotia incisa",
+    "Eunotia minor",
     "Eunotia muscicola",
-    "Frustulia rhomboides",
-    "Frustulia saxonica",
+    "Eunotia paludosa",
+    "Eunotia pectinalis",
+    "Eunotia rhomboidea",
+    "Eunotia septentrionalis",
+    "Eunotia tenella",
+    "Fragilaria gracilis",
+    "Fragilaria nanana",
     "Frustulia crassinervia",
     "Frustulia krammeri",
+    "Frustulia rhomboides",
+    "Frustulia saxonica",
     "Gomphonema acuminatum",
-    "Gomphonema pumilum",
-    "Gomphonema subtile",
     "Gomphonema calcifugum",
     "Gomphonema exilissimum",
     "Gomphonema hebridense",
     "Gomphonema helveticum",
-    "Meridion circulare",
+    "Gomphonema pumilum",
+    "Gomphonema subtile",
     "Hannaea arcus",
     "Hannaea arcus var. recta",
-    "Neidium affine",
-    "Neidium productum",
-    "Neidium alpinum",
-    "Neidium iridis",
-    "Neidium bisulcatum",
-    "Neidium hercynicum",
-    "Neidium longiceps",
-    "Pinnularia borealis",
-    "Pinnularia gibba",
-    "Pinnularia viridis",
-    "Pinnularia maior",
-    "Pinnularia subcapitata",
-    "Pinnularia microstauron",
-    "Pinnularia braunii",
-    "Pinnularia alpina",
-    "Pinnularia rupestris",
-    "Pinnularia biceps",
-    "Pinnularia divergens",
-    "Psammothidium helveticum",
-    "Psammothidium bioretii",
-    "Psammothidium subatomoides",
-    "Psammothidium scoticum",
-    "Psammothidium lauenburgianum",
-    "Stauroneis anceps",
-    "Stauroneis kriegeri",
-    "Stauroneis agrestis",
-    "Stauroneis gracilis",
-    "Stauroneis thermicola",
-    "Tabellaria flocculosa",
-    "Tabellaria fenestrata",
-    "Tabellaria quadriseptata",
-    "Tetracyclus lacustris",
-    "Peronia fibula",
-    "Orthoseira roseana",
-    "Kobayasiella subtilissima",
-    "Platessa zassocheana",
-    "Eucocconeis flexella",
-    "Delicata delicatula",
-    "Rossithidium pusillum",
-    "Rossithidium lineare",
-    "Rossithidium nodosum",
     "Karayevia clevei",
     "Karayevia oblongella",
     "Karayevia ploenensis",
-    "Didymosphenia geminata",
-    "Fragilaria gracilis",
-    "Fragilaria nanana",
+    "Kobayasiella subtilissima",
+    "Meridion circulare",
+    "Navicula harderi",
     "Navicula leptostriata",
+    "Navicula radiosa",
     "Navicula subtilissima",
-    "Navicula harderi"
+    "Neidium affine",
+    "Neidium alpinum",
+    "Neidium ampliatum",
+    "Neidium bisulcatum",
+    "Neidium hercynicum",
+    "Neidium iridis",
+    "Neidium longiceps",
+    "Neidium productum",
+    "Orthoseira roseana",
+    "Peronia fibula",
+    "Pinnularia alpina",
+    "Pinnularia biceps",
+    "Pinnularia borealis",
+    "Pinnularia braunii",
+    "Pinnularia divergens",
+    "Pinnularia gibba",
+    "Pinnularia maior",
+    "Pinnularia microstauron",
+    "Pinnularia rupestris",
+    "Pinnularia subcapitata",
+    "Pinnularia viridis",
+    "Platessa zassocheana",
+    "Psammothidium bioretii",
+    "Psammothidium helveticum",
+    "Psammothidium lauenburgianum",
+    "Psammothidium scoticum",
+    "Psammothidium subatomoides",
+    "Rossithidium lineare",
+    "Rossithidium nodosum",
+    "Rossithidium pusillum",
+    "Stauroneis agrestis",
+    "Stauroneis anceps",
+    "Stauroneis gracilis",
+    "Stauroneis kriegeri",
+    "Stauroneis thermicola",
+    "Surirella angusta",
+    "Surirella spiralis",
+    "Tabellaria fenestrata",
+    "Tabellaria flocculosa",
+    "Tabellaria quadriseptata",
+    "Tetracyclus lacustris"
   ],
   "toxicDB": [
+    "Amphora cf. coffeaeformis",
     "Amphora coffeaeformis",
+    "Amphora morsa",
     "Nitzschia bizertensis",
+    "Nitzschia cf. bizertensis",
     "Nitzschia cf. navis-varingica",
+    "Nitzschia longissima",
     "Nitzschia navis-varingica",
     "Pseudo-nitzschia adae",
     "Pseudo-nitzschia allochrona",
     "Pseudo-nitzschia americana",
     "Pseudo-nitzschia arenysensis",
     "Pseudo-nitzschia australis",
+    "Pseudo-nitzschia batesiana",
     "Pseudo-nitzschia brasiliana",
     "Pseudo-nitzschia caciantha",
+    "Pseudo-nitzschia caciantha f. longissima",
     "Pseudo-nitzschia calliantha",
     "Pseudo-nitzschia cf. americana",
     "Pseudo-nitzschia cf. australis",
+    "Pseudo-nitzschia cf. calliantha",
+    "Pseudo-nitzschia cf. cuspidata",
     "Pseudo-nitzschia cf. delicatissima",
+    "Pseudo-nitzschia cf. fraudulenta",
     "Pseudo-nitzschia cf. multiseries",
     "Pseudo-nitzschia cf. pungens",
     "Pseudo-nitzschia cf. seriata",
@@ -16808,6 +17287,7 @@
     "Ulnaria ulna"
   ],
   "gillPhysicalDB": [
+    "Attheya zachariasii",
     "Bacteriastrum hyalinum",
     "Cerataulina pelagica",
     "Chaetoceros armatus",
@@ -16819,36 +17299,54 @@
     "Chaetoceros criophilus",
     "Chaetoceros decipiens",
     "Chaetoceros densus",
+    "Chaetoceros diadema",
+    "Chaetoceros didymus",
+    "Chaetoceros laciniosus",
+    "Chaetoceros muelleri",
+    "Chaetoceros pseudocurvisetus",
     "Chaetoceros wighami",
     "Corethron criophilum",
     "Corethron hystrix",
+    "Corethron pennatum",
     "Coscinodiscus wailesii",
     "Dactyliosolen fragilissimus",
     "Didymosphenia geminata",
+    "Ditylum brightwellii",
     "Guinardia delicatula",
     "Guinardia flaccida",
     "Guinardia striata",
     "Hemiaulus hauckii",
     "Hemiaulus membranaceus",
+    "Hemiaulus sinensis",
     "Leptocylindrus danicus",
     "Leptocylindrus mediterraneus",
     "Leptocylindrus minimus",
     "Odontella aurita",
+    "Odontella mobiliensis",
     "Odontella sinensis",
     "Proboscia alata",
+    "Rhizosolenia acuminata",
+    "Rhizosolenia calcar-avis",
     "Rhizosolenia imbricata",
     "Rhizosolenia setigera",
     "Rhizosolenia styliformis",
+    "Skeletonema costatum",
     "Thalassionema frauenfeldii",
-    "Thalassionema nitzschioides"
+    "Thalassionema nitzschioides",
+    "Thalassiosira subtilis"
   ],
   "gillBloomDB": [
     "Acanthoceras zachariasii",
+    "Achnanthidium minutissimum",
     "Asterionella formosa",
+    "Asterionella gracillima",
     "Asterionellopsis glacialis",
+    "Aulacoseira alpigena",
     "Aulacoseira ambigua",
+    "Aulacoseira crenulata",
     "Aulacoseira granulata",
     "Aulacoseira islandica",
+    "Aulacoseira italica",
     "Aulacoseira subarctica",
     "Chaetoceros curvisetus",
     "Chaetoceros debilis",
@@ -16858,8 +17356,10 @@
     "Coscinodiscus radiatus",
     "Craticula accomodata",
     "Cyclotella atomus",
+    "Cyclotella bodanica",
     "Cyclotella meneghiniana",
     "Detonula pumila",
+    "Diatoma vulgaris",
     "Eolimna minima",
     "Eolimna subminuscula",
     "Fistulifera pelliculosa",
@@ -16867,6 +17367,7 @@
     "Fragilaria capucina",
     "Fragilaria crotonensis",
     "Gomphonema parvulum",
+    "Hannaea arcus",
     "Mayamaea atomus",
     "Mayamaea permitis",
     "Melosira nummuloides",
@@ -16882,22 +17383,85 @@
     "Nitzschia palea var. tenuirostris",
     "Nitzschia sigma",
     "Nitzschia umbonata",
+    "Planothidium lanceolatum",
     "Porosira glacialis",
     "Skeletonema costatum",
     "Skeletonema dohrnii",
     "Skeletonema marinoi",
     "Skeletonema pseudocostatum",
+    "Staurosira construens",
+    "Stephanodiscus alpinus",
     "Stephanodiscus binderanus",
     "Stephanodiscus hantzschii",
+    "Stephanodiscus medius",
     "Stephanodiscus minutulus",
     "Stephanodiscus neoastraea",
     "Stephanodiscus parvus",
     "Surirella ovata",
+    "Synedra acus",
     "Tabellaria flocculosa",
     "Thalassiosira gravida",
     "Thalassiosira nordenskioeldii",
     "Thalassiosira rotula",
     "Thalassiosira weissflogii",
+    "Ulnaria acus",
     "Ulnaria ulna"
+  ],
+  "toxicHighDB": [
+    "Nitzschia bizertensis",
+    "Nitzschia cf. navis-varingica",
+    "Nitzschia navis-varingica",
+    "Pseudo-nitzschia americana",
+    "Pseudo-nitzschia australis",
+    "Pseudo-nitzschia calliantha",
+    "Pseudo-nitzschia cf. americana",
+    "Pseudo-nitzschia cf. australis",
+    "Pseudo-nitzschia cf. delicatissima",
+    "Pseudo-nitzschia cf. multiseries",
+    "Pseudo-nitzschia cf. pungens",
+    "Pseudo-nitzschia cf. seriata",
+    "Pseudo-nitzschia cuspidata",
+    "Pseudo-nitzschia delicatissima",
+    "Pseudo-nitzschia fraudulenta",
+    "Pseudo-nitzschia galaxiae",
+    "Pseudo-nitzschia granii",
+    "Pseudo-nitzschia heimii",
+    "Pseudo-nitzschia multiseries",
+    "Pseudo-nitzschia pungens",
+    "Pseudo-nitzschia seriata",
+    "Pseudo-nitzschia turgidula"
+  ],
+  "toxicLowDB": [
+    "Amphora cf. coffeaeformis",
+    "Amphora coffeaeformis",
+    "Amphora morsa",
+    "Nitzschia cf. bizertensis",
+    "Nitzschia longissima",
+    "Pseudo-nitzschia adae",
+    "Pseudo-nitzschia allochrona",
+    "Pseudo-nitzschia arenysensis",
+    "Pseudo-nitzschia batesiana",
+    "Pseudo-nitzschia brasiliana",
+    "Pseudo-nitzschia caciantha",
+    "Pseudo-nitzschia caciantha f. longissima",
+    "Pseudo-nitzschia cf. calliantha",
+    "Pseudo-nitzschia cf. cuspidata",
+    "Pseudo-nitzschia cf. fraudulenta",
+    "Pseudo-nitzschia dolorosa",
+    "Pseudo-nitzschia fryxelliana",
+    "Pseudo-nitzschia hasleana",
+    "Pseudo-nitzschia inflatula",
+    "Pseudo-nitzschia lineola",
+    "Pseudo-nitzschia mannii",
+    "Pseudo-nitzschia micropora",
+    "Pseudo-nitzschia obtusa",
+    "Pseudo-nitzschia plurisecta",
+    "Pseudo-nitzschia pseudodelicatissima",
+    "Pseudo-nitzschia simulans",
+    "Pseudo-nitzschia singular",
+    "Pseudo-nitzschia sinica",
+    "Pseudo-nitzschia subfraudulenta",
+    "Pseudo-nitzschia subpacifica",
+    "Pseudo-nitzschia weissflogii"
   ]
 }

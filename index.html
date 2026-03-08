@@ -497,9 +497,6 @@
             const [isProcessing, setIsProcessing] = useState(false);
             const [analysisData, setAnalysisData] = useState(null);
             const [speciesDb, setSpeciesDb] = useState(null);
-            const toxicDB    = speciesDb ? new Set(speciesDb.toxicDB)    : new Set();
-            const gillPhysicalDB = speciesDb ? new Set(speciesDb.gillPhysicalDB) : new Set();
-            const gillBloomDB    = speciesDb ? new Set(speciesDb.gillBloomDB)    : new Set();
             
             // Import State
             const fileInputRef = useRef(null);
@@ -645,32 +642,40 @@
             const allSpeciesAnalysis = fullEcologicalAnalysis.all;
 
             // 5. Harmful species analysis (toxic / gill-damaging)
-            // Computed here in the worker where speciesDb is available
-            const _toxicSet     = new Set((speciesDb && speciesDb.toxicDB)        ? speciesDb.toxicDB        : []);
+            // Computed here in the worker where speciesDb is available.
+            // Toxicity is split: HIGH (confirmed strong DA/OA producers, dangerous even at low %)
+            //                    LOW  (mildly toxic, needs higher abundance to matter)
+            const _toxicHighSet = new Set((speciesDb && speciesDb.toxicHighDB) ? speciesDb.toxicHighDB : []);
+            const _toxicLowSet  = new Set((speciesDb && speciesDb.toxicLowDB)  ? speciesDb.toxicLowDB  : []);
             const _gillPhysSet  = new Set((speciesDb && speciesDb.gillPhysicalDB) ? speciesDb.gillPhysicalDB : []);
             const _gillBloomSet = new Set((speciesDb && speciesDb.gillBloomDB)    ? speciesDb.gillBloomDB    : []);
-            let _toxicCount = 0, _gillPhysCount = 0, _gillBloomCount = 0, _totalWithDB = 0;
-            const _detectedToxic = [], _detectedGillPhys = [], _detectedGillBloom = [];
+            let _toxicHighCount = 0, _toxicLowCount = 0, _gillPhysCount = 0, _gillBloomCount = 0, _totalWithDB = 0;
+            const _detectedToxicHigh = [], _detectedToxicLow = [], _detectedGillPhys = [], _detectedGillBloom = [];
             samplesWithIndices.forEach(function(sample) {
                 sample.taxa.forEach(function(t) {
                     var name = t.name.trim();
                     _totalWithDB++;
-                    if (_toxicSet.has(name))     { _toxicCount++;     if (_detectedToxic.indexOf(name) === -1)     _detectedToxic.push(name); }
-                    if (_gillPhysSet.has(name))  { _gillPhysCount++;  if (_detectedGillPhys.indexOf(name) === -1)  _detectedGillPhys.push(name); }
+                    if (_toxicHighSet.has(name)) { _toxicHighCount++; if (_detectedToxicHigh.indexOf(name) === -1) _detectedToxicHigh.push(name); }
+                    if (_toxicLowSet.has(name))  { _toxicLowCount++;  if (_detectedToxicLow.indexOf(name)  === -1) _detectedToxicLow.push(name);  }
+                    if (_gillPhysSet.has(name))  { _gillPhysCount++;  if (_detectedGillPhys.indexOf(name)  === -1) _detectedGillPhys.push(name);  }
                     if (_gillBloomSet.has(name)) { _gillBloomCount++; if (_detectedGillBloom.indexOf(name) === -1) _detectedGillBloom.push(name); }
                 });
             });
+            var _tot = _totalWithDB;
             const harmfulSpecies = {
-                toxicCount:       _toxicCount,
-                gillPhysCount:    _gillPhysCount,
-                gillBloomCount:   _gillBloomCount,
-                totalWithDB:      _totalWithDB,
-                detectedToxic:    _detectedToxic,
-                detectedGillPhys: _detectedGillPhys,
-                detectedGillBloom:_detectedGillBloom,
-                toxicRatio:    _totalWithDB > 0 ? (_toxicCount    / _totalWithDB) * 100 : 0,
-                gillPhysRatio: _totalWithDB > 0 ? (_gillPhysCount / _totalWithDB) * 100 : 0,
-                gillBloomRatio:_totalWithDB > 0 ? (_gillBloomCount/ _totalWithDB) * 100 : 0
+                toxicHighCount:     _toxicHighCount,
+                toxicLowCount:      _toxicLowCount,
+                gillPhysCount:      _gillPhysCount,
+                gillBloomCount:     _gillBloomCount,
+                totalWithDB:        _tot,
+                detectedToxicHigh:  _detectedToxicHigh,
+                detectedToxicLow:   _detectedToxicLow,
+                detectedGillPhys:   _detectedGillPhys,
+                detectedGillBloom:  _detectedGillBloom,
+                toxicHighRatio: _tot > 0 ? (_toxicHighCount / _tot) * 100 : 0,
+                toxicLowRatio:  _tot > 0 ? (_toxicLowCount  / _tot) * 100 : 0,
+                gillPhysRatio:  _tot > 0 ? (_gillPhysCount  / _tot) * 100 : 0,
+                gillBloomRatio: _tot > 0 ? (_gillBloomCount / _tot) * 100 : 0
             };
 
             return {
@@ -1955,32 +1960,59 @@
                 // ── TOXIC & GILL-HARM SPECIES ANALYSIS ─────────────────────────
                 // Results are pre-computed in the worker where speciesDb is available
                 const hs = data.harmfulSpecies || {};
-                const toxicCount     = hs.toxicCount     || 0;
-                const gillPhysCount  = hs.gillPhysCount  || 0;
-                const gillBloomCount = hs.gillBloomCount || 0;
-                const totalWithDB    = hs.totalWithDB    || 0;
-                const detectedToxic     = hs.detectedToxic     || [];
-                const detectedGillPhys  = hs.detectedGillPhys  || [];
-                const detectedGillBloom = hs.detectedGillBloom || [];
-                const toxicRatio     = hs.toxicRatio     || 0;
-                const gillPhysRatio  = hs.gillPhysRatio  || 0;
-                const gillBloomRatio = hs.gillBloomRatio || 0;
+                const toxicHighCount  = hs.toxicHighCount  || 0;
+                const toxicLowCount   = hs.toxicLowCount   || 0;
+                const gillPhysCount   = hs.gillPhysCount   || 0;
+                const gillBloomCount  = hs.gillBloomCount  || 0;
+                const totalWithDB     = hs.totalWithDB     || 0;
+                const detectedToxicHigh  = hs.detectedToxicHigh  || [];
+                const detectedToxicLow   = hs.detectedToxicLow   || [];
+                const detectedGillPhys   = hs.detectedGillPhys   || [];
+                const detectedGillBloom  = hs.detectedGillBloom  || [];
+                const toxicHighRatio  = hs.toxicHighRatio  || 0;
+                const toxicLowRatio   = hs.toxicLowRatio   || 0;
+                const gillPhysRatio   = hs.gillPhysRatio   || 0;
+                const gillBloomRatio  = hs.gillBloomRatio  || 0;
 
-                // Toxin assessment
-                let toxicDanger = '', toxicColor = '', toxicBg = '', toxicBorder = '';
-                if (toxicRatio === 0) {
-                    toxicDanger = 'Nem észlelhető toxintermelő faj a mintában.';
-                    toxicColor = 'text-green-900'; toxicBg = 'bg-green-50'; toxicBorder = 'border-green-300';
-                } else if (toxicRatio < 5) {
-                    toxicDanger = 'Minimális kockázat: toxintermelő fajok aránya alacsony (<5%). Potenciális domoinsav/okadásav terhelés figyelemmel kísérése javasolt.';
-                    toxicColor = 'text-yellow-900'; toxicBg = 'bg-yellow-50'; toxicBorder = 'border-yellow-300';
-                } else if (toxicRatio < 15) {
-                    toxicDanger = 'Közepes kockázat: toxintermelő fajok aránya mérsékelt (5–15%). Rendszeres monitorozás és halvizsgálat javasolt.';
-                    toxicColor = 'text-orange-900'; toxicBg = 'bg-orange-50'; toxicBorder = 'border-orange-400';
+                // ── HIGH toxicity assessment (threshold like gill-physical: low %)
+                // Confirmed strong DA/OA producers – dangerous even at 1–3%
+                let toxicHighDanger = '', toxicHighColor = '', toxicHighBg = '', toxicHighBorder = '';
+                if (toxicHighRatio === 0) {
+                    toxicHighDanger = 'Nem észlelhető veszélyesen toxikus faj a mintában.';
+                    toxicHighColor = 'text-green-900'; toxicHighBg = 'bg-green-50'; toxicHighBorder = 'border-green-300';
+                } else if (toxicHighRatio < 1) {
+                    toxicHighDanger = 'ALACSONY, DE VALÓS KOCKÁZAT (<1%): Erős toxintermelő fajok (pl. Pseudo-nitzschia multiseries, Nitzschia navis-varingica) jelen vannak. Már csekély egyedszámnál is domoinsav- / okadásav-szennyezés lehetséges. Azonnali monitoring javasolt!';
+                    toxicHighColor = 'text-yellow-900'; toxicHighBg = 'bg-yellow-50'; toxicHighBorder = 'border-yellow-400';
+                } else if (toxicHighRatio < 3) {
+                    toxicHighDanger = 'KÖZEPES KOCKÁZAT (1–3%): Megerősített erős toxintermelők mérsékelt arányban vannak jelen. Domoinsav / okadásav-termelés valószínű. Halfogyasztási figyelmeztetés és hatósági értesítés mérlegelendő!';
+                    toxicHighColor = 'text-orange-900'; toxicHighBg = 'bg-orange-50'; toxicHighBorder = 'border-orange-500';
                 } else {
-                    toxicDanger = 'KIFEJEZETT KOCKÁZAT: Toxintermelő fajok aránya magas (>15%). Azonnali vizsgálat és hatósági értesítés javasolt! Ivóvízkivételi és halfogyasztási tilalom mérlegelendő!';
-                    toxicColor = 'text-red-900'; toxicBg = 'bg-red-50'; toxicBorder = 'border-red-500';
+                    toxicHighDanger = 'KRITIKUS KOCKÁZAT (>3%): Erős toxintermelők dominálnak! Súlyos domoinsav / okadásav-szennyezés valószínűsíthető. Ivóvízkivétel és halfogyasztás azonnal felfüggesztendő! Hatósági mintavétel kötelező!';
+                    toxicHighColor = 'text-red-900'; toxicHighBg = 'bg-red-50'; toxicHighBorder = 'border-red-600';
                 }
+
+                // ── LOW toxicity assessment (threshold like bloom: needs higher %)
+                // Mildly/potentially toxic species – relevant only at higher abundance
+                let toxicLowDanger = '', toxicLowColor = '', toxicLowBg = '', toxicLowBorder = '';
+                if (toxicLowRatio === 0) {
+                    toxicLowDanger = 'Nem észlelhető enyhén toxikus faj a mintában.';
+                    toxicLowColor = 'text-green-900'; toxicLowBg = 'bg-green-50'; toxicLowBorder = 'border-green-300';
+                } else if (toxicLowRatio < 5) {
+                    toxicLowDanger = 'Minimális kockázat (<5%): Enyhén toxikus fajok alacsony arányban jelen vannak. Toxintermelés ennél az aránynál általában nem szignifikáns, de figyelemmel kísérése javasolt.';
+                    toxicLowColor = 'text-yellow-900'; toxicLowBg = 'bg-yellow-50'; toxicLowBorder = 'border-yellow-300';
+                } else if (toxicLowRatio < 15) {
+                    toxicLowDanger = 'Közepes kockázat (5–15%): Enyhén toxikus fajok mérsékelt dominanciája. Tömegesen elszaporodva okadásav / gyenge domoinsav szennyezés lehetséges. Rendszeres monitorozás ajánlott.';
+                    toxicLowColor = 'text-orange-900'; toxicLowBg = 'bg-orange-50'; toxicLowBorder = 'border-orange-400';
+                } else {
+                    toxicLowDanger = 'MAGAS KOCKÁZAT (>15%): Enyhén toxikus fajok magas aránya. Ilyen dominancia esetén toxintermelés és vízkémiai kockázat fennáll. Hatósági tesztelés (biotoxin-szűrés) javasolt!';
+                    toxicLowColor = 'text-red-900'; toxicLowBg = 'bg-red-50'; toxicLowBorder = 'border-red-500';
+                }
+
+                // Toxin assessment (legacy combined – used only for backward compat display)
+                const toxicDanger = toxicHighDanger; // keep for any legacy refs
+                const toxicColor = toxicHighColor;
+                const toxicBg = toxicHighBg;
+                const toxicBorder = toxicHighBorder;
 
                 // Physical gill injury – LOW threshold (even 1–3% is dangerous)
                 let gillPhysDanger = '', gillPhysColor = '', gillPhysBg = '', gillPhysBorder = '';
@@ -2071,18 +2103,40 @@
                             </div>
                         )}
 
-                        <div className={`p-4 rounded border ${toxicBg} ${toxicBorder}`}>
-                            <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${toxicColor}`}>
-                                5a. Toxintermelő fajok értékelése (domoinsav / okadásav / ASP / DSP)
+                        <div className={`p-4 rounded border ${toxicHighBg} ${toxicHighBorder}`}>
+                            <h4 className={`font-bold mb-1 uppercase text-xs tracking-wider ${toxicHighColor}`}>
+                                5a-i. Veszélyesen toxikus fajok (erős DA/OA termelők) – Küszöb: &gt;1% = közepes; &gt;3% = kritikus
                             </h4>
-                            <p className={toxicColor}>
-                                <strong>Toxintermelő fajok aránya: {toxicRatio.toFixed(1)}%</strong>
-                                {toxicCount > 0 && <span> ({toxicCount} rekord / {totalWithDB} összesen)</span>}
+                            <p className={`text-xs mb-2 opacity-75 ${toxicHighColor}`}>
+                                ⛔ Megerősített erős domoinsav / okadásav termelők. Már kis sejtszámnál is egészségügyi kockázatot jelentenek (pl. <em>Pseudo-nitzschia multiseries</em>, <em>Nitzschia navis-varingica</em>).
                             </p>
-                            <p className={`mt-1 ${toxicColor}`}>{toxicDanger}</p>
-                            {detectedToxic.length > 0 && (
-                                <p className={`mt-2 text-xs italic ${toxicColor}`}>
-                                    Azonosított fajok: {detectedToxic.sort().join(', ')}
+                            <p className={toxicHighColor}>
+                                <strong>Veszélyesen toxikus fajok aránya: {toxicHighRatio.toFixed(2)}%</strong>
+                                {toxicHighCount > 0 && <span> ({toxicHighCount} rekord / {totalWithDB} összesen)</span>}
+                            </p>
+                            <p className={`mt-1 ${toxicHighColor}`}>{toxicHighDanger}</p>
+                            {detectedToxicHigh.length > 0 && (
+                                <p className={`mt-2 text-xs italic ${toxicHighColor}`}>
+                                    Azonosított fajok: {[...detectedToxicHigh].sort().join(', ')}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className={`p-4 rounded border ${toxicLowBg} ${toxicLowBorder}`}>
+                            <h4 className={`font-bold mb-1 uppercase text-xs tracking-wider ${toxicLowColor}`}>
+                                5a-ii. Enyhén toxikus fajok (alacsony / változó toxicitás) – Küszöb: &gt;5% = közepes; &gt;15% = magas
+                            </h4>
+                            <p className={`text-xs mb-2 opacity-75 ${toxicLowColor}`}>
+                                ⚠ Alacsony vagy változó toxicitású fajok. Csak tömeges elszaporodáskor (>5–15%) releváns a kockázat.
+                            </p>
+                            <p className={toxicLowColor}>
+                                <strong>Enyhén toxikus fajok aránya: {toxicLowRatio.toFixed(1)}%</strong>
+                                {toxicLowCount > 0 && <span> ({toxicLowCount} rekord / {totalWithDB} összesen)</span>}
+                            </p>
+                            <p className={`mt-1 ${toxicLowColor}`}>{toxicLowDanger}</p>
+                            {detectedToxicLow.length > 0 && (
+                                <p className={`mt-2 text-xs italic ${toxicLowColor}`}>
+                                    Azonosított fajok: {[...detectedToxicLow].sort().join(', ')}
                                 </p>
                             )}
                         </div>
