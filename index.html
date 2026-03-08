@@ -198,7 +198,11 @@
                 alert_no_taxa: "Legalább egy taxon megadása kötelező!",
                 alert_success: "Minta sikeresen rögzítve a mappába",
                 alert_select_site: "Kérlek jelölj ki egy víztestet az elemzéshez!",
-                alert_empty_site: "A kiválasztott víztest üres."
+                alert_empty_site: "A kiválasztott víztest üres.",
+                dfcri_label: "DFCRI (Diatom Funkcionális Konnektivitás és Reziliencia Index)",
+                dfcri_high: "A közösség funkcionális hálózata stabil, magas rezilienciával rendelkezik a környezeti hatásokkal szemben.",
+                dfcri_mid: "A közösség ökológiai hálózata kiegyensúlyozott, de mérsékelten érzékeny a környezeti változásokra.",
+                dfcri_low: "A funkcionális konnektivitás alacsony, a közösség sérülékeny és instabil szerkezetet mutat."
             },
             en: {
                 app_title: "ATLAS DIATOM",
@@ -238,7 +242,7 @@
                 section2_title: "2. Species-Environment Relations (Prospective)",
                 section3_title: "3. Ecological State & Assessment (Narrative)",
                 section4_title: "4. Methodology & Formulas",
-                extra_title: "Detailed Dominance & Competition Analysis",
+                extra_title: "EXTRA: Detailed Dominance & Competition Analysis",
                 chart_title: "Combined Ecological & Environmental Chart",
                 chart_x: "Samples (By Date)",
                 chart_y_left: "Species Abundance (Ind.)",
@@ -317,7 +321,11 @@
                 alert_no_taxa: "At least one taxon is required!",
                 alert_success: "Sample successfully recorded to folder",
                 alert_select_site: "Please select a water body for analysis!",
-                alert_empty_site: "Selected water body is empty."
+                alert_empty_site: "Selected water body is empty.",
+                dfcri_label: "DFCRI (Diatom Functional Connectivity and Resilience Index)",
+                dfcri_high: "The community's functional network is stable, with high resilience to environmental impacts.",
+                dfcri_mid: "The community's ecological network is balanced, but moderately sensitive to environmental changes.",
+                dfcri_low: "Functional connectivity is low; the community exhibits a vulnerable and unstable structure."
             }
         };
 
@@ -2046,6 +2054,79 @@
                     gillBloomColor = 'text-red-900'; gillBloomBg = 'bg-red-50'; gillBloomBorder = 'border-red-500';
                 }
                 // ────────────────────────────────────────────────────────────────
+
+                // ── DFCRI: Diatom Functional Connectivity and Resilience Index ──
+                // Build species → s value lookup from allSpeciesAnalysis (s defaults to 3.0 if missing from DB)
+                const sValueMap = {};
+                if (data.allSpeciesAnalysis) {
+                    data.allSpeciesAnalysis.forEach(sp => { sValueMap[sp.name] = sp.s; });
+                }
+
+                // Classify a sensitivity value into one of 5 functional groups (0–4)
+                const classifyFuncGroup = (sVal) => {
+                    if (sVal >= 4.6) return 4;
+                    if (sVal >= 4.0) return 3;
+                    if (sVal >= 3.0) return 2;
+                    if (sVal >= 2.0) return 1;
+                    return 0;
+                };
+
+                const computeSampleDFCRI = (sample) => {
+                    try {
+                        const taxa = sample.taxa;
+                        const S = taxa.length;
+                        const N = sample.totalAbundance;
+                        if (!S || S < 2 || !N || N === 0) return null;
+
+                        // R = Resilience = Pielou evenness (Shannon / ln(S))
+                        const R = sample.indices.pielou != null ? sample.indices.pielou : (S > 1 ? sample.indices.shannon / Math.log(S) : 0);
+
+                        // C = Connectivity = normalized Shannon of the 5 functional groups
+                        const groupCounts = [0, 0, 0, 0, 0];
+                        taxa.forEach(tx => {
+                            const sVal = sValueMap[tx.name] !== undefined ? sValueMap[tx.name] : 3.0;
+                            groupCounts[classifyFuncGroup(sVal)] += tx.count;
+                        });
+                        const totalGroupCount = groupCounts.reduce((a, b) => a + b, 0);
+                        if (totalGroupCount === 0) return null;
+
+                        let H_groups = 0;
+                        groupCounts.forEach(c => {
+                            if (c > 0) {
+                                const p = c / totalGroupCount;
+                                H_groups -= p * Math.log(p);
+                            }
+                        });
+                        // Normalize C to [0,1]: max Shannon for 5 equal groups = ln(5)
+                        const C = H_groups / Math.log(5);
+
+                        return R * C;
+                    } catch (e) {
+                        return null;
+                    }
+                };
+
+                const dfcriValues = s.map(sample => computeSampleDFCRI(sample)).filter(v => v !== null && !isNaN(v));
+                const avgDFCRI = dfcriValues.length > 0
+                    ? dfcriValues.reduce((a, b) => a + b, 0) / dfcriValues.length
+                    : null;
+
+                let dfcriInterpText = '';
+                let dfcriBg = 'bg-teal-50', dfcriBorder = 'border-teal-200', dfcriColor = 'text-teal-900', dfcriHeadColor = 'text-teal-800';
+                if (avgDFCRI !== null) {
+                    if (avgDFCRI > 0.7) {
+                        dfcriInterpText = t('dfcri_high');
+                        dfcriBg = 'bg-teal-50'; dfcriBorder = 'border-teal-300'; dfcriColor = 'text-teal-900'; dfcriHeadColor = 'text-teal-800';
+                    } else if (avgDFCRI >= 0.4) {
+                        dfcriInterpText = t('dfcri_mid');
+                        dfcriBg = 'bg-yellow-50'; dfcriBorder = 'border-yellow-300'; dfcriColor = 'text-yellow-900'; dfcriHeadColor = 'text-yellow-800';
+                    } else {
+                        dfcriInterpText = t('dfcri_low');
+                        dfcriBg = 'bg-orange-50'; dfcriBorder = 'border-orange-300'; dfcriColor = 'text-orange-900'; dfcriHeadColor = 'text-orange-800';
+                    }
+                }
+                // ────────────────────────────────────────────────────────────────
+
                 return (
                     <div className="space-y-6 text-justify text-slate-800 text-sm leading-relaxed font-normal">
                         <div className="bg-slate-50 p-4 rounded border border-slate-200">
@@ -2100,6 +2181,18 @@
                                         <p className="text-purple-900 mt-0.5">{spearText}</p>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {avgDFCRI !== null && (
+                            <div className={`p-4 rounded border ${dfcriBg} ${dfcriBorder}`}>
+                                <h4 className={`font-bold mb-2 uppercase text-xs tracking-wider ${dfcriHeadColor}`}>
+                                    7. {t('dfcri_label')}
+                                </h4>
+                                <p className={`font-mono font-bold text-lg mb-1 ${dfcriColor}`}>
+                                    DFCRI = {avgDFCRI.toFixed(3)}
+                                </p>
+                                <p className={`text-sm ${dfcriColor}`}>{dfcriInterpText}</p>
                             </div>
                         )}
 
@@ -2695,5 +2788,4 @@
         );
     </script>
 </body>
-
 </html>
