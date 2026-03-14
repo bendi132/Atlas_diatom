@@ -188,6 +188,16 @@
                 osi_warn_drift: "Figyelem: Érzékeny taxon magas stresszszintű környezetben. Jelenléte sodródásra vagy friss behurcolásra utalhat.",
                 osi_warn_mono: "Figyelem: Extrém monodominancia (>80%) észlelhető. Az index érzékenysége csökkenhet.",
                 
+                trophic_section_title: "Tápanyagterhelés-preferencia elemzés (Trofikus profil)",
+                trophic_oligo_label: "Oligotróf",
+                trophic_meso_label: "Mezotróf",
+                trophic_eutro_label: "Eutróf",
+                trophic_unknown_label: "Nem ismert",
+                trophic_eval_oligo: "A közösséget az oligotróf fajok uralják, ami alacsony tápanyagterhelést és kiváló-jó ökológiai állapotot tükröz.",
+                trophic_eval_meso: "A mezotróf fajok dominanciája mérsékelt tápanyagterhelést és átmeneti ökológiai állapotot jelez.",
+                trophic_eval_eutro: "Az eutróf fajok dominanciája magas tápanyagterhelést és eutrofizációs folyamatokat jelez, ami csökkent ökológiai állapotot tükröz.",
+                trophic_eval_mixed: "A közösség vegyes trofikus összetétele átmeneti tápanyagterhelési állapotot tükröz – a domináns csoport jelzi az elsődleges trofikus nyomás irányát.",
+                refs_title: "Forrásjegyzék",
                 calc_error: "Hiba a számítás során",
                 confirm_delete_sample: "Biztosan törlöd ezt a mintát?",
                 confirm_delete_site: "FIGYELEM! Ezzel törlöd a teljes mappát és az összes benne lévő mintát. Folytatod?",
@@ -311,6 +321,16 @@
                 osi_warn_drift: "Caution: Sensitive taxon in high-stress environment. Presence may indicate drift or recent input.",
                 osi_warn_mono: "Caution: Extreme monodominance (>80%) detected. Index sensitivity may be reduced.",
 
+                trophic_section_title: "Nutrient Load Preference Analysis (Trophic Profile)",
+                trophic_oligo_label: "Oligotrophic",
+                trophic_meso_label: "Mesotrophic",
+                trophic_eutro_label: "Eutrophic",
+                trophic_unknown_label: "Unknown",
+                trophic_eval_oligo: "The community is dominated by oligotrophic species, reflecting low nutrient load and high/good ecological status.",
+                trophic_eval_meso: "Dominance of mesotrophic species indicates moderate nutrient load and a transitional ecological state.",
+                trophic_eval_eutro: "The dominance of eutrophic species indicates high nutrient load and ongoing eutrophication processes.",
+                trophic_eval_mixed: "The mixed trophic composition reflects a transitional nutrient loading state – the dominant group indicates the primary trophic pressure.",
+                refs_title: "References",
                 calc_error: "Calculation Error",
                 confirm_delete_sample: "Are you sure you want to delete this sample?",
                 confirm_delete_site: "WARNING! This will delete the entire folder and all samples. Continue?",
@@ -686,6 +706,48 @@
                 gillBloomRatio: _tot > 0 ? (_gillBloomCount / _tot) * 100 : 0
             };
 
+            // ── TROPHIC NUTRIENT PREFERENCE ANALYSIS ─────────────────────────
+            const _trophicDB = (speciesDb && speciesDb.trophicDB) ? speciesDb.trophicDB : {};
+            var _trophicO = 0, _trophicM = 0, _trophicE = 0, _trophicUnknown = 0;
+            var _detectedTrophicO = [], _detectedTrophicM = [], _detectedTrophicE = [];
+            var _trophicTotalAbund = 0;
+            samplesWithIndices.forEach(function(sample) {
+                sample.taxa.forEach(function(tx) {
+                    var nm = tx.name.trim();
+                    var cnt = tx.count || 0;
+                    _trophicTotalAbund += cnt;
+                    var cat = _trophicDB[nm];
+                    if (cat === 'O') {
+                        _trophicO += cnt;
+                        if (_detectedTrophicO.indexOf(nm) === -1) _detectedTrophicO.push(nm);
+                    } else if (cat === 'M') {
+                        _trophicM += cnt;
+                        if (_detectedTrophicM.indexOf(nm) === -1) _detectedTrophicM.push(nm);
+                    } else if (cat === 'E') {
+                        _trophicE += cnt;
+                        if (_detectedTrophicE.indexOf(nm) === -1) _detectedTrophicE.push(nm);
+                    } else {
+                        _trophicUnknown += cnt;
+                    }
+                });
+            });
+            var _trophicTot = _trophicTotalAbund || 1;
+            const trophicStats = {
+                oligoCount: _trophicO,
+                mesoCount: _trophicM,
+                eutroCount: _trophicE,
+                unknownCount: _trophicUnknown,
+                totalAbundance: _trophicTotalAbund,
+                oligoPct: (_trophicO / _trophicTot) * 100,
+                mesoPct: (_trophicM / _trophicTot) * 100,
+                eutroPct: (_trophicE / _trophicTot) * 100,
+                unknownPct: (_trophicUnknown / _trophicTot) * 100,
+                oligoSpecies: _detectedTrophicO,
+                mesoSpecies: _detectedTrophicM,
+                eutroSpecies: _detectedTrophicE
+            };
+            // ────────────────────────────────────────────────────────────────────
+
             return {
                 n,
                 isHypothesis,
@@ -695,6 +757,7 @@
                 dominantAnalysis, 
                 allSpeciesAnalysis,
                 harmfulSpecies,
+                trophicStats,
                 timestamp: new Date().toISOString()
             };
         }
@@ -1525,6 +1588,8 @@
             const chartInstance = useRef(null);
             const chartRefAll = useRef(null); // Reference for the new All Taxa chart
             const chartInstanceAll = useRef(null);
+            const chartRefTrophic = useRef(null); // Reference for trophic pie chart
+            const chartInstanceTrophic = useRef(null);
             
             const [missingParams, setMissingParams] = useState([]);
 
@@ -1717,6 +1782,45 @@
                 return () => { if (chartInstanceAll.current) chartInstanceAll.current.destroy(); };
             }, [data, t]);
 
+            // ── TROPHIC PIE CHART ────────────────────────────────────────────────
+            useEffect(() => {
+                const ts = data.trophicStats;
+                if (ts && chartRefTrophic.current) {
+                    const ctx = chartRefTrophic.current.getContext('2d');
+                    if (chartInstanceTrophic.current) chartInstanceTrophic.current.destroy();
+                    chartInstanceTrophic.current = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: [
+                                t('trophic_oligo_label') + ' (' + ts.oligoPct.toFixed(1) + '%)',
+                                t('trophic_meso_label')  + ' (' + ts.mesoPct.toFixed(1)  + '%)',
+                                t('trophic_eutro_label') + ' (' + ts.eutroPct.toFixed(1) + '%)',
+                                t('trophic_unknown_label') + ' (' + ts.unknownPct.toFixed(1) + '%)'
+                            ],
+                            datasets: [{
+                                data: [ts.oligoPct, ts.mesoPct, ts.eutroPct, ts.unknownPct],
+                                backgroundColor: ['#22c55e', '#f97316', '#ef4444', '#94a3b8'],
+                                borderColor:     ['#16a34a', '#ea580c', '#dc2626', '#64748b'],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => ' ' + ctx.label.split(' (')[0] + ': ' + ctx.raw.toFixed(1) + '%'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                return () => { if (chartInstanceTrophic.current) chartInstanceTrophic.current.destroy(); };
+            }, [data, t]);
+            // ─────────────────────────────────────────────────────────────────────
 
             const handlePdfExport = () => {
                 const element = document.getElementById('report-content');
@@ -2487,6 +2591,75 @@
 
                         </div>
 
+                        {/* ── TROPHIC NUTRIENT PREFERENCE SECTION ── */}
+                        {data.trophicStats && (() => {
+                            const ts = data.trophicStats;
+                            // Determine dominant trophic category (excluding unknown)
+                            const cats = [
+                                { key: 'O', pct: ts.oligoPct, label: t('trophic_oligo_label'), color: '#22c55e', bg: 'bg-green-50', border: 'border-green-300', headColor: 'text-green-800' },
+                                { key: 'M', pct: ts.mesoPct,  label: t('trophic_meso_label'),  color: '#f97316', bg: 'bg-orange-50', border: 'border-orange-300', headColor: 'text-orange-800' },
+                                { key: 'E', pct: ts.eutroPct, label: t('trophic_eutro_label'), color: '#ef4444', bg: 'bg-red-50',    border: 'border-red-300',    headColor: 'text-red-800'    },
+                            ];
+                            const dominant = cats.reduce((a, b) => a.pct > b.pct ? a : b);
+                            let evalText = t('trophic_eval_mixed');
+                            const knownPct = ts.oligoPct + ts.mesoPct + ts.eutroPct;
+                            if (knownPct > 0) {
+                                const domShare = dominant.pct / knownPct;
+                                if (domShare >= 0.45) {
+                                    if (dominant.key === 'O') evalText = t('trophic_eval_oligo');
+                                    else if (dominant.key === 'M') evalText = t('trophic_eval_meso');
+                                    else evalText = t('trophic_eval_eutro');
+                                }
+                            }
+                            return (
+                                <div className="mt-12 page-break break-inside-avoid">
+                                    <div className="flex items-center gap-3 border-b-2 border-emerald-400 pb-2 mb-6">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/>
+                                        </svg>
+                                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-wide m-0">
+                                            {t('trophic_section_title')}
+                                        </h2>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                                        {/* Pie chart */}
+                                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4" style={{height:'320px'}}>
+                                            <canvas ref={chartRefTrophic}></canvas>
+                                        </div>
+
+                                        {/* Stats + evaluation */}
+                                        <div className="flex flex-col gap-4">
+                                            {/* colour legend / stat bars */}
+                                            {[
+                                                { label: t('trophic_oligo_label'),   pct: ts.oligoPct,   n: ts.oligoSpecies ? ts.oligoSpecies.length : 0,  bar: 'bg-green-500'  },
+                                                { label: t('trophic_meso_label'),    pct: ts.mesoPct,    n: ts.mesoSpecies  ? ts.mesoSpecies.length  : 0,  bar: 'bg-orange-500' },
+                                                { label: t('trophic_eutro_label'),   pct: ts.eutroPct,   n: ts.eutroSpecies ? ts.eutroSpecies.length : 0,  bar: 'bg-red-500'    },
+                                                { label: t('trophic_unknown_label'), pct: ts.unknownPct, n: null,                                           bar: 'bg-slate-400'  },
+                                            ].map(row => (
+                                                <div key={row.label}>
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="text-xs font-semibold text-slate-700">{row.label}</span>
+                                                        <span className="text-xs font-mono text-slate-500">
+                                                            {row.pct.toFixed(1)}%{row.n !== null ? ` · ${row.n} sp.` : ''}
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full bg-slate-100 rounded-full h-2.5">
+                                                        <div className={`${row.bar} h-2.5 rounded-full`} style={{width: Math.min(100, row.pct) + '%'}}></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* 1-sentence evaluation */}
+                                            <div className={`mt-2 p-3 rounded-lg border text-sm font-medium ${dominant.bg} ${dominant.border} ${dominant.headColor}`}>
+                                                <span className="font-bold">Értékelés: </span>{evalText}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                        {/* ── END TROPHIC SECTION ── */}
 
                         <div className="mt-12 pt-8 border-t border-slate-200 text-xs text-slate-500">
                             <h4 className="font-bold text-slate-700 uppercase mb-2">{t('section4_title')}</h4>
@@ -2499,6 +2672,51 @@
                                 <li><strong>Success Index (ÖSI):</strong> (Rel. Abund * Tol Factor) / Stress.</li>
                             </ul>
                         </div>
+
+                        {/* ── REFERENCES SECTION ── */}
+                        <div className="mt-10 pt-6 border-t border-slate-200">
+                            <h4 className="font-bold text-slate-800 uppercase tracking-wide text-sm mb-4">{t('refs_title')}</h4>
+                            <div className="space-y-1.5 text-xs text-slate-600 leading-relaxed">
+                                {[
+                                    "Battarbee, R.W. (1986): Diatom analysis. In: Berglund, B.E. (ed.) Handbook of Holocene Palaeoecology and Palaeohydrology. Wiley, Chichester, pp. 527–570.",
+                                    "Battarbee, R.W., Jones, V.J., Flower, R.J., Cameron, N.G., Bennion, H., Carvalho, L. & Juggins, S. (2001): Diatoms. In: Smol, J.P. et al. (eds.) Tracking Environmental Change Using Lake Sediments. Kluwer, Dordrecht, pp. 155–202.",
+                                    "Bennion, H., Juggins, S. & Anderson, N.J. (1996): Predicting epilimnetic phosphorus concentrations using an improved diatom-based transfer function and its application to lake eutrophication management. Environmental Science & Technology 30(6): 2004–2007.",
+                                    "Birks, H.J.B., Line, J.M., Juggins, S., Stevenson, A.C. & ter Braak, C.J.F. (1990): Diatoms and pH reconstruction. Philosophical Transactions of the Royal Society B 327: 263–278.",
+                                    "Charles, D.F. (1985): Relationships between surface sediment diatom assemblages and lakewater characteristics in Adirondack lakes. Ecology 66(3): 994–1011.",
+                                    "Coste, M. & Ayphassorho, H. (1991): Étude de la qualité des eaux du Bassin Artois-Picardie. Rapport Cemagref, Bordeaux.",
+                                    "European Parliament (2000): Directive 2000/60/EC of the European Parliament and of the Council establishing a framework for Community action in the field of water policy. Official Journal of the European Communities L 327: 1–72.",
+                                    "Hill, M.O. (1973): Diversity and evenness: a unifying notation and its consequences. Ecology 54(2): 427–432.",
+                                    "Hoffmann, L., Ector, L. & Krammer, K. (2011): Die Diatomeen-Flora von Luxemburg. Bibliotheca Diatomologica 57, J. Cramer, Berlin.",
+                                    "Juggins, S. (2001): The European Diatom Database. University of Newcastle, Newcastle upon Tyne. https://www.ecrc.ucl.ac.uk",
+                                    "Kahlert, M., Albert, R.-L., Anttila, E.-L., Bengtsson, R., Bigler, C. & Eskola, T. (2009): Harmonization is more important than experience – results of the first Nordic/Baltic diatom intercalibration exercise 2007. Journal of Applied Phycology 21: 471–482.",
+                                    "Kelly, M.G., Cazaubon, A., Coring, E., Dell'Uomo, A., Ector, L., Goldsmith, B., Guasch, H., Hürlimann, J., Jarlman, A., Kawecka, B., Kwandrans, J., Laugaste, R., Lindstrøm, E.-A., Leitão, M., Marvan, P., Padisák, J., Pipp, E., Prygiel, J., Rott, E., Sabater, S., van Dam, H. & Vizinet, J. (1998): Recommendations for the routine sampling of diatoms for water quality assessments in Europe. Journal of Applied Phycology 10: 215–224.",
+                                    "Krammer, K. & Lange-Bertalot, H. (1986–1991): Bacillariophyceae. In: Ettl, H., Gerloff, J., Heynig, H. & Mollenhauer, D. (eds.) Süsswasserflora von Mitteleuropa, Vols. 2/1–2/4. Gustav Fischer, Stuttgart.",
+                                    "Lange-Bertalot, H. (1979): Pollution tolerance of diatoms as a criterion for water quality estimation. Nova Hedwigia, Beiheft 64: 285–304.",
+                                    "Lange-Bertalot, H. (1993): 85 Neue Taxa und über 100 weitere neu definierte Taxa ergänzend zur Süsswasserflora von Mitteleuropa. Bibliotheca Diatomologica 27, J. Cramer, Berlin.",
+                                    "Lange-Bertalot, H. & Metzeltin, D. (1996): Indicators of Oligotrophy – 800 taxa representative of three ecologically distinct lake types. Iconographia Diatomologica 2. Koeltz Scientific Books, Königstein.",
+                                    "Lecointe, C., Coste, M. & Prygiel, J. (1993): 'Omnidia': software for taxonomy, calculation of diatom indices and inventories management. Hydrobiologia 269/270: 509–513.",
+                                    "Padisák, J. & Reynolds, C.S. (2003): Selection of phytoplankton associations in Lake Balaton, Hungary, in response to eutrophication and restoration measures. Hydrobiologia 502: 1–14.",
+                                    "Prygiel, J. & Coste, M. (2000): Guide méthodologique pour la mise en oeuvre de l'Indice Biologique Diatomées. Agences de l'Eau/Cemagref, Bordeaux.",
+                                    "Reavie, E.D. & Smol, J.P. (2001): Diatom-environmental relationships in 64 alkaline southeastern Ontario (Canada) lakes: a diatom-based model for water quality reconstructions. Journal of Paleolimnology 25: 25–42.",
+                                    "Rimet, F. & Bouchez, A. (2012): Life-forms, cell-sizes and ecological guilds of diatoms in European rivers. Knowledge and Management of Aquatic Ecosystems 406: 01.",
+                                    "Rott, E., Hofmann, G., Pall, K., Pfister, P. & Pipp, E. (1997): Indikationslisten für Aufwuchsalgen. Teil 1: Saprobielle Indikation. Bundesministerium für Land- und Forstwirtschaft, Wien.",
+                                    "Rott, E., Pipp, E., Pfister, P., Van Dam, H., Ortler, K., Binder, N. & Pall, K. (1999): Indikationslisten für Aufwuchsalgen in österreichischen Fliessgewässern. Teil 2: Trophieindikation. Bundesministerium für Land- und Forstwirtschaft, Wien.",
+                                    "Shannon, C.E. & Weaver, W. (1949): The Mathematical Theory of Communication. University of Illinois Press, Urbana.",
+                                    "Statzner, B. & Beche, L.A. (2010): Can biological invertebrate traits resolve effects of multiple stressors on running water ecosystems? Freshwater Biology 55 (Suppl. 1): 80–119.",
+                                    "Van Dam, H., Mertens, A. & Sinkeldam, J. (1994): A coded checklist and ecological indicator values of freshwater diatoms from the Netherlands. Netherlands Journal of Aquatic Ecology 28(1): 117–133.",
+                                    "Zelinka, M. & Marvan, P. (1961): Zur Präzisierung der biologischen Klassifikation der Reinheit fliessender Gewässer. Archiv für Hydrobiologie 57: 389–407.",
+                                    "Chao, A. (1984): Nonparametric estimation of the number of classes in a population. Scandinavian Journal of Statistics 11: 265–270.",
+                                    "Pielou, E.C. (1966): The measurement of diversity in different types of biological collections. Journal of Theoretical Biology 13: 131–144.",
+                                    "Smol, J.P. & Stoermer, E.F. (eds.) (2010): The Diatoms: Applications for the Environmental and Earth Sciences (2nd ed.). Cambridge University Press, Cambridge."
+                                ].map((ref, i) => (
+                                    <div key={i} className="flex gap-2">
+                                        <span className="font-mono text-slate-400 select-none shrink-0" style={{minWidth:'1.6rem'}}>[{i+1}]</span>
+                                        <span>{ref}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        {/* ── END REFERENCES ── */}
                     </div>
                 </div>
             );
