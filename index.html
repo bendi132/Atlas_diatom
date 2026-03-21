@@ -2864,9 +2864,12 @@
                             setLoading(false); return;
                         }
 
-                        // 3. Profil lekérés
+                        // 3. Profil lekérés – profiles tábla, majd user_metadata, majd email prefix
                         const { data: profile } = await supabase.from('profiles').select('username, email').eq('id', userId).maybeSingle();
-                        const uname = profile?.username || email.split('@')[0];
+                        const uname = profile?.username 
+                            || authData.user?.user_metadata?.username 
+                            || authData.user?.user_metadata?.full_name
+                            || email.split('@')[0];
 
                         localStorage.setItem(AUTH_USERNAME_KEY, uname);
                         localStorage.setItem(AUTH_EMAIL_KEY, email.trim());
