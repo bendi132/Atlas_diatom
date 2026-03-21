@@ -1121,16 +1121,61 @@
             };
             // ────────────────────────────────────────────────────────────────────
 
+            // ══════════════════════════════════════════════════════════════════
+            // Ω-OSI PER-SAMPLE AGGREGATION
+            // For each sample, compute the abundance-weighted mean Ω-OSI across
+            // its constituent species.  Uses allSpeciesAnalysis lookup.
+            // ══════════════════════════════════════════════════════════════════
+            // Build lookup: spName → ωosi
+            const _ωosiLookup = {};
+            (fullEcologicalAnalysis.all || []).forEach(sp => {
+                _ωosiLookup[sp.name] = sp.ωosi !== undefined ? sp.ωosi : sp.ösi;
+            });
+
+            // Attach per-sample ωosi to each sample object
+            const samplesWithOmega = samplesWithIndices.map(sm => {
+                const totalN = sm.totalAbundance || 1;
+                let weightedSum = 0, weightTotal = 0;
+                sm.taxa.forEach(tx => {
+                    const w   = tx.count / totalN;
+                    const val = _ωosiLookup[tx.name];
+                    if (val !== undefined && isFinite(val)) {
+                        weightedSum  += w * val;
+                        weightTotal  += w;
+                    }
+                });
+                const sampleOmega = weightTotal > 0 ? weightedSum / weightTotal : null;
+                return { ...sm, ωosi: sampleOmega };
+            });
+
+            // ── Summary statistics for Ω-OSI ─────────────────────────────────
+            const validOmegaVals = samplesWithOmega
+                .map(s => s.ωosi)
+                .filter(v => v !== null && isFinite(v));
+
+            const OMEGA_HIGH_STRESS_THRESHOLD = 1.5; // configurable; >1.5 = high stress
+            const omegaSummary = validOmegaVals.length > 0 ? {
+                mean:  validOmegaVals.reduce((a, b) => a + b, 0) / validOmegaVals.length,
+                max:   Math.max(...validOmegaVals),
+                min:   Math.min(...validOmegaVals),
+                highStressCount: validOmegaVals.filter(v => v > OMEGA_HIGH_STRESS_THRESHOLD).length,
+                highStressPct:   (validOmegaVals.filter(v => v > OMEGA_HIGH_STRESS_THRESHOLD).length / validOmegaVals.length) * 100,
+                threshold:       OMEGA_HIGH_STRESS_THRESHOLD,
+                n:               validOmegaVals.length
+            } : null;
+            // ──────────────────────────────────────────────────────────────────
+
             return {
                 n,
                 isHypothesis,
-                samples: samplesWithIndices,
+                samples: samplesWithOmega,
                 speciesAnalysis,
                 aggregatedStats,
                 dominantAnalysis, 
                 allSpeciesAnalysis,
                 harmfulSpecies,
                 trophicStats,
+                omegaSummary,
                 timestamp: new Date().toISOString()
             };
         }
@@ -1172,30 +1217,189 @@
             const avgStress = samples.reduce((acc, s) => acc + getSampleStress(s), 0) / (samples.length || 1);
             const stressForCalc = Math.max(0.1, avgStress);
 
-            // 3. Analyze ALL species (Additive Change)
+            // ═══════════════════════════════════════════════════════════════════
+            // Ω-OSI  (Omega Ecological Stress Index)  — full formula implementation
+            // ═══════════════════════════════════════════════════════════════════
+            //
+            // Formula (per species i, per sample):
+            //
+            //   Ω_i = ( 1 - Σ_j [ w_j · exp(-0.5·(x_i-μ_j)²/σ_j²) · Φ_j ]
+            //             + λ·H(X_i)  +  ξ·D_KL(P_i||Q_i) )
+            //         ─────────────────────────────────────────────────────────
+            //         ( mean(σ_j)  +  ε  +  γ·G_i  +  η·||dx_i/dt|| )
+            //
+            // Variable mapping to available diatom data:
+            //   x_i        = normalised relative abundance of species i  (0–1)
+            //   μ_j        = per-group sensitivity centroid  (s_val / 5)
+            //   σ_j        = per-group tolerance spread      (v_val / 5, floored 0.1)
+            //   w_j        = group weight  = 1 (uniform; extend if prior known)
+            //   Φ_j(t)     = temporal phenological factor   = 1 (static; extend with month data)
+            //   λ          = Shannon-weight  = 0.15
+            //   ξ          = KL-weight       = 0.10
+            //   H(X_i)     = Shannon entropy contribution of species i across all samples
+            //   D_KL       = KL divergence of observed vs. uniform reference distribution
+            //   γ          = gradient penalty weight   = 0.20
+            //   G_i        = ecological gradient       = normalised |s_val - 3.0| / 2
+            //   η          = temporal-change weight    = 0.10
+            //   ||dx/dt||  = temporal rate of change of rel. abundance (0 when single sample)
+            //   ε          = regularisation floor      = 1e-6  (prevents divide-by-zero)
+            //   d          = dimensionality (=1, scalar implementation)
+
+            // ── Hyper-parameters ─────────────────────────────────────────────
+            const OMEGA_LAMBDA = 0.15;   // weight for Shannon entropy term
+            const OMEGA_XI     = 0.10;   // weight for KL-divergence term
+            const OMEGA_GAMMA  = 0.20;   // weight for ecological gradient G_i
+            const OMEGA_ETA    = 0.10;   // weight for temporal rate-of-change
+            const OMEGA_EPS    = 1e-6;   // denominator floor (anti-divide-by-zero)
+
+            // ── Step A: Build temporal series per species (for ||dx/dt||) ────
+            // Sort samples by date ascending for temporal gradient
+            const sortedSamples = [...samples].sort(
+                (a, b) => new Date(a.date) - new Date(b.date)
+            );
+            const nSamples = sortedSamples.length;
+
+            // Map: spName → array of relative abundances in date order
+            const spTimeSeries = {};
+            sortedSamples.forEach(sm => {
+                const totalN = sm.totalAbundance || 1;
+                Object.keys(speciesSums).forEach(spName => {
+                    if (!spTimeSeries[spName]) spTimeSeries[spName] = [];
+                    const tx = sm.taxa.find(t => t.name === spName);
+                    spTimeSeries[spName].push(tx ? tx.count / totalN : 0);
+                });
+            });
+
+            // ||dx/dt|| = mean absolute difference between consecutive time-points
+            const computeTemporalRate = (series) => {
+                if (series.length < 2) return 0;
+                let sumDiff = 0;
+                for (let k = 1; k < series.length; k++) {
+                    sumDiff += Math.abs(series[k] - series[k - 1]);
+                }
+                return sumDiff / (series.length - 1);
+            };
+
+            // ── Step B: Global Shannon entropy per species (H(X_i)) ──────────
+            // H(X_i) = -Σ_t p_it · ln(p_it)   where p_it = rel. abund at time t
+            // Normalise by ln(nSamples) so H ∈ [0, 1]
+            const lnN = nSamples > 1 ? Math.log(nSamples) : 1;
+            const computeSpeciesEntropy = (series) => {
+                let h = 0;
+                const total = series.reduce((a, b) => a + b, 0);
+                if (total <= 0) return 0;
+                series.forEach(v => {
+                    const p = v / total;
+                    if (p > 0) h -= p * Math.log(p);
+                });
+                return h / lnN; // normalised 0–1
+            };
+
+            // ── Step C: KL divergence vs. uniform reference ───────────────────
+            // D_KL(P_i || Q_i) where Q_i = uniform over nSamples time-points
+            // = Σ_t p_it · ln(p_it / (1/nSamples))
+            const computeKL = (series) => {
+                const total = series.reduce((a, b) => a + b, 0);
+                if (total <= 0 || nSamples < 2) return 0;
+                const qUnif = 1 / nSamples;
+                let kl = 0;
+                series.forEach(v => {
+                    const p = v / total;
+                    if (p > 0) kl += p * Math.log(p / qUnif);
+                });
+                return Math.max(0, kl); // KL is non-negative by definition
+            };
+
+            // ── Step D: Per-sensitivity-group Gaussian kernels ────────────────
+            // Groups j: each unique integer s_val rounded to nearest 0.5 step
+            // μ_j = s_j / 5  (maps s ∈ [1..5] → μ ∈ [0.2..1])
+            // σ_j = v_j / 5  (maps valence v ∈ [1..3] → σ ∈ [0.1..0.6], min 0.1)
+            // w_j = 1 (uniform)  ·  Φ_j = 1 (static)
+            const gaussianKernelSum = (x_i, s_val, v_val) => {
+                // Single Gaussian group centred on this species' own s-class
+                const mu_j  = s_val / 5;
+                const sig_j = Math.max(0.1, v_val / 5);
+                const diff  = x_i - mu_j;
+                // exp( -0.5 · diff² / sig_j² )   (1-D covariance = sig_j²)
+                return Math.exp(-0.5 * (diff * diff) / (sig_j * sig_j));
+            };
+
+            // ── Step E: Compute mean(σ_j) over all species in the sample ─────
+            // Used in denominator as mean scale estimate
+            const allSVals = Object.keys(speciesSums).map(nm => {
+                const e = sensitivityDB[nm];
+                return e ? e.v : 1;
+            });
+            const meanSigma = allSVals.length > 0
+                ? allSVals.reduce((a, b) => a + Math.max(0.1, b / 5), 0) / allSVals.length
+                : 0.3;
+
+            // ── Step F: Assemble Ω-OSI per species ───────────────────────────
+            // 3. Analyze ALL species
             const allSpeciesKeys = Object.keys(speciesSums);
             const allSpeciesAnalysis = allSpeciesKeys.map(spName => {
-                const totalCount = speciesSums[spName];
+                const totalCount  = speciesSums[spName];
                 const relAbundance = totalCount / (totalAbundanceAll || 1);
-                
+
                 const entry = sensitivityDB[spName];
-                const sVal = entry ? entry.s : 3.0;
-                const vVal = entry ? entry.v : 1;
-                
-                // Note: VI is computationally expensive O(N^2), so we only calculate it fully for the Dominant subset below.
-                // For the "All Species" overview, we omit VI or set to 0.
-                
+                const sVal  = entry ? entry.s : 3.0;
+                const vVal  = entry ? entry.v : 1;
+
+                // Legacy ÖSI (kept for backward-compat fields, not displayed)
                 const tolFactor = Math.max(0.5, Math.min(2.0, 2.375 - (0.375 * sVal)));
-                const ösi = (relAbundance * tolFactor) / stressForCalc;
+                const ösi       = (relAbundance * tolFactor) / stressForCalc; // retained internally
+
+                // — Ω-OSI numerator components —
+                // x_i: use normalised relative abundance as the "feature vector"
+                const x_i = relAbundance;
+
+                // Gaussian kernel sum (Σ_j w_j · exp(…) · Φ_j)
+                const kernelSum = gaussianKernelSum(x_i, sVal, vVal);
+
+                // Shannon entropy H(X_i) — temporal distribution
+                const series  = spTimeSeries[spName] || [relAbundance];
+                const H_xi    = computeSpeciesEntropy(series);
+
+                // KL divergence D_KL(P_i || Q_i)
+                const D_kl    = computeKL(series);
+
+                // Numerator: 1 − kernelSum + λ·H + ξ·D_KL
+                const numerator = Math.max(0,
+                    1 - kernelSum + OMEGA_LAMBDA * H_xi + OMEGA_XI * D_kl
+                );
+
+                // — Ω-OSI denominator components —
+                // G_i: normalised ecological gradient  = |s_val − 3| / 2
+                const G_i = Math.abs(sVal - 3.0) / 2;
+
+                // ||dx/dt||: temporal rate of change
+                const dxdt = computeTemporalRate(series);
+
+                // Denominator: mean(σ_j) + ε + γ·G_i + η·||dx/dt||
+                const denominator = meanSigma + OMEGA_EPS
+                    + OMEGA_GAMMA * G_i
+                    + OMEGA_ETA   * dxdt;
+
+                // Final Ω-OSI (clamped to [0, ∞); practically bounded by data)
+                const ωosi = numerator / denominator;
 
                 return {
-                    name: spName,
-                    s: sVal,
-                    v: vVal,
+                    name:        spName,
+                    s:           sVal,
+                    v:           vVal,
                     relAbundance,
-                    ösi,
+                    ösi,            // legacy — kept for internal use
+                    ωosi,           // NEW: Omega-OSI value
                     tolFactor,
-                    avgStress
+                    avgStress,
+                    // expose sub-components for driver analysis
+                    _kernelSum:  kernelSum,
+                    _H_xi:       H_xi,
+                    _D_kl:       D_kl,
+                    _G_i:        G_i,
+                    _dxdt:       dxdt,
+                    _numerator:  numerator,
+                    _denominator: denominator
                 };
             });
 
@@ -1965,6 +2169,8 @@
             const chartInstanceAll = useRef(null);
             const chartRefTrophic = useRef(null); // Reference for trophic pie chart
             const chartInstanceTrophic = useRef(null);
+            const chartRefOmega = useRef(null);   // NEW: Ω-OSI timeline chart
+            const chartInstanceOmega = useRef(null);
             
             const [missingParams, setMissingParams] = useState([]);
 
@@ -2095,23 +2301,34 @@
             }, [data, t]);
 
 
-            // NEW: All Taxa ÖSI Chart
+            // NEW: All Taxa Ω-OSI Chart
             useEffect(() => {
                 if (data.allSpeciesAnalysis && chartRefAll.current) {
                     const ctx = chartRefAll.current.getContext('2d');
                     
-                    // Filter or Limit? No, instruction says ALL. 
-                    // To keep it readable, we display them sorted by abundance.
-                    // We can limit top 30 or 50 if it's too huge, but sticking to "All" as per request.
-                    // If dataset is huge, chart.js handles it but bars become thin.
                     const speciesData = data.allSpeciesAnalysis;
                     
-                    const labels = speciesData.map(s => s.name);
-                    const osiValues = speciesData.map(s => s.ösi);
+                    const labels   = speciesData.map(s => s.name);
+                    // Use ωosi if available, fall back to ösi
+                    const osiValues = speciesData.map(s =>
+                        s.ωosi !== undefined && s.ωosi !== null ? s.ωosi : (s.ösi || 0)
+                    );
                     
-                    // Highlight dominant species (top 5)
-                    const bgColors = speciesData.map((s, i) => i < 5 ? 'rgba(8, 145, 178, 0.8)' : 'rgba(203, 213, 225, 0.6)');
-                    const borderColors = speciesData.map((s, i) => i < 5 ? '#0891b2' : '#94a3b8');
+                    // Color: red = high Ω-OSI (stress), cyan = dominant top-5, grey = rest
+                    const bgColors = speciesData.map((s, i) => {
+                        const val = s.ωosi !== undefined ? s.ωosi : s.ösi;
+                        if (i < 5) return 'rgba(99, 102, 241, 0.85)'; // indigo for top-5
+                        if (val > 1.5) return 'rgba(239, 68, 68, 0.7)'; // red high stress
+                        if (val > 0.8) return 'rgba(245, 158, 11, 0.6)'; // amber mid
+                        return 'rgba(203, 213, 225, 0.55)'; // grey low
+                    });
+                    const borderColors = speciesData.map((s, i) => {
+                        if (i < 5) return '#6366f1';
+                        const val = s.ωosi !== undefined ? s.ωosi : s.ösi;
+                        if (val > 1.5) return '#ef4444';
+                        if (val > 0.8) return '#f59e0b';
+                        return '#94a3b8';
+                    });
 
                     if (chartInstanceAll.current) chartInstanceAll.current.destroy();
 
@@ -2120,7 +2337,7 @@
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: t('osi_axis'),
+                                label: 'Ω-OSI',
                                 data: osiValues,
                                 backgroundColor: bgColors,
                                 borderColor: borderColors,
@@ -2128,28 +2345,30 @@
                             }]
                         },
                         options: {
-                            indexAxis: 'y', // Horizontal Bar Chart for better readability of names
+                            indexAxis: 'y',
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: { display: false },
-                                title: { display: true, text: t('chart_all_osi') },
+                                title: { display: true, text: 'Ω-OSI (Omega Ecological Stress Index) — Minden Taxon' },
                                 tooltip: {
                                     callbacks: {
-                                        label: (ctx) => `ÖSI: ${ctx.raw.toFixed(2)}`
+                                        label: (ctx) => {
+                                            const sp = speciesData[ctx.dataIndex];
+                                            const omega = sp.ωosi !== undefined ? sp.ωosi : sp.ösi;
+                                            const stress = omega > 1.5 ? '🔴 Magas' : omega > 0.8 ? '🟡 Közepes' : '🟢 Alacsony';
+                                            return [`Ω-OSI: ${omega.toFixed(3)}`, `Stressz: ${stress}`, `s=${sp.s}`];
+                                        }
                                     }
                                 }
                             },
                             scales: {
                                 x: {
-                                    title: { display: true, text: t('osi_axis') },
-                                    suggestedMax: 2.0
+                                    title: { display: true, text: 'Ω-OSI érték' },
+                                    suggestedMax: Math.max(2.0, ...(osiValues.filter(v => isFinite(v))))
                                 },
                                 y: {
-                                    ticks: {
-                                        autoSkip: false,
-                                        font: { size: 10 }
-                                    }
+                                    ticks: { autoSkip: false, font: { size: 10 } }
                                 }
                             }
                         }
@@ -2196,6 +2415,98 @@
                 }
                 return () => { if (chartInstanceTrophic.current) chartInstanceTrophic.current.destroy(); };
             }, [data, t]);
+            // ─────────────────────────────────────────────────────────────────────
+
+            // ── Ω-OSI TIMELINE CHART ──────────────────────────────────────────────
+            useEffect(() => {
+                if (!data.samples || !chartRefOmega.current) return;
+                const ctx = chartRefOmega.current.getContext('2d');
+                if (chartInstanceOmega.current) chartInstanceOmega.current.destroy();
+
+                const sorted = [...data.samples].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const labels = sorted.map(s => s.date);
+                const omegaVals = sorted.map(s => s.ωosi !== null && s.ωosi !== undefined ? +s.ωosi.toFixed(4) : null);
+
+                // Background zone colours (annotation via segment colouring)
+                const pointColors = omegaVals.map(v =>
+                    v === null ? '#94a3b8'
+                    : v > 1.5  ? '#ef4444'
+                    : v > 0.8  ? '#f59e0b'
+                    : '#22c55e'
+                );
+
+                chartInstanceOmega.current = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Ω-OSI per minta',
+                                data: omegaVals,
+                                borderColor: '#6366f1',
+                                backgroundColor: 'rgba(99,102,241,0.08)',
+                                pointBackgroundColor: pointColors,
+                                pointBorderColor: pointColors,
+                                pointRadius: 7,
+                                pointHoverRadius: 9,
+                                borderWidth: 2,
+                                tension: 0.35,
+                                fill: true,
+                                spanGaps: true
+                            },
+                            // High-stress threshold line
+                            {
+                                label: 'Magas stressz küszöb (1.5)',
+                                data: labels.map(() => 1.5),
+                                borderColor: 'rgba(239,68,68,0.55)',
+                                borderDash: [6, 4],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                fill: false
+                            },
+                            // Moderate threshold line
+                            {
+                                label: 'Közepes stressz küszöb (0.8)',
+                                data: labels.map(() => 0.8),
+                                borderColor: 'rgba(245,158,11,0.45)',
+                                borderDash: [4, 4],
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+                            title: { display: true, text: 'Ω-OSI Idősor — Ökológiai Stressz Trendje', font: { size: 13, weight: 'bold' } },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        if (ctx.datasetIndex !== 0) return ctx.dataset.label;
+                                        const v = ctx.raw;
+                                        if (v === null) return 'Ω-OSI: N/A';
+                                        const lvl = v > 1.5 ? '🔴 Magas' : v > 0.8 ? '🟡 Közepes' : '🟢 Alacsony';
+                                        return [`Ω-OSI: ${v.toFixed(3)}`, `Szint: ${lvl}`];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Mintavétel dátuma' } },
+                            y: {
+                                title: { display: true, text: 'Ω-OSI érték' },
+                                suggestedMin: 0,
+                                suggestedMax: Math.max(2.0, ...omegaVals.filter(v => v !== null)) * 1.1
+                            }
+                        }
+                    }
+                });
+                return () => { if (chartInstanceOmega.current) chartInstanceOmega.current.destroy(); };
+            }, [data]);
             // ─────────────────────────────────────────────────────────────────────
 
             const handlePdfExport = () => {
@@ -2246,43 +2557,52 @@
                 if (stats.vi < 1.0) compText = `${t('sp_comp_low')} (VI=${stats.vi.toFixed(2)})`;
                 else compText = `${t('sp_comp_high')} (VI=${stats.vi.toFixed(2)})`;
 
-                let succText = "";
-                if (stats.ösi > 0.5) succText = `${t('sp_succ_high')} (ÖSI=${stats.ösi.toFixed(2)})`;
-                else succText = `${t('sp_succ_low')} (ÖSI=${stats.ösi.toFixed(2)})`;
+                // Use Ω-OSI value; fall back to ösi if ωosi not present
+                const omegaVal = stats.ωosi !== undefined ? stats.ωosi : stats.ösi;
 
-                // --- NEW ÖSI INTERPRETATION LOGIC ---
+                let succText = "";
+                if (omegaVal > 1.5) succText = `Magas Ω-OSI (>${1.5}) – erős ökológiai stressz jele. (Ω-OSI=${omegaVal.toFixed(3)})`;
+                else if (omegaVal > 0.8) succText = `Mérsékelt Ω-OSI – közepes stressz. (Ω-OSI=${omegaVal.toFixed(3)})`;
+                else succText = `Alacsony Ω-OSI – a faj alacsony stressz-közeges körülmények között él. (Ω-OSI=${omegaVal.toFixed(3)})`;
+
+                // Ω-OSI interpretation
                 const isHighStress = stats.avgStress > 0.5;
-                const isTolerant = stats.s < 2.5;
-                const isSensitive = stats.s > 4.0;
-                const isMono = stats.relAbundance > 0.8;
+                const isTolerant   = stats.s < 2.5;
+                const isSensitive  = stats.s > 4.0;
+                const isMono       = stats.relAbundance > 0.8;
 
                 let osiInterp = "";
-                if (stats.ösi > 0.5) osiInterp = t('osi_high_success');
-                else if (stats.ösi < 0.2) osiInterp = t('osi_low_success');
-                else osiInterp = t('osi_mod_success');
+                if (omegaVal > 1.5) osiInterp = "Magas Ω-OSI: a Gauss-kernel és KL-divergencia komponensek nagy eltérést jeleznek az ökológiai optimumtól. Erős stressz és közösségi diszrupció jele.";
+                else if (omegaVal < 0.5) osiInterp = "Alacsony Ω-OSI: a faj abundancia-eloszlása közel esik a saját szenzitivitási centrumához – alacsony stressz, stabil populáció.";
+                else osiInterp = "Mérsékelt Ω-OSI: a közösségi stressz közepes szintű, egyensúlyi állapot és külső perturbáció egyszerre hat.";
 
                 if (isHighStress && isTolerant) osiInterp += " " + t('osi_strat_stress_tol');
                 else if (!isHighStress && isSensitive) osiInterp += " " + t('osi_strat_sensitive');
                 else if (isHighStress && isSensitive) osiInterp += " " + t('osi_warn_drift');
-
                 if (isMono) osiInterp += " " + t('osi_warn_mono');
 
-                // --- NEW ECOLOGICAL PROFILE DESCRIPTION (p5) ---
+                // Ω-OSI driver breakdown if sub-components available
+                let driverText = "";
+                if (stats._kernelSum !== undefined) {
+                    driverText = `Kernel-összeg: ${stats._kernelSum.toFixed(3)} · H(X): ${stats._H_xi.toFixed(3)} · KL: ${stats._D_kl.toFixed(3)} · G: ${stats._G_i.toFixed(3)} · dx/dt: ${stats._dxdt.toFixed(4)}`;
+                }
+
                 const v = stats.v || 1;
                 let profileText = `Ecological Context: A ${v > 2 ? 'stenoecious (narrow-tolerance)' : 'euryecious (broad-tolerance)'} taxon (Valence: ${v}). `;
                 if (stats.s > 4.0) profileText += "Typically associated with pristine, reference conditions. ";
                 else if (stats.s < 2.5) profileText += "Typically serves as a primary colonizer in disturbed environments. ";
                 else profileText += "Occupies an intermediate ecological niche. ";
-                
-                if (stats.ösi > 0.5) profileText += "Current high ÖSI indicates successful competitive exclusion of other species.";
-                else profileText += "Moderate ÖSI suggests coexistence rather than dominance.";
+                profileText += omegaVal > 0.8
+                    ? `Elevated Ω-OSI indicates the species is experiencing or driving community-level stress.`
+                    : `Low Ω-OSI indicates the species is within its ecological comfort zone.`;
+                if (driverText) profileText += ` [${driverText}]`;
 
                 return {
                     p1: indText,
                     p2: tolText,
                     p3: `${compText} ${succText}`,
                     p4: osiInterp,
-                    p5: profileText // Added new profile text
+                    p5: profileText
                 };
             };
 
@@ -2831,7 +3151,7 @@
                         )}
 
                         <h2 className="text-xl font-black text-cyan-900 border-b-2 border-cyan-100 pb-2 uppercase tracking-wide">{t('section1_title')}</h2>
-                        <div className="overflow-x-auto mb-12">
+                        <div className="overflow-x-auto mb-6">
                             <table className="w-full text-sm text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-100 border-b border-slate-200 text-xs uppercase text-slate-600">
@@ -2842,10 +3162,21 @@
                                         <th className="p-3">IPS Coverage</th>
                                         <th className="p-3">% Tolerant</th>
                                         <th className="p-3">DO Sat%</th>
+                                        <th className="p-3 bg-indigo-50 text-indigo-700 font-black">Ω-OSI</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {data.samples.map(s => (
+                                    {data.samples.map(s => {
+                                        const omega = s.ωosi;
+                                        const omegaColor = omega === null ? 'text-slate-400'
+                                            : omega > 1.5 ? 'text-red-700 font-bold'
+                                            : omega > 0.8 ? 'text-amber-700 font-semibold'
+                                            : 'text-emerald-700 font-semibold';
+                                        const omegaIcon = omega === null ? '—'
+                                            : omega > 1.5 ? '🔴'
+                                            : omega > 0.8 ? '🟡'
+                                            : '🟢';
+                                        return (
                                         <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50">
                                             <td className="p-3 font-mono font-bold">{s.date}</td>
                                             <td className="p-3">{s.indices.richness}</td>
@@ -2854,11 +3185,150 @@
                                             <td className="p-3 text-slate-500 text-xs">{s.indices.ipsCoverage ? s.indices.ipsCoverage.toFixed(1)+'%' : '-'}</td>
                                             <td className="p-3">{s.indices.pctTolerant.toFixed(1)}%</td>
                                             <td className="p-3">{s.indices.doSat ? s.indices.doSat.toFixed(1)+'%' : '-'}</td>
+                                            <td className={`p-3 bg-indigo-50 ${omegaColor}`}>
+                                                {omegaIcon} {omega !== null ? omega.toFixed(3) : '—'}
+                                            </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* ── Ω-OSI SUMMARY PANEL ──────────────────────────────────────── */}
+                        {data.omegaSummary && (() => {
+                            const os = data.omegaSummary;
+                            const stressLevel = os.mean > 1.5 ? 'high' : os.mean > 0.8 ? 'mid' : 'low';
+                            const panelCfg = {
+                                low:  { bg: 'bg-emerald-50', border: 'border-emerald-300', head: 'text-emerald-800', val: 'text-emerald-700', icon: '🟢', label: 'Alacsony stressz / Low Stress' },
+                                mid:  { bg: 'bg-amber-50',   border: 'border-amber-300',   head: 'text-amber-800',   val: 'text-amber-700',   icon: '🟡', label: 'Mérsékelt stressz / Moderate Stress' },
+                                high: { bg: 'bg-red-50',     border: 'border-red-400',     head: 'text-red-800',     val: 'text-red-700',     icon: '🔴', label: 'Magas stressz / High Stress' }
+                            };
+                            const cfg = panelCfg[stressLevel];
+
+                            // Key drivers from allSpeciesAnalysis: top-3 species by ωosi that are in dominant set
+                            const driverSpecies = (data.allSpeciesAnalysis || [])
+                                .filter(sp => sp.ωosi !== undefined && sp.ωosi !== null)
+                                .sort((a, b) => b.ωosi - a.ωosi)
+                                .slice(0, 3);
+
+                            // Samples of concern
+                            const concernSamples = data.samples
+                                .filter(s => s.ωosi !== null && s.ωosi > os.threshold)
+                                .sort((a, b) => b.ωosi - a.ωosi);
+
+                            return (
+                                <div className={`mb-12 p-5 rounded-xl border-2 ${cfg.bg} ${cfg.border} shadow-sm`}>
+                                    {/* Title */}
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={cfg.head}>
+                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                        </svg>
+                                        <h3 className={`font-black text-sm uppercase tracking-wider ${cfg.head}`}>
+                                            Ω-OSI — Összesített Ökológiai Stressz Értékelés
+                                        </h3>
+                                        <span className={`ml-auto text-xs font-mono px-2 py-1 rounded-full border ${cfg.border} ${cfg.val} font-bold`}>
+                                            {cfg.icon} {cfg.label}
+                                        </span>
+                                    </div>
+
+                                    {/* Metric cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                        {[
+                                            { label: 'Átlag Ω-OSI / Mean', value: os.mean.toFixed(3), sub: 'Súlyozott közösségi átlag' },
+                                            { label: 'Maximum Ω-OSI', value: os.max.toFixed(3), sub: 'Legmagasabb minta-érték' },
+                                            { label: 'Minimum Ω-OSI', value: os.min.toFixed(3), sub: 'Legalacsonyabb minta-érték' },
+                                            { label: 'Magas stressz / High-stress', value: `${os.highStressCount} / ${os.n}`, sub: `${os.highStressPct.toFixed(0)}% · küszöb > ${os.threshold}` }
+                                        ].map(m => (
+                                            <div key={m.label} className="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                                                <div className={`text-[10px] font-bold uppercase tracking-wide ${cfg.head} mb-1`}>{m.label}</div>
+                                                <div className={`font-black text-lg font-mono ${cfg.val}`}>{m.value}</div>
+                                                <div className="text-[10px] text-slate-400 mt-1">{m.sub}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Inline Ω-OSI sparkbar per sample */}
+                                    <div className="mb-4">
+                                        <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-2">Ω-OSI per minta (időrendben)</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[...data.samples].sort((a,b) => new Date(a.date)-new Date(b.date)).map(s => {
+                                                if (s.ωosi === null) return null;
+                                                const pct = Math.min(100, (s.ωosi / Math.max(os.max, os.threshold * 1.5)) * 100);
+                                                const barColor = s.ωosi > os.threshold ? '#ef4444' : s.ωosi > 0.8 ? '#f59e0b' : '#22c55e';
+                                                return (
+                                                    <div key={s.id} className="flex flex-col items-center" style={{minWidth: '48px'}}>
+                                                        <div className="text-[9px] font-mono text-slate-500 mb-1">{s.date.slice(0,10)}</div>
+                                                        <div className="relative w-8 bg-slate-100 rounded" style={{height:'60px'}}>
+                                                            <div className="absolute bottom-0 w-full rounded transition-all"
+                                                                style={{height: pct + '%', background: barColor, opacity: 0.85}}>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-[9px] font-black mt-1" style={{color: barColor}}>{s.ωosi.toFixed(2)}</div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Key drivers */}
+                                    {driverSpecies.length > 0 && (
+                                        <div className="mb-3">
+                                            <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-2">
+                                                Legfontosabb stressz-driverek (Top-3 faj Ω-OSI szerint)
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {driverSpecies.map(sp => (
+                                                    <div key={sp.name} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${cfg.border} bg-white`}>
+                                                        <span className="italic font-semibold text-slate-700">{sp.name}</span>
+                                                        <span className={`font-mono font-black ${cfg.val}`}>Ω={sp.ωosi.toFixed(2)}</span>
+                                                        <span className="text-slate-400">s={sp.s}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Samples of concern */}
+                                    {concernSamples.length > 0 && (
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800">
+                                            <span className="font-bold">⚠ Aggasztó minták (Ω-OSI &gt; {os.threshold}):</span>{' '}
+                                            {concernSamples.map(s => `${s.date.slice(0,10)} (Ω=${s.ωosi.toFixed(2)})`).join(' · ')}
+                                        </div>
+                                    )}
+
+                                    {/* Stress distribution narrative */}
+                                    <div className={`mt-3 text-xs ${cfg.val} border-t ${cfg.border} pt-3 leading-relaxed`}>
+                                        <span className="font-bold">Stressz-eloszlás értékelése: </span>
+                                        {stressLevel === 'low' && 'Az Ω-OSI értékek alacsonyak, a közösség stabil, kis ökológiai stressz áll fenn. A Gauss-kernel alapú szenzitivitás-analízis szerint a fajok relatív abundanciája közel esik a saját érzékenységi centrumukhoz, ami egészséges közösségi összetételt jelez.'}
+                                        {stressLevel === 'mid' && 'Mérsékelt Ω-OSI értékek: a közösség átmeneti stressznek van kitéve. A Gauss-kernel szórások és a KL-divergencia közepes eltérést jeleznek az optimális állapottól. Rendszeres monitorizálás javasolt.'}
+                                        {stressLevel === 'high' && 'Magas Ω-OSI értékek: a KL-divergencia és a Gauss-kernel összeg együttesen erős eltérést jelez az ökológiai referencia-állapottól. Az érzékeny fajok dominanciája csökkent, a toleráns formák kerültek előtérbe. Azonnali beavatkozás javasolt.'}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                        {/* ── END Ω-OSI SUMMARY ─────────────────────────────────────────── */}
+
+                        {/* ── Ω-OSI TIMELINE CHART ──────────────────────────────────────── */}
+                        {data.samples && data.samples.some(s => s.ωosi !== null && s.ωosi !== undefined) && (
+                            <div className="mb-12 break-inside-avoid">
+                                <div className="flex items-center gap-3 border-b-2 border-indigo-300 pb-2 mb-4">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                    </svg>
+                                    <h2 className="text-lg font-black text-slate-900 uppercase tracking-wide m-0">
+                                        Ω-OSI Stressz Idősor / Stress Timeline
+                                    </h2>
+                                </div>
+                                <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4" style={{height:'300px'}}>
+                                    <canvas ref={chartRefOmega} style={{width:'100%', height:'100%'}}></canvas>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-2 text-center">
+                                    🟢 &lt;0.8 Alacsony · 🟡 0.8–1.5 Közepes · 🔴 &gt;1.5 Magas stressz (Ω-OSI)
+                                </p>
+                            </div>
+                        )}
+                        {/* ── END Ω-OSI TIMELINE ────────────────────────────────────────── */}
 
                         <div className="page-break"></div>
                         <h2 className="text-xl font-black text-cyan-900 border-b-2 border-cyan-100 pb-2 uppercase tracking-wide mt-8">{t('section2_title')}</h2>
@@ -2949,7 +3419,9 @@
                                                 <h3 className="text-lg font-bold text-slate-800 italic">{sp.name}</h3>
                                                 <div className="flex gap-2 text-xs font-mono">
                                                     <span className="bg-slate-100 px-2 py-1 rounded">Rel. Abund: {(sp.relAbundance*100).toFixed(1)}%</span>
-                                                    <span className="bg-cyan-50 text-cyan-700 px-2 py-1 rounded font-bold">ÖSI: {sp.ösi.toFixed(2)}</span>
+                                                    <span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded font-black border border-indigo-200">
+                                                        Ω-OSI: {sp.ωosi !== undefined ? sp.ωosi.toFixed(3) : sp.ösi.toFixed(2)}
+                                                    </span>
                                                 </div>
                                             </div>
                                             
@@ -2967,9 +3439,9 @@
                                                     <span>{texts.p3}</span>
                                                 </p>
                                                 
-                                                {/* ÖSI INTERPRETATION SUBSECTION */}
+                                                {/* Ω-OSI INTERPRETATION SUBSECTION */}
                                                 <div className="mt-3 pt-2 border-t border-slate-100">
-                                                    <h4 className="font-bold text-cyan-700 text-xs uppercase mb-1">{t('osi_section_title')}</h4>
+                                                    <h4 className="font-bold text-indigo-700 text-xs uppercase mb-1">Ω-OSI Értelmezés</h4>
                                                     <p className="text-sm text-slate-600">{texts.p4}</p>
                                                     <p className="text-sm text-slate-600 mt-2 italic">{texts.p5}</p>
                                                 </div>
@@ -2997,7 +3469,7 @@
                                     <canvas ref={chartRefAll} style={{width:'100%', height:'100%'}}></canvas>
                                 </div>
                                 <p className="text-xs text-slate-400 mt-2 text-center">
-                                    * {t('chart_all_osi')} (Sorted by Abundance). Top 5 Dominant species highlighted in Cyan.
+                                    * Ω-OSI (Omega Ecological Stress Index) – Minden Taxon (Abundancia szerint rendezve). Top 5 domináns faj lilával jelölve.
                                 </p>
                             </div>
 
@@ -3080,8 +3552,14 @@
                                 <li><strong>Optimum:</strong> Weighted Averaging (WA).</li>
                                 <li><strong>Index:</strong> Shannon (ln base), IPS (OMNIDIA compatible).</li>
                                 <li><strong>Stat Engine:</strong> Spearman Rank Correlation + Bootstrapping (1000 iter).</li>
-                                <li><strong>Competition Index (VI):</strong> VI_i = Σ(|Ai - Aj| / (Ai + Aj)).</li>
-                                <li><strong>Success Index (ÖSI):</strong> (Rel. Abund * Tol Factor) / Stress.</li>
+                                <li><strong>Competition Index (VI):</strong> VI_i = Σ(|Ai − Aj| / (Ai + Aj)).</li>
+                                <li><strong>Ω-OSI (Omega Ecological Stress Index) — replaces ÖSI:</strong>{' '}
+                                    Ω_i = (1 − Σ_j[w_j · exp(−0.5·(x_i−μ_j)²/σ_j²) · Φ_j] + λ·H(X_i) + ξ·D_KL(P_i‖Q_i))
+                                    / (mean(σ_j) + ε + γ·G_i + η·‖dx_i/dt‖).
+                                    Paraméterek: x_i = rel. abundancia; μ_j = s/5; σ_j = max(0.1, v/5); w_j = Φ_j = 1;
+                                    λ=0.15 (Shannon-súly); ξ=0.10 (KL-súly); γ=0.20 (gradiens-súly); η=0.10 (temporális súly); ε=1e-6;
+                                    G_i = |s−3|/2; H = normált Shannon-entrópia; D_KL = KL-divergencia vs. egyenletes ref.;
+                                    dx/dt = temporális abundancia-változás sebessége. Értelmezés: Ω &lt; 0.8 = alacsony stressz; 0.8–1.5 = közepes; &gt; 1.5 = magas.</li>
                             </ul>
                         </div>
 
