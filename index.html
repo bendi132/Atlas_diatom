@@ -13,6 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
 
+    <!-- D3.js for ERNI Network Visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <!-- NEW: HTML2PDF for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- NEW: SheetJS for Excel Import -->
@@ -500,6 +502,351 @@
                 </svg>
             );
         };
+
+        // ══════════════════════════════════════════════════════════════
+        // ── ERNI: Eco-Rarity Network Index – Component + Computation ──
+        // ══════════════════════════════════════════════════════════════
+        const computeERNI = (taxaList, sensitivityDB) => {
+            if (!taxaList || taxaList.length === 0) return { erniValue: null, nodes: [], edges: [] };
+
+            // 1. Ritkasági súly: s érték alapján (s: 1–5, ahol 5=legszennyezésintoleráns/ritka)
+            // Ritkasági súly = (s - 1) / 4  →  0 (közönséges, s≈1) ... 1 (ritka, s≈5)
+            // Ha nincs az adatbázisban: közepes érték (0.5)
+            const nodes = taxaList.map(tx => {
+                const dbEntry = sensitivityDB ? sensitivityDB[tx.name] : null;
+                const sVal = dbEntry ? dbEntry.s : 3.0;
+                const rarity = Math.min(1, Math.max(0, (sVal - 1) / 4));
+                return {
+                    id: tx.name,
+                    name: tx.name,
+                    rarity: rarity,
+                    sVal: sVal,
+                    count: tx.count,
+                    inDB: !!dbEntry
+                };
+            });
+
+            // 2. Taxonómiai/ökológiai élek: két faj kapcsolódik, ha azonos genus (taxonómiai közelség)
+            //    vagy ha ritkasági értékük különbsége < 0.15 (ökológiai niche-közelség)
+            const edges = [];
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const ni = nodes[i], nj = nodes[j];
+                    const genusI = ni.name.split(' ')[0];
+                    const genusJ = nj.name.split(' ')[0];
+                    const samGenus = genusI === genusJ;
+                    const rarityDiff = Math.abs(ni.rarity - nj.rarity);
+                    const ecoDist = rarityDiff;
+                    if (samGenus || rarityDiff < 0.15) {
+                        edges.push({
+                            source: ni.id,
+                            target: nj.id,
+                            type: samGenus ? 'taxonomic' : 'ecological',
+                            weight: samGenus ? 1.0 : (1 - rarityDiff / 0.15)
+                        });
+                    }
+                }
+            }
+
+            // 3. ERNI értékszámítás
+            // ERNI = (Σ rarity_i) / S  × (1 + E/S) × connectivity_bonus
+            // ahol E = élek száma, S = fajszám, connectivity_bonus = connected/S
+            const S = nodes.length;
+            if (S === 0) return { erniValue: null, nodes, edges };
+            const sumRarity = nodes.reduce((acc, n) => acc + n.rarity, 0);
+            const avgRarity = sumRarity / S;
+            const E = edges.length;
+            const networkDensity = S > 1 ? (2 * E) / (S * (S - 1)) : 0;
+            // Adjacency: which nodes have edges
+            const connectedSet = new Set();
+            edges.forEach(e => { connectedSet.add(e.source); connectedSet.add(e.target); });
+            const connFraction = connectedSet.size / S;
+            const erniValue = Math.min(1, avgRarity * (1 + networkDensity) * (0.5 + 0.5 * connFraction));
+
+            return { erniValue, nodes, edges };
+        };
+
+        const ERNINetworkGraph = ({ taxaList, sensitivityDB, lang }) => {
+            const svgRef = useRef(null);
+            const [tooltip, setTooltip] = useState(null);
+            const [erniData, setErniData] = useState(null);
+
+            const t_erni = (key) => {
+                const labels = {
+                    hu: {
+                        title: 'Eco-Rarity Network Index (ERNI)',
+                        subtitle: 'Ritkasági Hálózat – Taxonómiai és Ökológiai Kapcsolatok',
+                        erni_val: 'ERNI Érték',
+                        legend_rare: 'Ritka',
+                        legend_common: 'Közönséges',
+                        legend_tax: 'Taxonómiai kapcsolat',
+                        legend_eco: 'Ökológiai kapcsolat',
+                        no_data: 'Nincs elegendő adat az ERNI számításhoz.',
+                        species: 'Faj',
+                        rarity_weight: 'Ritkasági súly',
+                        s_value: 'Érzékenység (s)',
+                        in_db: 'Adatbázisban',
+                        not_in_db: 'Nincs adatbázisban (becsült)',
+                        interp_low: 'Alacsony ritkasági hálózat – a közösséget jellemzően elterjedt, generalista fajok alkotják. Kedvező ökológiai állapot lehetséges.',
+                        interp_mid: 'Mérsékelt ERNI – a közösségben elterjedt és ritka fajok egyaránt jelen vannak. Átmeneti ökológiai állapot.',
+                        interp_high: 'Magas ERNI – a közösséget ritka, érzékeny specialista fajok jellemzik, sűrű taxonómiai/ökológiai kapcsolathálóval. Kiváló ökológiai referencia-állapot jelzése.',
+                        click_hint: 'Kattints egy csomópontra a részletekért',
+                        nodes: 'csomópont',
+                        edges: 'él'
+                    },
+                    en: {
+                        title: 'Eco-Rarity Network Index (ERNI)',
+                        subtitle: 'Rarity Network – Taxonomic & Ecological Links',
+                        erni_val: 'ERNI Value',
+                        legend_rare: 'Rare',
+                        legend_common: 'Common',
+                        legend_tax: 'Taxonomic link',
+                        legend_eco: 'Ecological link',
+                        no_data: 'Insufficient data to compute ERNI.',
+                        species: 'Species',
+                        rarity_weight: 'Rarity weight',
+                        s_value: 'Sensitivity (s)',
+                        in_db: 'In database',
+                        not_in_db: 'Not in database (estimated)',
+                        interp_low: 'Low rarity network – community dominated by widespread, generalist species. Potentially favorable ecological conditions.',
+                        interp_mid: 'Moderate ERNI – community contains both common and rare species. Transitional ecological state.',
+                        interp_high: 'High ERNI – community characterised by rare, sensitive specialist species with dense taxonomic/ecological linkage. Indicative of excellent reference ecological state.',
+                        click_hint: 'Click a node for details',
+                        nodes: 'nodes',
+                        edges: 'edges'
+                    }
+                };
+                const l = labels[lang] || labels['hu'];
+                return l[key] || key;
+            };
+
+            useEffect(() => {
+                if (!taxaList || taxaList.length === 0) return;
+                const result = computeERNI(taxaList, sensitivityDB);
+                setErniData(result);
+            }, [taxaList, sensitivityDB]);
+
+            useEffect(() => {
+                if (!erniData || !erniData.nodes || erniData.nodes.length === 0) return;
+                if (!svgRef.current) return;
+
+                const container = svgRef.current.parentElement;
+                const W = container ? Math.min(container.offsetWidth || 600, 680) : 600;
+                const H = Math.min(W * 0.7, 420);
+
+                const svg = d3.select(svgRef.current);
+                svg.selectAll('*').remove();
+                svg.attr('width', W).attr('height', H);
+
+                const { nodes, edges } = erniData;
+
+                // Rarity → color scale: green (common) → yellow → red (rare)
+                const colorScale = d3.scaleLinear()
+                    .domain([0, 0.5, 1])
+                    .range(['#22c55e', '#f59e0b', '#ef4444'])
+                    .interpolate(d3.interpolateRgb);
+
+                // Node radius: bigger = rarer
+                const rScale = d3.scaleLinear().domain([0, 1]).range([7, 22]);
+
+                // Build simulation
+                const simNodes = nodes.map(n => ({ ...n }));
+                const simLinks = edges.map(e => ({
+                    ...e,
+                    source: simNodes.find(n => n.id === e.source),
+                    target: simNodes.find(n => n.id === e.target)
+                })).filter(e => e.source && e.target);
+
+                const simulation = d3.forceSimulation(simNodes)
+                    .force('link', d3.forceLink(simLinks).id(d => d.id).distance(80).strength(0.5))
+                    .force('charge', d3.forceManyBody().strength(-120))
+                    .force('center', d3.forceCenter(W / 2, H / 2))
+                    .force('collision', d3.forceCollide().radius(d => rScale(d.rarity) + 6));
+
+                // Defs: arrowhead
+                const defs = svg.append('defs');
+                defs.append('marker')
+                    .attr('id', 'arrow-tax').attr('viewBox', '0 -5 10 10').attr('refX', 20).attr('refY', 0)
+                    .attr('markerWidth', 5).attr('markerHeight', 5).attr('orient', 'auto')
+                    .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#94a3b8').attr('opacity', 0.6);
+
+                // Links
+                const link = svg.append('g').attr('class', 'links')
+                    .selectAll('line')
+                    .data(simLinks)
+                    .enter().append('line')
+                    .attr('stroke', d => d.type === 'taxonomic' ? '#94a3b8' : '#7dd3fc')
+                    .attr('stroke-width', d => d.type === 'taxonomic' ? 1.5 : 0.8)
+                    .attr('stroke-dasharray', d => d.type === 'ecological' ? '4,3' : null)
+                    .attr('opacity', d => d.type === 'taxonomic' ? 0.55 : 0.35);
+
+                // Node groups
+                const nodeG = svg.append('g').attr('class', 'nodes')
+                    .selectAll('g')
+                    .data(simNodes)
+                    .enter().append('g')
+                    .style('cursor', 'pointer')
+                    .call(d3.drag()
+                        .on('start', (event, d) => {
+                            if (!event.active) simulation.alphaTarget(0.3).restart();
+                            d.fx = d.x; d.fy = d.y;
+                        })
+                        .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+                        .on('end', (event, d) => {
+                            if (!event.active) simulation.alphaTarget(0);
+                            d.fx = null; d.fy = null;
+                        })
+                    )
+                    .on('click', (event, d) => {
+                        event.stopPropagation();
+                        setTooltip({ x: event.offsetX, y: event.offsetY, node: d });
+                    });
+
+                // Circle
+                nodeG.append('circle')
+                    .attr('r', d => rScale(d.rarity))
+                    .attr('fill', d => colorScale(d.rarity))
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 2)
+                    .attr('opacity', 0.92)
+                    .on('mouseenter', function(event, d) {
+                        d3.select(this).attr('opacity', 1).attr('stroke', '#1e293b').attr('stroke-width', 2.5);
+                    })
+                    .on('mouseleave', function() {
+                        d3.select(this).attr('opacity', 0.92).attr('stroke', '#fff').attr('stroke-width', 2);
+                    });
+
+                // Genus label (only for nodes with rarity > 0.5 or bigger ones to avoid clutter)
+                nodeG.append('text')
+                    .text(d => {
+                        const parts = d.name.split(' ');
+                        return parts[0].substring(0, 3) + (parts[1] ? '.' : '');
+                    })
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', '0.35em')
+                    .attr('font-size', d => rScale(d.rarity) > 12 ? '9px' : '7px')
+                    .attr('fill', '#1e293b')
+                    .attr('font-weight', '700')
+                    .attr('pointer-events', 'none')
+                    .style('user-select', 'none');
+
+                simulation.on('tick', () => {
+                    link
+                        .attr('x1', d => Math.max(20, Math.min(W - 20, d.source.x)))
+                        .attr('y1', d => Math.max(20, Math.min(H - 20, d.source.y)))
+                        .attr('x2', d => Math.max(20, Math.min(W - 20, d.target.x)))
+                        .attr('y2', d => Math.max(20, Math.min(H - 20, d.target.y)));
+                    nodeG.attr('transform', d =>
+                        `translate(${Math.max(20, Math.min(W - 20, d.x))},${Math.max(20, Math.min(H - 20, d.y))})`
+                    );
+                });
+
+                // Dismiss tooltip on svg click
+                svg.on('click', () => setTooltip(null));
+
+                return () => simulation.stop();
+            }, [erniData]);
+
+            if (!taxaList || taxaList.length === 0) return null;
+            if (!erniData) return null;
+
+            const { erniValue, nodes, edges } = erniData;
+
+            // ERNI color & interpretation
+            let erniBg = 'bg-green-50', erniBorder = 'border-green-300', erniColor = 'text-green-900', erniHeadColor = 'text-green-800';
+            let erniInterp = t_erni('interp_low');
+            if (erniValue >= 0.55) {
+                erniBg = 'bg-violet-50'; erniBorder = 'border-violet-400'; erniColor = 'text-violet-900'; erniHeadColor = 'text-violet-800';
+                erniInterp = t_erni('interp_high');
+            } else if (erniValue >= 0.3) {
+                erniBg = 'bg-amber-50'; erniBorder = 'border-amber-300'; erniColor = 'text-amber-900'; erniHeadColor = 'text-amber-800';
+                erniInterp = t_erni('interp_mid');
+            }
+
+            return (
+                <div className="mt-8 page-break">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 border-b-2 border-violet-400 pb-2 mb-5">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="5" r="3"/><circle cx="19" cy="19" r="3"/><circle cx="5" cy="19" r="3"/>
+                            <line x1="12" y1="8" x2="19" y2="16"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="5" y1="19" x2="19" y2="19"/>
+                        </svg>
+                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-wide m-0">{t_erni('title')}</h2>
+                    </div>
+
+                    {/* ERNI value box */}
+                    <div className={`p-4 rounded border mb-5 ${erniBg} ${erniBorder}`}>
+                        <h4 className={`font-bold mb-1 uppercase text-xs tracking-wider ${erniHeadColor}`}>
+                            8. {t_erni('erni_val')}
+                        </h4>
+                        <p className={`font-mono font-black text-2xl mb-1 ${erniColor}`}>
+                            ERNI = {erniValue !== null ? erniValue.toFixed(3) : 'N/A'}
+                        </p>
+                        <p className={`text-sm ${erniColor}`}>{erniInterp}</p>
+                        <p className={`text-xs mt-2 opacity-70 ${erniColor} font-mono`}>
+                            S={nodes.length} {t_erni('nodes')} · {edges.length} {t_erni('edges')} · {t_erni('click_hint')}
+                        </p>
+                    </div>
+
+                    {/* Network Graph */}
+                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-3 relative no-print" style={{minHeight: '420px'}}>
+                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 px-1">{t_erni('subtitle')}</div>
+                        <div style={{position:'relative'}}>
+                            <svg ref={svgRef} style={{display:'block', width:'100%'}}></svg>
+                            {/* Tooltip */}
+                            {tooltip && (
+                                <div
+                                    style={{
+                                        position:'absolute',
+                                        left: tooltip.x + 14,
+                                        top: tooltip.y - 14,
+                                        background:'#1e293b',
+                                        color:'#f1f5f9',
+                                        borderRadius:'8px',
+                                        padding:'10px 14px',
+                                        fontSize:'12px',
+                                        pointerEvents:'none',
+                                        zIndex:20,
+                                        minWidth:'200px',
+                                        boxShadow:'0 4px 24px rgba(0,0,0,0.4)',
+                                        border:'1px solid rgba(148,163,184,0.2)'
+                                    }}
+                                >
+                                    <div style={{fontWeight:700, fontSize:'13px', marginBottom:'6px', fontStyle:'italic', color:'#7dd3fc'}}>{tooltip.node.name}</div>
+                                    <div style={{display:'flex', flexDirection:'column', gap:'3px'}}>
+                                        <span><span style={{color:'#94a3b8'}}>{t_erni('rarity_weight')}:</span> <strong style={{color: tooltip.node.rarity > 0.5 ? '#f87171' : '#4ade80'}}>{tooltip.node.rarity.toFixed(3)}</strong></span>
+                                        <span><span style={{color:'#94a3b8'}}>{t_erni('s_value')}:</span> {tooltip.node.sVal.toFixed(1)}</span>
+                                        <span style={{fontSize:'10px', color: tooltip.node.inDB ? '#86efac' : '#fbbf24'}}>{tooltip.node.inDB ? '✓ ' + t_erni('in_db') : '⚠ ' + t_erni('not_in_db')}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {/* Legend */}
+                        <div className="flex flex-wrap items-center gap-4 mt-3 px-2 text-xs text-slate-500">
+                            <div className="flex items-center gap-1.5">
+                                <div style={{width:14,height:14,borderRadius:'50%',background:'#ef4444',border:'2px solid #fff',boxShadow:'0 0 0 1px #ef4444'}}></div>
+                                <span>{t_erni('legend_rare')}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div style={{width:10,height:10,borderRadius:'50%',background:'#22c55e',border:'2px solid #fff',boxShadow:'0 0 0 1px #22c55e'}}></div>
+                                <span>{t_erni('legend_common')}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div style={{width:18,height:2,background:'#94a3b8',borderRadius:2}}></div>
+                                <span>{t_erni('legend_tax')}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div style={{width:18,height:2,background:'#7dd3fc',borderRadius:2,backgroundImage:'repeating-linear-gradient(90deg,#7dd3fc 0,#7dd3fc 4px,transparent 4px,transparent 7px)'}}></div>
+                                <span>{t_erni('legend_eco')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        // ══════════════════════════════════════════════════════════════
+        // END ERNI
+        // ══════════════════════════════════════════════════════════════
 
         // --- APP COMPONENT ---
         const App = ({ currentUserId }) => {
@@ -1342,6 +1689,8 @@
                         siteId={selectedAnalysisSiteId} 
                         onBack={() => setView('input')} 
                         t={t}
+                        speciesDb={speciesDb}
+                        lang={lang}
                     />
                 );
             }
@@ -1608,7 +1957,7 @@
         };
 
         // --- REPORT COMPONENT ---
-        const ReportView = ({ data, siteId, onBack, t }) => {
+        const ReportView = ({ data, siteId, onBack, t, speciesDb, lang }) => {
 
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
@@ -2341,6 +2690,27 @@
                                 <p className={`text-sm ${dfcriColor}`}>{dfcriInterpText}</p>
                             </div>
                         )}
+
+                        {/* ── ERNI: Eco-Rarity Network Index ── */}
+                        {(() => {
+                            // Collect all taxa from all samples (merged, summed)
+                            const taxaMap = {};
+                            s.forEach(sample => {
+                                (sample.taxa || []).forEach(tx => {
+                                    if (!taxaMap[tx.name]) taxaMap[tx.name] = { name: tx.name, count: 0 };
+                                    taxaMap[tx.name].count += tx.count;
+                                });
+                            });
+                            const mergedTaxa = Object.values(taxaMap);
+                            return mergedTaxa.length > 0 ? (
+                                <ERNINetworkGraph
+                                    taxaList={mergedTaxa}
+                                    sensitivityDB={speciesDb ? speciesDb.sensitivityDB : null}
+                                    lang={lang}
+                                />
+                            ) : null;
+                        })()}
+                        {/* ── END ERNI ── */}
 
                         <div className={`p-4 rounded border ${toxicHighBg} ${toxicHighBorder}`}>
                             <h4 className={`font-bold mb-1 uppercase text-xs tracking-wider ${toxicHighColor}`}>
