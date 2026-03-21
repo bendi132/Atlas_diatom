@@ -2856,10 +2856,9 @@
                             .from('access_codes')
                             .select('user_id')
                             .eq('code', accessCode)
-                            .eq('user_id', userId)
                             .maybeSingle();
                         if (codeErr2) throw codeErr2;
-                        if (!codeRow) {
+                        if (!codeRow || codeRow.user_id !== userId) {
                             await supabase.auth.signOut();
                             setError('Érvénytelen azonosító kód ehhez a fiókhoz.');
                             setLoading(false); return;
