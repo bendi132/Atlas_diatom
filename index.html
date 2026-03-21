@@ -2770,6 +2770,27 @@
         const AUTH_SESSION_KEY  = 'atlas_session';
         const AUTH_EMAIL_KEY    = 'atlas_email';
 
+        // ════════════════════════════════════════════════════════════
+        // ██████████████████  ADMIN HOZZÁFÉRÉSI KÓDOK  ██████████████
+        // ════════════════════════════════════════════════════════════
+        //
+        //  ► A kódokat a Supabase Dashboard-on kezeld:
+        //    Tábla neve: "access_codes"
+        //    Oszlopok:   username (text), code (text, 6 számjegy)
+        //
+        //  ► Kód hozzárendelése egy felhasználóhoz:
+        //    Supabase → Table Editor → access_codes → Insert row
+        //    username: "FelhasználóNeve"   code: "123456"
+        //
+        //  ► Ha valakinek le kell tiltani a hozzáférését:
+        //    Töröld ki a sorát az access_codes táblából,
+        //    vagy módosítsd a kódját egy olyanra amit nem tud.
+        //
+        //  ► Egy felhasználóhoz pontosan egy sor tartozhat.
+        //    A kód 6 számjegyű legyen (pl. 472819).
+        //
+        // ════════════════════════════════════════════════════════════
+
         const hashPassword = async (pw) => {
             const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -2777,35 +2798,87 @@
 
         // ── Login / Register Screen ───────────────────────────────────────────
         const LoginScreen = ({ onAuthenticated }) => {
-            const [mode, setMode]         = React.useState('login');
-            const [username, setUsername] = React.useState('');
-            const [email, setEmail]       = React.useState('');
-            const [password, setPassword] = React.useState('');
-            const [loading, setLoading]   = React.useState(false);
-            const [error, setError]       = React.useState('');
-            const [showPw, setShowPw]     = React.useState(false);
+            const [mode, setMode]           = React.useState('login');
+            const [username, setUsername]   = React.useState('');
+            const [email, setEmail]         = React.useState('');
+            const [password, setPassword]   = React.useState('');
+            const [accessCode, setAccessCode] = React.useState('');
+            const [loading, setLoading]     = React.useState(false);
+            const [error, setError]         = React.useState('');
+            const [showPw, setShowPw]       = React.useState(false);
 
             const handleSubmit = async () => {
                 if (!username.trim()) { setError('Kérjük, adja meg a felhasználónevet.'); return; }
                 if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError('Kérjük, adjon meg érvényes e-mail címet.'); return; }
                 if (password.length < 6) { setError('A jelszónak legalább 6 karakter hosszúnak kell lennie.'); return; }
+
+                // Hozzáférési kód ellenőrzés – bejelentkezésnél és regisztrációnál is kötelező
+                if (!/^\d{6}$/.test(accessCode)) {
+                    setError('Az azonosító kód pontosan 6 számjegyű kell legyen.');
+                    return;
+                }
+
                 setLoading(true); setError('');
                 try {
                     const hash = await hashPassword(password);
+
                     if (mode === 'register') {
-                        // Check if username already exists
+                        // Regisztrációkor: a kódnak léteznie kell, de még nem lehet hozzárendelve
+                        const { data: codeRow, error: codeErr } = await supabase
+                            .from('access_codes')
+                            .select('username')
+                            .eq('code', accessCode)
+                            .maybeSingle();
+                        if (codeErr) throw codeErr;
+                        if (!codeRow) {
+                            setError('Érvénytelen azonosító kód. Kérjük, ellenőrizze a kapott kódot.');
+                            setLoading(false); return;
+                        }
+                        if (codeRow.username && codeRow.username !== username.trim()) {
+                            setError('Ez az azonosító kód már egy másik fiókhoz van rendelve.');
+                            setLoading(false); return;
+                        }
+
+                        // Felhasználónév foglaltság ellenőrzés
                         const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).maybeSingle();
                         if (existing) { setError('Ez a felhasználónév már foglalt. Válasszon másikat.'); setLoading(false); return; }
+
+                        // Regisztráció
                         const { error: insErr } = await supabase.from('users').insert([{ username: username.trim(), password_hash: hash, email: email.trim() }]);
                         if (insErr) throw insErr;
+
+                        // Kód hozzárendelése a fiókhoz (username frissítése az access_codes táblában)
+                        await supabase.from('access_codes').update({ username: username.trim() }).eq('code', accessCode);
+
                         localStorage.setItem(AUTH_USERNAME_KEY, username.trim());
                         localStorage.setItem(AUTH_SESSION_KEY, 'active');
                         localStorage.setItem(AUTH_EMAIL_KEY, email.trim());
                         onAuthenticated(username.trim(), email.trim());
+
                     } else {
-                        const { data: user, error: selErr } = await supabase.from('users').select('username, email').eq('username', username.trim()).eq('password_hash', hash).maybeSingle();
+                        // Bejelentkezés: felhasználónév + jelszó ellenőrzés
+                        const { data: user, error: selErr } = await supabase
+                            .from('users')
+                            .select('username, email')
+                            .eq('username', username.trim())
+                            .eq('password_hash', hash)
+                            .maybeSingle();
                         if (selErr) throw selErr;
                         if (!user) { setError('Hibás felhasználónév vagy jelszó.'); setLoading(false); return; }
+
+                        // Kód ellenőrzés: a kódnak pontosan ehhez a felhasználóhoz kell tartoznia
+                        const { data: codeRow, error: codeErr2 } = await supabase
+                            .from('access_codes')
+                            .select('username')
+                            .eq('code', accessCode)
+                            .eq('username', username.trim())
+                            .maybeSingle();
+                        if (codeErr2) throw codeErr2;
+                        if (!codeRow) {
+                            setError('Érvénytelen azonosító kód ehhez a fiókhoz.');
+                            setLoading(false); return;
+                        }
+
                         localStorage.setItem(AUTH_USERNAME_KEY, username.trim());
                         localStorage.setItem(AUTH_SESSION_KEY, 'active');
                         localStorage.setItem(AUTH_EMAIL_KEY, user.email || email.trim());
@@ -2864,7 +2937,7 @@
                             <div style={{position:'relative'}}>
                                 <input id="atlas-pw-input" type={showPw ? 'text' : 'password'} value={password}
                                     onChange={e => { setPassword(e.target.value); setError(''); }}
-                                    onKeyDown={handleKeyDown}
+                                    onKeyDown={e => { if (e.key==='Enter') document.getElementById('atlas-code-input').focus(); }}
                                     placeholder={mode==='register' ? 'Min. 6 karakter' : '••••••••'}
                                     className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 text-sm outline-none placeholder-slate-500 transition-all"
                                     style={{border:'1px solid rgba(148,163,184,0.2)', paddingRight:'44px'}}
@@ -2878,6 +2951,31 @@
                                     }
                                 </button>
                             </div>
+
+                            {/* ── AZONOSÍTÓ KÓD MEZŐ ── */}
+                            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 mt-4" style={{letterSpacing:'0.08em'}}>
+                                <span style={{marginRight:'6px'}}>🔑</span>
+                                Azonosító Kód
+                                <span style={{color:'#475569', fontWeight:400, textTransform:'none', fontSize:'10px', marginLeft:'8px'}}>
+                                    (6 számjegy – csak jogosult felhasználóknak)
+                                </span>
+                            </label>
+                            <input
+                                id="atlas-code-input"
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={6}
+                                value={accessCode}
+                                onChange={e => { const v = e.target.value.replace(/\D/g,''); setAccessCode(v); setError(''); }}
+                                onKeyDown={handleKeyDown}
+                                placeholder="● ● ● ● ● ●"
+                                className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 text-sm outline-none placeholder-slate-600 transition-all font-mono tracking-[0.5em] text-center"
+                                style={{border:'1px solid rgba(6,182,212,0.35)', letterSpacing: accessCode ? '0.5em' : '0.5em'}}
+                                onFocus={e => e.target.style.borderColor='#06b6d4'}
+                                onBlur={e => e.target.style.borderColor='rgba(6,182,212,0.35)'}
+                            />
+                            {/* ── ─────────────────── ── */}
+
                             {error && <p className="mt-3 text-red-400 text-xs">⚠ {error}</p>}
                             <button onClick={handleSubmit} disabled={loading}
                                 className="mt-6 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-lg text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2"
