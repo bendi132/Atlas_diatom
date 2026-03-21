@@ -2864,12 +2864,16 @@
                             setLoading(false); return;
                         }
 
-                        // 3. Profil lekérés – profiles tábla, majd user_metadata, majd email prefix
+                        // 3. Profil lekérés – user_metadata elsőként (RLS-mentes), majd profiles tábla
                         const { data: profile } = await supabase.from('profiles').select('username, email').eq('id', userId).maybeSingle();
-                        const uname = profile?.username 
-                            || authData.user?.user_metadata?.username 
-                            || authData.user?.user_metadata?.full_name
+                        const uname = authData.user?.user_metadata?.username
+                            || profile?.username
                             || email.split('@')[0];
+
+                        // Mentjük a user_metadata-ba is, hogy újratöltéskor is elérhető legyen
+                        if (!authData.user?.user_metadata?.username && profile?.username) {
+                            await supabase.auth.updateUser({ data: { username: profile.username } });
+                        }
 
                         localStorage.setItem(AUTH_USERNAME_KEY, uname);
                         localStorage.setItem(AUTH_EMAIL_KEY, email.trim());
@@ -3133,16 +3137,24 @@
                 const checkSession = async () => {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
-                        // Valódi felhasználónév betöltése a profiles táblából
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('username')
-                            .eq('id', session.user.id)
-                            .maybeSingle();
-                        const uname = profile?.username 
-                            || localStorage.getItem(AUTH_USERNAME_KEY) 
-                            || session.user.user_metadata?.username
-                            || session.user.email.split('@')[0];
+                        // user_metadata elsőként – ez RLS nélkül elérhető
+                        let uname = session.user.user_metadata?.username;
+                        
+                        // Ha nincs user_metadata-ban, próbáljuk a profiles táblából
+                        if (!uname) {
+                            const { data: profile } = await supabase
+                                .from('profiles')
+                                .select('username')
+                                .eq('id', session.user.id)
+                                .maybeSingle();
+                            uname = profile?.username;
+                            // Ha megvan, mentjük user_metadata-ba a jövőre
+                            if (uname) {
+                                await supabase.auth.updateUser({ data: { username: uname } });
+                            }
+                        }
+                        
+                        uname = uname || session.user.email.split('@')[0];
                         localStorage.setItem(AUTH_USERNAME_KEY, uname);
                         setUserInfo({ id: session.user.id, username: uname, email: session.user.email });
                         setAuthenticated(true);
