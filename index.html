@@ -502,7 +502,7 @@
         };
 
         // --- APP COMPONENT ---
-        const App = () => {
+        const App = ({ currentUserId }) => {
             const [view, setView] = useState('input');
             const [lang, setLang] = useState('hu'); // Default: Hungarian (as per original file)
 
@@ -558,7 +558,9 @@
             // ── SUPABASE: Save a sample to the cloud database ─────────────────
             const saveSampleToDatabase = async (sample) => {
                 try {
-                    const userId = localStorage.getItem(AUTH_USERNAME_KEY) || 'unknown';
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const userId = session?.user?.id || currentUserId;
+                    if (!userId) { console.error('No authenticated user'); return null; }
                     const { data: inserted, error } = await supabase.from('Data').insert([{
                         user_id:         userId,
                         sample_name:     sample.site_id,
@@ -577,7 +579,8 @@
             // ── SUPABASE: Load samples from the cloud database ────────────────
             const loadSamplesFromDatabase = async () => {
                 try {
-                    const userId = localStorage.getItem(AUTH_USERNAME_KEY);
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const userId = session?.user?.id || currentUserId;
                     if (!userId) return [];
                     const { data, error } = await supabase
                         .from('Data')
@@ -2763,11 +2766,10 @@
 
         // ============================================================
         // ============================================================
-        // AUTHENTICATION – Felhasználónév + Jelszó (Supabase DB)
+        // AUTHENTICATION – Supabase Auth (email + jelszó + kód)
         // ============================================================
 
         const AUTH_USERNAME_KEY = 'atlas_username';
-        const AUTH_SESSION_KEY  = 'atlas_session';
         const AUTH_EMAIL_KEY    = 'atlas_email';
 
         // ════════════════════════════════════════════════════════════
@@ -2776,113 +2778,100 @@
         //
         //  ► A kódokat a Supabase Dashboard-on kezeld:
         //    Tábla neve: "access_codes"
-        //    Oszlopok:   username (text), code (text, 6 számjegy)
+        //    Oszlopok:   user_id (uuid, nullable), code (text, 6 számjegy)
         //
         //  ► Kód hozzárendelése egy felhasználóhoz:
         //    Supabase → Table Editor → access_codes → Insert row
-        //    username: "FelhasználóNeve"   code: "123456"
+        //    code: "123456"   user_id: (üresen hagyod)
         //
         //  ► Ha valakinek le kell tiltani a hozzáférését:
-        //    Töröld ki a sorát az access_codes táblából,
-        //    vagy módosítsd a kódját egy olyanra amit nem tud.
+        //    Töröld ki a sorát az access_codes táblából.
         //
         //  ► Egy felhasználóhoz pontosan egy sor tartozhat.
         //    A kód 6 számjegyű legyen (pl. 472819).
         //
         // ════════════════════════════════════════════════════════════
 
-        const hashPassword = async (pw) => {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-        };
-
         // ── Login / Register Screen ───────────────────────────────────────────
         const LoginScreen = ({ onAuthenticated }) => {
-            const [mode, setMode]           = React.useState('login');
-            const [username, setUsername]   = React.useState('');
-            const [email, setEmail]         = React.useState('');
-            const [password, setPassword]   = React.useState('');
+            const [mode, setMode]             = React.useState('login');
+            const [username, setUsername]     = React.useState('');
+            const [email, setEmail]           = React.useState('');
+            const [password, setPassword]     = React.useState('');
             const [accessCode, setAccessCode] = React.useState('');
-            const [loading, setLoading]     = React.useState(false);
-            const [error, setError]         = React.useState('');
-            const [showPw, setShowPw]       = React.useState(false);
+            const [loading, setLoading]       = React.useState(false);
+            const [error, setError]           = React.useState('');
+            const [showPw, setShowPw]         = React.useState(false);
 
             const handleSubmit = async () => {
-                if (!username.trim()) { setError('Kérjük, adja meg a felhasználónevet.'); return; }
                 if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError('Kérjük, adjon meg érvényes e-mail címet.'); return; }
                 if (password.length < 6) { setError('A jelszónak legalább 6 karakter hosszúnak kell lennie.'); return; }
-
-                // Hozzáférési kód ellenőrzés – bejelentkezésnél és regisztrációnál is kötelező
-                if (!/^\d{6}$/.test(accessCode)) {
-                    setError('Az azonosító kód pontosan 6 számjegyű kell legyen.');
-                    return;
-                }
+                if (!/^\d{6}$/.test(accessCode)) { setError('Az azonosító kód pontosan 6 számjegyű kell legyen.'); return; }
+                if (mode === 'register' && !username.trim()) { setError('Kérjük, adja meg a felhasználónevet.'); return; }
 
                 setLoading(true); setError('');
                 try {
-                    const hash = await hashPassword(password);
-
                     if (mode === 'register') {
-                        // Regisztrációkor: a kódnak léteznie kell, de még nem lehet hozzárendelve
+                        // 1. Kód ellenőrzés – létezik-e és szabad-e?
                         const { data: codeRow, error: codeErr } = await supabase
                             .from('access_codes')
-                            .select('username')
+                            .select('user_id, code')
                             .eq('code', accessCode)
                             .maybeSingle();
                         if (codeErr) throw codeErr;
-                        if (!codeRow) {
-                            setError('Érvénytelen azonosító kód. Kérjük, ellenőrizze a kapott kódot.');
-                            setLoading(false); return;
-                        }
-                        if (codeRow.username && codeRow.username !== username.trim()) {
-                            setError('Ez az azonosító kód már egy másik fiókhoz van rendelve.');
-                            setLoading(false); return;
-                        }
+                        if (!codeRow) { setError('Érvénytelen azonosító kód.'); setLoading(false); return; }
+                        if (codeRow.user_id) { setError('Ez az azonosító kód már használatban van.'); setLoading(false); return; }
 
-                        // Felhasználónév foglaltság ellenőrzés
-                        const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).maybeSingle();
-                        if (existing) { setError('Ez a felhasználónév már foglalt. Válasszon másikat.'); setLoading(false); return; }
+                        // 2. Supabase Auth regisztráció
+                        const { data: authData, error: signUpErr } = await supabase.auth.signUp({
+                            email: email.trim(),
+                            password: password,
+                            options: { data: { username: username.trim() } }
+                        });
+                        if (signUpErr) throw signUpErr;
+                        const userId = authData.user?.id;
+                        if (!userId) throw new Error('Regisztráció sikertelen.');
 
-                        // Regisztráció
-                        const { error: insErr } = await supabase.from('users').insert([{ username: username.trim(), password_hash: hash, email: email.trim() }]);
-                        if (insErr) throw insErr;
+                        // 3. Kód hozzárendelése a Supabase Auth user_id-hez
+                        await supabase.from('access_codes').update({ user_id: userId }).eq('code', accessCode);
 
-                        // Kód hozzárendelése a fiókhoz (username frissítése az access_codes táblában)
-                        await supabase.from('access_codes').update({ username: username.trim() }).eq('code', accessCode);
+                        // 4. Username mentése profiles táblába
+                        await supabase.from('profiles').upsert({ id: userId, username: username.trim(), email: email.trim() });
 
                         localStorage.setItem(AUTH_USERNAME_KEY, username.trim());
-                        localStorage.setItem(AUTH_SESSION_KEY, 'active');
                         localStorage.setItem(AUTH_EMAIL_KEY, email.trim());
-                        onAuthenticated(username.trim(), email.trim());
+                        onAuthenticated(userId, username.trim(), email.trim());
 
                     } else {
-                        // Bejelentkezés: felhasználónév + jelszó ellenőrzés
-                        const { data: user, error: selErr } = await supabase
-                            .from('users')
-                            .select('username, email')
-                            .eq('username', username.trim())
-                            .eq('password_hash', hash)
-                            .maybeSingle();
-                        if (selErr) throw selErr;
-                        if (!user) { setError('Hibás felhasználónév vagy jelszó.'); setLoading(false); return; }
+                        // 1. Supabase Auth bejelentkezés
+                        const { data: authData, error: signInErr } = await supabase.auth.signInWithPassword({
+                            email: email.trim(),
+                            password: password
+                        });
+                        if (signInErr) { setError('Hibás e-mail cím vagy jelszó.'); setLoading(false); return; }
+                        const userId = authData.user?.id;
 
-                        // Kód ellenőrzés: a kódnak pontosan ehhez a felhasználóhoz kell tartoznia
+                        // 2. Kód ellenőrzés – ehhez a user_id-hez tartozik-e?
                         const { data: codeRow, error: codeErr2 } = await supabase
                             .from('access_codes')
-                            .select('username')
+                            .select('user_id')
                             .eq('code', accessCode)
-                            .eq('username', username.trim())
+                            .eq('user_id', userId)
                             .maybeSingle();
                         if (codeErr2) throw codeErr2;
                         if (!codeRow) {
+                            await supabase.auth.signOut();
                             setError('Érvénytelen azonosító kód ehhez a fiókhoz.');
                             setLoading(false); return;
                         }
 
-                        localStorage.setItem(AUTH_USERNAME_KEY, username.trim());
-                        localStorage.setItem(AUTH_SESSION_KEY, 'active');
-                        localStorage.setItem(AUTH_EMAIL_KEY, user.email || email.trim());
-                        onAuthenticated(username.trim(), user.email || email.trim());
+                        // 3. Profil lekérés
+                        const { data: profile } = await supabase.from('profiles').select('username, email').eq('id', userId).maybeSingle();
+                        const uname = profile?.username || email.split('@')[0];
+
+                        localStorage.setItem(AUTH_USERNAME_KEY, uname);
+                        localStorage.setItem(AUTH_EMAIL_KEY, email.trim());
+                        onAuthenticated(userId, uname, email.trim());
                     }
                 } catch (err) {
                     setError('Hiba: ' + (err.message || 'Ismeretlen hiba'));
@@ -3005,11 +2994,12 @@
                 return () => document.removeEventListener('mousedown', handler);
             }, []);
 
-            // Load sample counts from Supabase (same source as App)
+            // Load sample counts from Supabase (Supabase Auth user ID alapján)
             React.useEffect(() => {
                 const loadCounts = async () => {
                     try {
-                        const userId = localStorage.getItem(AUTH_USERNAME_KEY);
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const userId = session?.user?.id;
                         if (!userId) return;
                         const { data, error } = await supabase
                             .from('Data')
@@ -3026,7 +3016,8 @@
                 if (!open) return;
                 const loadCounts = async () => {
                     try {
-                        const userId = localStorage.getItem(AUTH_USERNAME_KEY);
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const userId = session?.user?.id;
                         if (!userId) return;
                         const { data, error } = await supabase
                             .from('Data')
@@ -3131,32 +3122,57 @@
 
         // ── AuthWrapper ───────────────────────────────────────────────────────
         const AuthWrapper = ({ children }) => {
-            const savedUsername = localStorage.getItem(AUTH_USERNAME_KEY);
-            const savedSession  = localStorage.getItem(AUTH_SESSION_KEY);
-            const savedEmail    = localStorage.getItem(AUTH_EMAIL_KEY) || '';
-            const [authenticated, setAuthenticated] = React.useState(!!(savedUsername && savedSession));
-            const [userInfo, setUserInfo] = React.useState(
-                savedUsername && savedSession ? { username: savedUsername, email: savedEmail } : null
-            );
+            const [authenticated, setAuthenticated] = React.useState(false);
+            const [userInfo, setUserInfo]           = React.useState(null);
+            const [checking, setChecking]           = React.useState(true);
 
-            const handleAuthenticated = (username, email) => {
-                setUserInfo({ username, email: email || '' });
+            React.useEffect(() => {
+                // Ellenőrzés: van-e aktív Supabase Auth session?
+                const checkSession = async () => {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        const uname = localStorage.getItem(AUTH_USERNAME_KEY) || session.user.email.split('@')[0];
+                        setUserInfo({ id: session.user.id, username: uname, email: session.user.email });
+                        setAuthenticated(true);
+                    }
+                    setChecking(false);
+                };
+                checkSession();
+
+                // Session változás figyelése (pl. token lejárat)
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                    if (!session) {
+                        setAuthenticated(false);
+                        setUserInfo(null);
+                    }
+                });
+                return () => subscription.unsubscribe();
+            }, []);
+
+            const handleAuthenticated = (userId, username, email) => {
+                setUserInfo({ id: userId, username, email });
                 setAuthenticated(true);
             };
 
-            const handleLogout = () => {
+            const handleLogout = async () => {
+                await supabase.auth.signOut();
                 localStorage.removeItem(AUTH_USERNAME_KEY);
-                localStorage.removeItem(AUTH_SESSION_KEY);
                 localStorage.removeItem(AUTH_EMAIL_KEY);
                 localStorage.removeItem('atlas_diatom_data');
-                window.location.reload();
+                setAuthenticated(false);
+                setUserInfo(null);
             };
 
+            if (checking) return (
+                <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+                    <div className="text-cyan-400 font-mono text-sm animate-pulse">Betöltés...</div>
+                </div>
+            );
             if (!authenticated) return <LoginScreen onAuthenticated={handleAuthenticated} />;
             return (
                 <>
                     <UserMenu userInfo={userInfo} onLogout={handleLogout} />
-                    {children}
+                    {React.cloneElement(children, { currentUserId: userInfo?.id })}
                 </>
             );
         };
