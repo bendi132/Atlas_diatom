@@ -3133,7 +3133,17 @@
                 const checkSession = async () => {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
-                        const uname = localStorage.getItem(AUTH_USERNAME_KEY) || session.user.email.split('@')[0];
+                        // Valódi felhasználónév betöltése a profiles táblából
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('username')
+                            .eq('id', session.user.id)
+                            .maybeSingle();
+                        const uname = profile?.username 
+                            || localStorage.getItem(AUTH_USERNAME_KEY) 
+                            || session.user.user_metadata?.username
+                            || session.user.email.split('@')[0];
+                        localStorage.setItem(AUTH_USERNAME_KEY, uname);
                         setUserInfo({ id: session.user.id, username: uname, email: session.user.email });
                         setAuthenticated(true);
                     }
