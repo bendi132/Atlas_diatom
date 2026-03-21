@@ -28,9 +28,32 @@
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; }
-            .page-break { page-break-before: always; }
+            .page-break { page-break-before: always; break-before: page; }
             .shadow-xl, .shadow-lg, .shadow-sm { box-shadow: none !important; }
             .border { border: 1px solid #ddd !important; }
+            canvas { max-width: 100% !important; }
+            .chart-container-main {
+                height: 380px !important;
+                max-height: 380px !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .chart-container-all-taxa {
+                height: 500px !important;
+                max-height: 500px !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .chart-container-trophic {
+                height: 280px !important;
+                max-height: 280px !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .break-inside-avoid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
         }
 
         /* Custom Scrollbar */
@@ -1628,7 +1651,7 @@
                     const envParams = [
                         {key: 'pH', label: t('param_ph'), color: '#1e293b', axisId: 'y_ph'}, 
                         {key: 'conductivity_uS_cm', label: t('param_cond'), color: '#64748b', axisId: 'y_cond'},
-                        {key: 'nitrate_mg_L', label: t('param_no3'), color: '#94a3b8', axisId: 'y_nut'} 
+                        {key: 'phosphate_mg_L', label: t('param_po4'), color: '#94a3b8', axisId: 'y_nut'} 
                     ];
 
                     envParams.forEach((p, i) => {
@@ -1669,6 +1692,7 @@
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { position: 'bottom' },
@@ -1707,7 +1731,7 @@
                                 y_nut: {
                                     type: 'linear',
                                     display: datasets.some(d => d.yAxisID === 'y_nut'), 
-                                    position: 'right', title: { display: true, text: 'NO3' },
+                                    position: 'right', title: { display: true, text: 'PO4 (mg/L)' },
                                     grid: { drawOnChartArea: false },
                                 }
                             }
@@ -1825,11 +1849,26 @@
             const handlePdfExport = () => {
                 const element = document.getElementById('report-content');
                 const opt = {
-                    margin: 0,
+                    margin: [10, 10, 10, 10],
                     filename: `Report_${siteId}_${new Date().toISOString().split('T')[0]}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        onclone: (clonedDoc) => {
+                            // Ensure chart containers have explicit pixel heights in the clone
+                            const mainChart = clonedDoc.querySelector('.chart-container-main');
+                            if (mainChart) { mainChart.style.height = '400px'; mainChart.style.maxHeight = '400px'; mainChart.style.overflow = 'hidden'; }
+                            const allTaxaChart = clonedDoc.querySelector('.chart-container-all-taxa');
+                            if (allTaxaChart) { allTaxaChart.style.height = '600px'; allTaxaChart.style.maxHeight = '600px'; allTaxaChart.style.overflow = 'hidden'; }
+                            const trophicChart = clonedDoc.querySelector('.chart-container-trophic');
+                            if (trophicChart) { trophicChart.style.height = '320px'; trophicChart.style.maxHeight = '320px'; trophicChart.style.overflow = 'hidden'; }
+                        }
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'], before: '.page-break' }
                 };
                 
                 const btn = document.getElementById('btn-export-pdf');
@@ -2519,8 +2558,8 @@
                                 </h2>
                             </div>
 
-                            <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 mb-8">
-                                <canvas ref={chartRef} className="max-h-[500px] w-full"></canvas>
+                            <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 mb-8 chart-container-main" style={{height: '400px'}}>
+                                <canvas ref={chartRef} style={{width:'100%', height:'100%'}}></canvas>
                                 {missingParams.length > 0 && (
                                     <div className="mt-4 text-xs text-amber-700 bg-amber-50 p-3 rounded border border-amber-200">
                                         <strong>{t('missing_data')}:</strong> {t('missing_data_desc')} {missingParams.join(', ')}.
@@ -2581,8 +2620,8 @@
                                         {t('extra_all_taxa_title')}
                                     </h2>
                                 </div>
-                                <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200" style={{height: '600px'}}>
-                                    <canvas ref={chartRefAll}></canvas>
+                                <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 chart-container-all-taxa" style={{height: '600px'}}>
+                                    <canvas ref={chartRefAll} style={{width:'100%', height:'100%'}}></canvas>
                                 </div>
                                 <p className="text-xs text-slate-400 mt-2 text-center">
                                     * {t('chart_all_osi')} (Sorted by Abundance). Top 5 Dominant species highlighted in Cyan.
@@ -2624,8 +2663,8 @@
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                                         {/* Pie chart */}
-                                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4" style={{height:'320px'}}>
-                                            <canvas ref={chartRefTrophic}></canvas>
+                                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 chart-container-trophic" style={{height:'320px'}}>
+                                            <canvas ref={chartRefTrophic} style={{width:'100%', height:'100%'}}></canvas>
                                         </div>
 
                                         {/* Stats + evaluation */}
@@ -2860,6 +2899,7 @@
             const [open, setOpen]           = React.useState(false);
             const [activeTab, setActiveTab] = React.useState('profil');
             const menuRef = React.useRef(null);
+            const [samples, setSamples] = React.useState([]);
 
             React.useEffect(() => {
                 const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false); };
@@ -2867,11 +2907,39 @@
                 return () => document.removeEventListener('mousedown', handler);
             }, []);
 
-            const getSamples = () => {
-                try { const raw = localStorage.getItem('atlas_diatom_data'); if (!raw) return []; return JSON.parse(raw).samplings || []; }
-                catch { return []; }
-            };
-            const samples = getSamples();
+            // Load sample counts from Supabase (same source as App)
+            React.useEffect(() => {
+                const loadCounts = async () => {
+                    try {
+                        const userId = localStorage.getItem(AUTH_USERNAME_KEY);
+                        if (!userId) return;
+                        const { data, error } = await supabase
+                            .from('Data')
+                            .select('id, sample_name')
+                            .eq('user_id', userId);
+                        if (!error && data) setSamples(data.map(row => ({ id: row.id, site_id: row.sample_name || '' })));
+                    } catch(e) { /* silent */ }
+                };
+                loadCounts();
+            }, []);
+
+            // Re-fetch when menu opens so counts are fresh
+            React.useEffect(() => {
+                if (!open) return;
+                const loadCounts = async () => {
+                    try {
+                        const userId = localStorage.getItem(AUTH_USERNAME_KEY);
+                        if (!userId) return;
+                        const { data, error } = await supabase
+                            .from('Data')
+                            .select('id, sample_name')
+                            .eq('user_id', userId);
+                        if (!error && data) setSamples(data.map(row => ({ id: row.id, site_id: row.sample_name || '' })));
+                    } catch(e) { /* silent */ }
+                };
+                loadCounts();
+            }, [open]);
+
             const siteGroups = samples.reduce((acc, s) => { acc[s.site_id] = (acc[s.site_id]||0)+1; return acc; }, {});
             const initials = (userInfo?.username || '?').slice(0,2).toUpperCase();
 
