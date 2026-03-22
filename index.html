@@ -1122,7 +1122,7 @@
             // ────────────────────────────────────────────────────────────────────
 
             // ══════════════════════════════════════════════════════════════════
-            // Ω-OSI PER-SAMPLE AGGREGATION
+            // Ω-ÖSI (Ökológiai Stressz Index) PER-SAMPLE AGGREGATION
             // For each sample, compute the abundance-weighted mean Ω-OSI across
             // its constituent species.  Uses allSpeciesAnalysis lookup.
             // ══════════════════════════════════════════════════════════════════
@@ -1218,7 +1218,7 @@
             const stressForCalc = Math.max(0.1, avgStress);
 
             // ═══════════════════════════════════════════════════════════════════
-            // Ω-OSI  (Omega Ecological Stress Index)  — full formula implementation
+            // Ω-ÖSI  (Omega Ökológiai Stressz Index)  — teljes képlet implementáció
             // ═══════════════════════════════════════════════════════════════════
             //
             // Formula (per species i, per sample):
@@ -2337,7 +2337,7 @@
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: 'Ω-OSI',
+                                label: 'Ω-ÖSI',
                                 data: osiValues,
                                 backgroundColor: bgColors,
                                 borderColor: borderColors,
@@ -2350,21 +2350,21 @@
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: { display: false },
-                                title: { display: true, text: 'Ω-OSI (Omega Ecological Stress Index) — Minden Taxon' },
+                                title: { display: true, text: 'Ω-ÖSI (Omega Ökológiai Stressz Index) — Minden Taxon' },
                                 tooltip: {
                                     callbacks: {
                                         label: (ctx) => {
                                             const sp = speciesData[ctx.dataIndex];
                                             const omega = sp.ωosi !== undefined ? sp.ωosi : sp.ösi;
                                             const stress = omega > 1.5 ? '🔴 Magas' : omega > 0.8 ? '🟡 Közepes' : '🟢 Alacsony';
-                                            return [`Ω-OSI: ${omega.toFixed(3)}`, `Stressz: ${stress}`, `s=${sp.s}`];
+                                            return [`Ω-ÖSI: ${omega.toFixed(3)}`, `Stressz: ${stress}`, `s=${sp.s}`];
                                         }
                                     }
                                 }
                             },
                             scales: {
                                 x: {
-                                    title: { display: true, text: 'Ω-OSI érték' },
+                                    title: { display: true, text: 'Ω-ÖSI érték' },
                                     suggestedMax: Math.max(2.0, ...(osiValues.filter(v => isFinite(v))))
                                 },
                                 y: {
@@ -2441,7 +2441,7 @@
                         labels,
                         datasets: [
                             {
-                                label: 'Ω-OSI per minta',
+                                label: 'Ω-ÖSI per minta',
                                 data: omegaVals,
                                 borderColor: '#6366f1',
                                 backgroundColor: 'rgba(99,102,241,0.08)',
@@ -2456,7 +2456,7 @@
                             },
                             // High-stress threshold line
                             {
-                                label: 'Magas stressz küszöb (1.5)',
+                                label: 'Magas stressz küszöb / High Stress (1.5)',
                                 data: labels.map(() => 1.5),
                                 borderColor: 'rgba(239,68,68,0.55)',
                                 borderDash: [6, 4],
@@ -2466,7 +2466,7 @@
                             },
                             // Moderate threshold line
                             {
-                                label: 'Közepes stressz küszöb (0.8)',
+                                label: 'Közepes stressz küszöb / Moderate Stress (0.8)',
                                 data: labels.map(() => 0.8),
                                 borderColor: 'rgba(245,158,11,0.45)',
                                 borderDash: [4, 4],
@@ -2482,15 +2482,15 @@
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
-                            title: { display: true, text: 'Ω-OSI Idősor — Ökológiai Stressz Trendje', font: { size: 13, weight: 'bold' } },
+                            title: { display: true, text: 'Ω-ÖSI Idősor — Ökológiai Stressz Index Trendje', font: { size: 13, weight: 'bold' } },
                             tooltip: {
                                 callbacks: {
                                     label: (ctx) => {
                                         if (ctx.datasetIndex !== 0) return ctx.dataset.label;
                                         const v = ctx.raw;
-                                        if (v === null) return 'Ω-OSI: N/A';
+                                        if (v === null) return 'Ω-ÖSI: N/A';
                                         const lvl = v > 1.5 ? '🔴 Magas' : v > 0.8 ? '🟡 Közepes' : '🟢 Alacsony';
-                                        return [`Ω-OSI: ${v.toFixed(3)}`, `Szint: ${lvl}`];
+                                        return [`Ω-ÖSI: ${v.toFixed(3)}`, `Szint: ${lvl}`];
                                     }
                                 }
                             }
@@ -2498,7 +2498,7 @@
                         scales: {
                             x: { title: { display: true, text: 'Mintavétel dátuma' } },
                             y: {
-                                title: { display: true, text: 'Ω-OSI érték' },
+                                title: { display: true, text: 'Ω-ÖSI érték' },
                                 suggestedMin: 0,
                                 suggestedMax: Math.max(2.0, ...omegaVals.filter(v => v !== null)) * 1.1
                             }
@@ -2561,9 +2561,9 @@
                 const omegaVal = stats.ωosi !== undefined ? stats.ωosi : stats.ösi;
 
                 let succText = "";
-                if (omegaVal > 1.5) succText = `Magas Ω-OSI (>${1.5}) – erős ökológiai stressz jele. (Ω-OSI=${omegaVal.toFixed(3)})`;
-                else if (omegaVal > 0.8) succText = `Mérsékelt Ω-OSI – közepes stressz. (Ω-OSI=${omegaVal.toFixed(3)})`;
-                else succText = `Alacsony Ω-OSI – a faj alacsony stressz-közeges körülmények között él. (Ω-OSI=${omegaVal.toFixed(3)})`;
+                if (omegaVal > 1.5) succText = `Magas Ω-ÖSI (>${1.5}) – erős Ökológiai Stressz Index. (Ω-ÖSI=${omegaVal.toFixed(3)})`;
+                else if (omegaVal > 0.8) succText = `Mérsékelt Ω-ÖSI – közepes Ökológiai Stressz Index. (Ω-ÖSI=${omegaVal.toFixed(3)})`;
+                else succText = `Alacsony Ω-ÖSI – a faj kedvező Ökológiai Stressz Index értéket mutat. (Ω-ÖSI=${omegaVal.toFixed(3)})`;
 
                 // Ω-OSI interpretation
                 const isHighStress = stats.avgStress > 0.5;
@@ -2572,9 +2572,9 @@
                 const isMono       = stats.relAbundance > 0.8;
 
                 let osiInterp = "";
-                if (omegaVal > 1.5) osiInterp = "Magas Ω-OSI: a Gauss-kernel és KL-divergencia komponensek nagy eltérést jeleznek az ökológiai optimumtól. Erős stressz és közösségi diszrupció jele.";
-                else if (omegaVal < 0.5) osiInterp = "Alacsony Ω-OSI: a faj abundancia-eloszlása közel esik a saját szenzitivitási centrumához – alacsony stressz, stabil populáció.";
-                else osiInterp = "Mérsékelt Ω-OSI: a közösségi stressz közepes szintű, egyensúlyi állapot és külső perturbáció egyszerre hat.";
+                if (omegaVal > 1.5) osiInterp = "Magas Ω-ÖSI (Ökológiai Stressz Index): a Gauss-kernel és KL-divergencia komponensek nagy eltérést jeleznek az ökológiai optimumtól. Erős stressz és közösségi diszrupció jele.";
+                else if (omegaVal < 0.5) osiInterp = "Alacsony Ω-ÖSI (Ökológiai Stressz Index): a faj abundancia-eloszlása közel esik a saját szenzitivitási centrumához – alacsony stressz, stabil populáció.";
+                else osiInterp = "Mérsékelt Ω-ÖSI (Ökológiai Stressz Index): a közösségi stressz közepes szintű, egyensúlyi állapot és külső perturbáció egyszerre hat.";
 
                 if (isHighStress && isTolerant) osiInterp += " " + t('osi_strat_stress_tol');
                 else if (!isHighStress && isSensitive) osiInterp += " " + t('osi_strat_sensitive');
@@ -2593,8 +2593,8 @@
                 else if (stats.s < 2.5) profileText += "Typically serves as a primary colonizer in disturbed environments. ";
                 else profileText += "Occupies an intermediate ecological niche. ";
                 profileText += omegaVal > 0.8
-                    ? `Elevated Ω-OSI indicates the species is experiencing or driving community-level stress.`
-                    : `Low Ω-OSI indicates the species is within its ecological comfort zone.`;
+                    ? `Magas Ω-ÖSI (Ökológiai Stressz Index): a faj közösségi szintű stressz forrása vagy elszenvedője.`
+                    : `Alacsony Ω-ÖSI: a faj ökológiai komfortzónájában van, stabil ökológiai stressz index.`;
                 if (driverText) profileText += ` [${driverText}]`;
 
                 return {
@@ -3162,7 +3162,7 @@
                                         <th className="p-3">IPS Coverage</th>
                                         <th className="p-3">% Tolerant</th>
                                         <th className="p-3">DO Sat%</th>
-                                        <th className="p-3 bg-indigo-50 text-indigo-700 font-black">Ω-OSI</th>
+                                        <th className="p-3 bg-indigo-50 text-indigo-700 font-black">Ω-ÖSI</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -3195,7 +3195,7 @@
                             </table>
                         </div>
 
-                        {/* ── Ω-OSI SUMMARY PANEL ──────────────────────────────────────── */}
+                        {/* ── Ω-ÖSI ÖSSZESÍTŐ PANEL ──────────────────────────────────────── */}
                         {data.omegaSummary && (() => {
                             const os = data.omegaSummary;
                             const stressLevel = os.mean > 1.5 ? 'high' : os.mean > 0.8 ? 'mid' : 'low';
@@ -3225,7 +3225,7 @@
                                             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                                         </svg>
                                         <h3 className={`font-black text-sm uppercase tracking-wider ${cfg.head}`}>
-                                            Ω-OSI — Összesített Ökológiai Stressz Értékelés
+                                            Ω-ÖSI — Összesített Ökológiai Stressz Index (ÖSI) Értékelés
                                         </h3>
                                         <span className={`ml-auto text-xs font-mono px-2 py-1 rounded-full border ${cfg.border} ${cfg.val} font-bold`}>
                                             {cfg.icon} {cfg.label}
@@ -3235,9 +3235,9 @@
                                     {/* Metric cards */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                                         {[
-                                            { label: 'Átlag Ω-OSI / Mean', value: os.mean.toFixed(3), sub: 'Súlyozott közösségi átlag' },
-                                            { label: 'Maximum Ω-OSI', value: os.max.toFixed(3), sub: 'Legmagasabb minta-érték' },
-                                            { label: 'Minimum Ω-OSI', value: os.min.toFixed(3), sub: 'Legalacsonyabb minta-érték' },
+                                            { label: 'Átlag Ω-ÖSI (Ökológiai Stressz Index)', value: os.mean.toFixed(3), sub: 'Súlyozott közösségi átlag' },
+                                            { label: 'Maximum Ω-ÖSI', value: os.max.toFixed(3), sub: 'Legmagasabb minta-érték' },
+                                            { label: 'Minimum Ω-ÖSI', value: os.min.toFixed(3), sub: 'Legalacsonyabb minta-érték' },
                                             { label: 'Magas stressz / High-stress', value: `${os.highStressCount} / ${os.n}`, sub: `${os.highStressPct.toFixed(0)}% · küszöb > ${os.threshold}` }
                                         ].map(m => (
                                             <div key={m.label} className="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
@@ -3250,7 +3250,7 @@
 
                                     {/* Inline Ω-OSI sparkbar per sample */}
                                     <div className="mb-4">
-                                        <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-2">Ω-OSI per minta (időrendben)</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-2">Ω-ÖSI per minta – Ökológiai Stressz Index (időrendben)</div>
                                         <div className="flex flex-wrap gap-2">
                                             {[...data.samples].sort((a,b) => new Date(a.date)-new Date(b.date)).map(s => {
                                                 if (s.ωosi === null) return null;
@@ -3275,13 +3275,13 @@
                                     {driverSpecies.length > 0 && (
                                         <div className="mb-3">
                                             <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-2">
-                                                Legfontosabb stressz-driverek (Top-3 faj Ω-OSI szerint)
+                                                Legfontosabb stressz-driverek (Top-3 faj Ω-ÖSI szerint)
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 {driverSpecies.map(sp => (
                                                     <div key={sp.name} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${cfg.border} bg-white`}>
                                                         <span className="italic font-semibold text-slate-700">{sp.name}</span>
-                                                        <span className={`font-mono font-black ${cfg.val}`}>Ω={sp.ωosi.toFixed(2)}</span>
+                                                        <span className={`font-mono font-black ${cfg.val}`}>Ω-ÖSI={sp.ωosi.toFixed(2)}</span>
                                                         <span className="text-slate-400">s={sp.s}</span>
                                                     </div>
                                                 ))}
@@ -3292,24 +3292,24 @@
                                     {/* Samples of concern */}
                                     {concernSamples.length > 0 && (
                                         <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800">
-                                            <span className="font-bold">⚠ Aggasztó minták (Ω-OSI &gt; {os.threshold}):</span>{' '}
-                                            {concernSamples.map(s => `${s.date.slice(0,10)} (Ω=${s.ωosi.toFixed(2)})`).join(' · ')}
+                                            <span className="font-bold">⚠ Aggasztó minták – magas Ökológiai Stressz Index (Ω-ÖSI &gt; {os.threshold}):</span>{' '}
+                                            {concernSamples.map(s => `${s.date.slice(0,10)} (Ω-ÖSI=${s.ωosi.toFixed(2)})`).join(' · ')}
                                         </div>
                                     )}
 
                                     {/* Stress distribution narrative */}
                                     <div className={`mt-3 text-xs ${cfg.val} border-t ${cfg.border} pt-3 leading-relaxed`}>
-                                        <span className="font-bold">Stressz-eloszlás értékelése: </span>
-                                        {stressLevel === 'low' && 'Az Ω-OSI értékek alacsonyak, a közösség stabil, kis ökológiai stressz áll fenn. A Gauss-kernel alapú szenzitivitás-analízis szerint a fajok relatív abundanciája közel esik a saját érzékenységi centrumukhoz, ami egészséges közösségi összetételt jelez.'}
-                                        {stressLevel === 'mid' && 'Mérsékelt Ω-OSI értékek: a közösség átmeneti stressznek van kitéve. A Gauss-kernel szórások és a KL-divergencia közepes eltérést jeleznek az optimális állapottól. Rendszeres monitorizálás javasolt.'}
-                                        {stressLevel === 'high' && 'Magas Ω-OSI értékek: a KL-divergencia és a Gauss-kernel összeg együttesen erős eltérést jelez az ökológiai referencia-állapottól. Az érzékeny fajok dominanciája csökkent, a toleráns formák kerültek előtérbe. Azonnali beavatkozás javasolt.'}
+                                        <span className="font-bold">Ω-ÖSI Stressz-eloszlás értékelése (Ökológiai Stressz Index): </span>
+                                        {stressLevel === 'low' && 'Az Ω-ÖSI (Ökológiai Stressz Index) értékek alacsonyak, a közösség stabil, kis ökológiai stressz áll fenn. A Gauss-kernel alapú szenzitivitás-analízis szerint a fajok relatív abundanciája közel esik a saját érzékenységi centrumukhoz, ami egészséges közösségi összetételt jelez.'}
+                                        {stressLevel === 'mid' && 'Mérsékelt Ω-ÖSI (Ökológiai Stressz Index) értékek: a közösség átmeneti stressznek van kitéve. A Gauss-kernel szórások és a KL-divergencia közepes eltérést jeleznek az optimális állapottól. Rendszeres monitorizálás javasolt.'}
+                                        {stressLevel === 'high' && 'Magas Ω-ÖSI (Ökológiai Stressz Index) értékek: a KL-divergencia és a Gauss-kernel összeg együttesen erős eltérést jelez az ökológiai referencia-állapottól. Az érzékeny fajok dominanciája csökkent, a toleráns formák kerültek előtérbe. Azonnali beavatkozás javasolt.'}
                                     </div>
                                 </div>
                             );
                         })()}
-                        {/* ── END Ω-OSI SUMMARY ─────────────────────────────────────────── */}
+                        {/* ── END Ω-ÖSI ÖSSZESÍTŐ ─────────────────────────────────────────── */}
 
-                        {/* ── Ω-OSI TIMELINE CHART ──────────────────────────────────────── */}
+                        {/* ── Ω-ÖSI IDŐSOR CHART ──────────────────────────────────────── */}
                         {data.samples && data.samples.some(s => s.ωosi !== null && s.ωosi !== undefined) && (
                             <div className="mb-12 break-inside-avoid">
                                 <div className="flex items-center gap-3 border-b-2 border-indigo-300 pb-2 mb-4">
@@ -3317,18 +3317,18 @@
                                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                                     </svg>
                                     <h2 className="text-lg font-black text-slate-900 uppercase tracking-wide m-0">
-                                        Ω-OSI Stressz Idősor / Stress Timeline
+                                        Ω-ÖSI Ökológiai Stressz Index — Idősor
                                     </h2>
                                 </div>
                                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4" style={{height:'300px'}}>
                                     <canvas ref={chartRefOmega} style={{width:'100%', height:'100%'}}></canvas>
                                 </div>
                                 <p className="text-xs text-slate-400 mt-2 text-center">
-                                    🟢 &lt;0.8 Alacsony · 🟡 0.8–1.5 Közepes · 🔴 &gt;1.5 Magas stressz (Ω-OSI)
+                                    🟢 &lt;0.8 Alacsony · 🟡 0.8–1.5 Közepes · 🔴 &gt;1.5 Magas (Ω-ÖSI – Ökológiai Stressz Index)
                                 </p>
                             </div>
                         )}
-                        {/* ── END Ω-OSI TIMELINE ────────────────────────────────────────── */}
+                        {/* ── END Ω-ÖSI IDŐSOR ────────────────────────────────────────── */}
 
                         <div className="page-break"></div>
                         <h2 className="text-xl font-black text-cyan-900 border-b-2 border-cyan-100 pb-2 uppercase tracking-wide mt-8">{t('section2_title')}</h2>
@@ -3420,7 +3420,7 @@
                                                 <div className="flex gap-2 text-xs font-mono">
                                                     <span className="bg-slate-100 px-2 py-1 rounded">Rel. Abund: {(sp.relAbundance*100).toFixed(1)}%</span>
                                                     <span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded font-black border border-indigo-200">
-                                                        Ω-OSI: {sp.ωosi !== undefined ? sp.ωosi.toFixed(3) : sp.ösi.toFixed(2)}
+                                                        Ω-ÖSI: {sp.ωosi !== undefined ? sp.ωosi.toFixed(3) : sp.ösi.toFixed(2)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -3441,7 +3441,7 @@
                                                 
                                                 {/* Ω-OSI INTERPRETATION SUBSECTION */}
                                                 <div className="mt-3 pt-2 border-t border-slate-100">
-                                                    <h4 className="font-bold text-indigo-700 text-xs uppercase mb-1">Ω-OSI Értelmezés</h4>
+                                                    <h4 className="font-bold text-indigo-700 text-xs uppercase mb-1">Ω-ÖSI – Ökológiai Stressz Index Értelmezés</h4>
                                                     <p className="text-sm text-slate-600">{texts.p4}</p>
                                                     <p className="text-sm text-slate-600 mt-2 italic">{texts.p5}</p>
                                                 </div>
@@ -3469,7 +3469,7 @@
                                     <canvas ref={chartRefAll} style={{width:'100%', height:'100%'}}></canvas>
                                 </div>
                                 <p className="text-xs text-slate-400 mt-2 text-center">
-                                    * Ω-OSI (Omega Ecological Stress Index) – Minden Taxon (Abundancia szerint rendezve). Top 5 domináns faj lilával jelölve.
+                                    * Ω-ÖSI (Omega Ökológiai Stressz Index) – Minden Taxon (Abundancia szerint rendezve). Top 5 domináns faj lilával jelölve.
                                 </p>
                             </div>
 
@@ -3553,7 +3553,7 @@
                                 <li><strong>Index:</strong> Shannon (ln base), IPS (OMNIDIA compatible).</li>
                                 <li><strong>Stat Engine:</strong> Spearman Rank Correlation + Bootstrapping (1000 iter).</li>
                                 <li><strong>Competition Index (VI):</strong> VI_i = Σ(|Ai − Aj| / (Ai + Aj)).</li>
-                                <li><strong>Ω-OSI (Omega Ecological Stress Index) — replaces ÖSI:</strong>{' '}
+                                <li><strong>Ω-ÖSI – Omega Ökológiai Stressz Index (ÖSI helyett):</strong>{' '}
                                     Ω_i = (1 − Σ_j[w_j · exp(−0.5·(x_i−μ_j)²/σ_j²) · Φ_j] + λ·H(X_i) + ξ·D_KL(P_i‖Q_i))
                                     / (mean(σ_j) + ε + γ·G_i + η·‖dx_i/dt‖).
                                     Paraméterek: x_i = rel. abundancia; μ_j = s/5; σ_j = max(0.1, v/5); w_j = Φ_j = 1;
