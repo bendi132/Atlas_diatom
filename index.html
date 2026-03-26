@@ -1463,7 +1463,9 @@
             // ══════════════════════════════════════════════════════════════════
             const _sensitivityDBforWEFRF = (speciesDb && speciesDb.sensitivityDB) ? speciesDb.sensitivityDB : {};
             const wefrfSamples = samplesWithOmega.map(sm => {
-                const result = computeWEFRF(sm, _sensitivityDBforWEFRF);
+                const _wHdb = (speciesDb && speciesDb.wefrfHabitatDB)    || {};
+                const _wTdb = (speciesDb && speciesDb.wefrfFunctionalDB) || {};
+                const result = computeWEFRF(sm, _sensitivityDBforWEFRF, _wHdb, _wTdb);
                 return { ...sm, wefrfResult: result };
             });
 
@@ -1786,167 +1788,14 @@
         //   E_j(t) = normált környezeti stressz szint (0–1)
         // ════════════════════════════════════════════════════════════════════════
 
-        // ── wEFRF Habitat-típus súlyok (w_H) ────────────────────────────────
-        // Diatóma-közösség szenzitivitása és referencia-állapot alapján
-        const WEFRF_HABITAT_DB = {
-            // Oligotróf / tiszta rendszerek
-            'Achnanthidium minutissimum':         { h: 'H_rhe', wH: 0.85 },
-            'Achnanthidium jackii':               { h: 'H_spr', wH: 0.95 },
-            'Achnanthidium pyrenaicum':            { h: 'H_rhe', wH: 0.85 },
-            'Achnanthidium biasolettianum':        { h: 'H_rhe', wH: 0.85 },
-            'Achnanthidium catenatum':             { h: 'H_oli', wH: 1.00 },
-            'Achnanthes lanceolata':               { h: 'H_pot', wH: 0.88 },
-            'Encyonema silesiacum':                { h: 'H_rhe', wH: 0.85 },
-            'Encyonema minutum':                   { h: 'H_pot', wH: 0.88 },
-            'Encyonema ventricosum':               { h: 'H_spr', wH: 0.95 },
-            'Gomphonema olivaceum':                { h: 'H_rhe', wH: 0.85 },
-            'Gomphonema tergestinum':              { h: 'H_rhe', wH: 0.85 },
-            'Gomphonema angustatum':               { h: 'H_pot', wH: 0.88 },
-            'Gomphonema angustum':                 { h: 'H_rhe', wH: 0.85 },
-            'Gomphonema parvulum':                 { h: 'H_eut', wH: 0.70 },
-            'Gomphonema truncatum':                { h: 'H_pot', wH: 0.88 },
-            'Cymbella excisa':                     { h: 'H_spr', wH: 0.95 },
-            'Cymbella helvetica':                  { h: 'H_spr', wH: 0.95 },
-            'Cymbella tumida':                     { h: 'H_pot', wH: 0.88 },
-            'Cymbella affinis':                    { h: 'H_rhe', wH: 0.85 },
-            'Navicula antonii':                    { h: 'H_pot', wH: 0.88 },
-            'Navicula cryptocephala':              { h: 'H_pot', wH: 0.88 },
-            'Navicula cryptotenella':              { h: 'H_rhe', wH: 0.85 },
-            'Navicula reichardtiana':              { h: 'H_pot', wH: 0.88 },
-            'Navicula tripunctata':                { h: 'H_pot', wH: 0.88 },
-            'Navicula lanceolata':                 { h: 'H_pot', wH: 0.88 },
-            'Navicula gregaria':                   { h: 'H_eut', wH: 0.70 },
-            'Navicula rostellata':                 { h: 'H_pot', wH: 0.88 },
-            'Nitzschia fonticola':                 { h: 'H_rhe', wH: 0.85 },
-            'Nitzschia dissipata':                 { h: 'H_pot', wH: 0.88 },
-            'Nitzschia linearis':                  { h: 'H_pot', wH: 0.88 },
-            'Nitzschia palea':                     { h: 'H_pol', wH: 0.20 },
-            'Nitzschia draveillensis':             { h: 'H_pol', wH: 0.20 },
-            'Nitzschia acicularis':                { h: 'H_eut', wH: 0.70 },
-            'Nitzschia amphibia':                  { h: 'H_pol', wH: 0.20 },
-            'Nitzschia capitellata':               { h: 'H_eut', wH: 0.70 },
-            'Diatoma vulgaris':                    { h: 'H_pot', wH: 0.88 },
-            'Diatoma moniliformis':                { h: 'H_rhe', wH: 0.85 },
-            'Diatoma mesodon':                     { h: 'H_spr', wH: 0.95 },
-            'Diatoma tenuis':                      { h: 'H_pot', wH: 0.88 },
-            'Cocconeis placentula':                { h: 'H_pot', wH: 0.88 },
-            'Cocconeis euglypta':                  { h: 'H_rhe', wH: 0.85 },
-            'Cocconeis pediculus':                 { h: 'H_pot', wH: 0.88 },
-            'Fragilaria capucina':                 { h: 'H_rhe', wH: 0.85 },
-            'Fragilaria gracilis':                 { h: 'H_oli', wH: 1.00 },
-            'Fragilaria ulna':                     { h: 'H_pot', wH: 0.88 },
-            'Fragilaria crotonensis':              { h: 'H_eut', wH: 0.70 },
-            'Ulnaria ulna':                        { h: 'H_pot', wH: 0.88 },
-            'Meridion circulare':                  { h: 'H_spr', wH: 0.95 },
-            'Rhoicosphenia abbreviata':            { h: 'H_pot', wH: 0.88 },
-            'Reimeria sinuata':                    { h: 'H_rhe', wH: 0.85 },
-            'Surirella brebissonii':               { h: 'H_pot', wH: 0.88 },
-            'Surirella ovata':                     { h: 'H_mar', wH: 0.85 },
-            'Sellaphora pupula':                   { h: 'H_eut', wH: 0.70 },
-            'Sellaphora seminulum':                { h: 'H_pol', wH: 0.20 },
-            'Amphora pediculus':                   { h: 'H_rhe', wH: 0.85 },
-            'Amphora ovalis':                      { h: 'H_pot', wH: 0.88 },
-            'Hippodonta capitata':                 { h: 'H_pot', wH: 0.88 },
-            'Planothidium frequentissimum':        { h: 'H_pot', wH: 0.88 },
-            'Planothidium lanceolatum':            { h: 'H_rhe', wH: 0.85 },
-            'Cyclotella meneghiniana':             { h: 'H_eut', wH: 0.70 },
-            'Cyclotella atomus':                   { h: 'H_eut', wH: 0.70 },
-            'Stephanodiscus hantzschii':           { h: 'H_eut', wH: 0.70 },
-            'Stephanodiscus minutulus':            { h: 'H_eut', wH: 0.70 },
-            'Aulacoseira granulata':               { h: 'H_eut', wH: 0.70 },
-            'Aulacoseira ambigua':                 { h: 'H_eut', wH: 0.70 },
-            'Diploneis oblongella':                { h: 'H_bog', wH: 0.80 },
-            'Eunotia bilunaris':                   { h: 'H_bog', wH: 0.80 },
-            'Eunotia exigua':                      { h: 'H_bog', wH: 0.80 },
-            'Eunotia minor':                       { h: 'H_bog', wH: 0.80 },
-            'Pinnularia viridis':                  { h: 'H_mar', wH: 0.85 },
-            'Pinnularia subcapitata':              { h: 'H_bog', wH: 0.80 },
-            'Caloneis bacillum':                   { h: 'H_pot', wH: 0.88 },
-            'Gyrosigma acuminatum':                { h: 'H_pot', wH: 0.88 },
-        };
-
-        // ── wEFRF Funkcionális típus súlyok (w_T) ───────────────────────────
-        // Diatóma ökológiai funkcionális szerep alapján
-        const WEFRF_FUNCTIONAL_DB = {
-            // Elsődleges termelők – fő diatóma szerep
-            'Achnanthidium minutissimum':         { t: 'T_pro', wT: 0.75 },
-            'Achnanthidium jackii':               { t: 'T_key', wT: 0.95 },  // szenzitív kulcsfaj
-            'Achnanthidium pyrenaicum':            { t: 'T_pro', wT: 0.75 },
-            'Achnanthidium biasolettianum':        { t: 'T_pro', wT: 0.75 },
-            'Achnanthidium catenatum':             { t: 'T_key', wT: 0.95 },
-            'Achnanthes lanceolata':               { t: 'T_pro', wT: 0.75 },
-            'Encyonema silesiacum':                { t: 'T_pro', wT: 0.75 },
-            'Encyonema minutum':                   { t: 'T_pro', wT: 0.75 },
-            'Encyonema ventricosum':               { t: 'T_key', wT: 0.95 },
-            'Gomphonema olivaceum':                { t: 'T_pro', wT: 0.75 },
-            'Gomphonema tergestinum':              { t: 'T_pro', wT: 0.75 },
-            'Gomphonema angustatum':               { t: 'T_pro', wT: 0.75 },
-            'Gomphonema angustum':                 { t: 'T_pro', wT: 0.75 },
-            'Gomphonema parvulum':                 { t: 'T_omn', wT: 0.60 },
-            'Gomphonema truncatum':                { t: 'T_pro', wT: 0.75 },
-            'Cymbella excisa':                     { t: 'T_key', wT: 0.95 },
-            'Cymbella helvetica':                  { t: 'T_key', wT: 0.95 },
-            'Cymbella tumida':                     { t: 'T_pro', wT: 0.75 },
-            'Cymbella affinis':                    { t: 'T_pro', wT: 0.75 },
-            'Navicula antonii':                    { t: 'T_pro', wT: 0.75 },
-            'Navicula cryptocephala':              { t: 'T_pro', wT: 0.75 },
-            'Navicula cryptotenella':              { t: 'T_pro', wT: 0.75 },
-            'Navicula reichardtiana':              { t: 'T_pro', wT: 0.75 },
-            'Navicula tripunctata':                { t: 'T_pro', wT: 0.75 },
-            'Navicula lanceolata':                 { t: 'T_pro', wT: 0.75 },
-            'Navicula gregaria':                   { t: 'T_omn', wT: 0.60 },
-            'Navicula rostellata':                 { t: 'T_pro', wT: 0.75 },
-            'Nitzschia fonticola':                 { t: 'T_pro', wT: 0.75 },
-            'Nitzschia dissipata':                 { t: 'T_pro', wT: 0.75 },
-            'Nitzschia linearis':                  { t: 'T_pro', wT: 0.75 },
-            'Nitzschia palea':                     { t: 'T_inv', wT: 0.10 }, // invazív–jellegű, erős szennyezéstűrő
-            'Nitzschia draveillensis':             { t: 'T_inv', wT: 0.10 },
-            'Nitzschia acicularis':                { t: 'T_omn', wT: 0.60 },
-            'Nitzschia amphibia':                  { t: 'T_dec', wT: 0.70 },
-            'Nitzschia capitellata':               { t: 'T_omn', wT: 0.60 },
-            'Diatoma vulgaris':                    { t: 'T_pro', wT: 0.75 },
-            'Diatoma moniliformis':                { t: 'T_pro', wT: 0.75 },
-            'Diatoma mesodon':                     { t: 'T_key', wT: 0.95 },
-            'Diatoma tenuis':                      { t: 'T_pro', wT: 0.75 },
-            'Cocconeis placentula':                { t: 'T_pro', wT: 0.75 },
-            'Cocconeis euglypta':                  { t: 'T_pro', wT: 0.75 },
-            'Cocconeis pediculus':                 { t: 'T_eng', wT: 0.88 }, // biofilm mérnök
-            'Fragilaria capucina':                 { t: 'T_pro', wT: 0.75 },
-            'Fragilaria gracilis':                 { t: 'T_key', wT: 0.95 },
-            'Fragilaria ulna':                     { t: 'T_pro', wT: 0.75 },
-            'Fragilaria crotonensis':              { t: 'T_pro', wT: 0.75 },
-            'Ulnaria ulna':                        { t: 'T_pro', wT: 0.75 },
-            'Meridion circulare':                  { t: 'T_key', wT: 0.95 },
-            'Rhoicosphenia abbreviata':            { t: 'T_pro', wT: 0.75 },
-            'Reimeria sinuata':                    { t: 'T_pro', wT: 0.75 },
-            'Surirella brebissonii':               { t: 'T_pro', wT: 0.75 },
-            'Surirella ovata':                     { t: 'T_pro', wT: 0.75 },
-            'Sellaphora pupula':                   { t: 'T_omn', wT: 0.60 },
-            'Sellaphora seminulum':                { t: 'T_dec', wT: 0.70 },
-            'Amphora pediculus':                   { t: 'T_pro', wT: 0.75 },
-            'Amphora ovalis':                      { t: 'T_pro', wT: 0.75 },
-            'Hippodonta capitata':                 { t: 'T_pro', wT: 0.75 },
-            'Planothidium frequentissimum':        { t: 'T_pro', wT: 0.75 },
-            'Planothidium lanceolatum':            { t: 'T_pro', wT: 0.75 },
-            'Cyclotella meneghiniana':             { t: 'T_pro', wT: 0.75 },
-            'Cyclotella atomus':                   { t: 'T_pro', wT: 0.75 },
-            'Stephanodiscus hantzschii':           { t: 'T_pro', wT: 0.75 },
-            'Stephanodiscus minutulus':            { t: 'T_pro', wT: 0.75 },
-            'Aulacoseira granulata':               { t: 'T_pro', wT: 0.75 },
-            'Aulacoseira ambigua':                 { t: 'T_pro', wT: 0.75 },
-            'Diploneis oblongella':                { t: 'T_key', wT: 0.95 },
-            'Eunotia bilunaris':                   { t: 'T_key', wT: 0.95 },
-            'Eunotia exigua':                      { t: 'T_key', wT: 0.95 },
-            'Eunotia minor':                       { t: 'T_key', wT: 0.95 },
-            'Pinnularia viridis':                  { t: 'T_pro', wT: 0.75 },
-            'Pinnularia subcapitata':              { t: 'T_key', wT: 0.95 },
-            'Caloneis bacillum':                   { t: 'T_pro', wT: 0.75 },
-            'Gyrosigma acuminatum':                { t: 'T_pro', wT: 0.75 },
-        };
+        // ── wEFRF súlyok: species.json > wefrfHabitatDB + wefrfFunctionalDB
+        // 2418+ faj, genus + s-érték alapú besorolás (automatikusan generált adatbázis)
+        // computeWEFRF() a speciesDb paraméteren keresztül kapja ezeket.
 
         // ── wEFRF számítás per-sample ────────────────────────────────────────
         // Visszaad: wefrf (szám), speciesDetails (tömb), habitatClass (string)
-        function computeWEFRF(sample, sensitivityDB) {
+        function computeWEFRF(sample, sensitivityDB, wefrfHabitatDB, wefrfFunctionalDB) {
+            // wefrfHabitatDB + wefrfFunctionalDB: species.json-ből töltve (2418+ faj)
             // Fixen rögzített súlyok
             const w_mu = 0.6, w_K = 0.4, w_R = 1.0;
             const w_E1 = 0.7, w_E2 = 0.5;
@@ -1980,13 +1829,13 @@
                 // K_i: kolonizációs potenciál – 1 - rel. abund. (ritkább = potenciálisan domináns)
                 const K_i   = Math.max(0, 1 - relA);
 
-                // w_H és w_T
-                const hEntry = WEFRF_HABITAT_DB[name]     || null;
-                const tEntry = WEFRF_FUNCTIONAL_DB[name]  || null;
-                const wH = hEntry ? hEntry.wH : 0.50;  // ismeretlen: 0.50
-                const wT = tEntry ? tEntry.wT : 0.50;
-                const hCode = hEntry ? hEntry.h : 'H_unk';
-                const tCode = tEntry ? tEntry.t : 'T_unk';
+                // w_H és w_T — species.json wefrfHabitatDB / wefrfFunctionalDB
+                const hEntry = (wefrfHabitatDB    && wefrfHabitatDB[name])    || null;
+                const tEntry = (wefrfFunctionalDB && wefrfFunctionalDB[name]) || null;
+                const wH     = hEntry ? hEntry.wH : 0.50;  // ismeretlen faj: 0.50
+                const wT     = tEntry ? tEntry.wT : 0.50;
+                const hCode  = hEntry ? hEntry.h  : 'H_unk';
+                const tCode  = tEntry ? tEntry.t  : 'T_unk';
 
                 // M_i = (w_mu·μ_i + w_K·K_i) · w_H · w_T
                 const M_i = (w_mu * mu_i + w_K * K_i) * wH * wT;
