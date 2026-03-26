@@ -150,7 +150,7 @@
                 missing_data_desc: "A következő paraméterek nem ábrázolhatók, mert nem áll rendelkezésre számszerű adat:",
                 
                 // Additive Translations
-                extra_all_taxa_title: "Teljes Közösségi ÖSI Áttekintés",
+                extra_all_taxa_title: "Teljes Közösség ÖSI Áttekintés",
                 chart_all_osi: "Ökológiai Sikerességi Index (ÖSI) - Minden Taxon",
                 osi_axis: "ÖSI Érték",
                 
@@ -506,6 +506,299 @@
         // ══════════════════════════════════════════════════════════════
         // ── ERNI: Eco-Rarity Network Index – Component + Computation ──
         // ══════════════════════════════════════════════════════════════
+        // ══════════════════════════════════════════════════════════════════════
+        // WEFRFChart — Weighted Eco-Flow Resonance Function vizualizáció
+        // A képen látott vonaldiagram reprodukciója Chart.js-sel:
+        //   - Vastag kék vonal: wEFRF (rezonancia) idősor
+        //   - Szaggatott színes vonalak: top-5 domináns faj M_i aktivitása
+        //   - Mintavételi pontok jelölve minden vonalon
+        //   - Fajonként 1 mondatos értékelés + összértékelés
+        // ══════════════════════════════════════════════════════════════════════
+        const WEFRFChart = ({ data, lang }) => {
+            const chartRef    = useRef(null);
+            const chartInst   = useRef(null);
+
+            const tW = (key) => {
+                const L = {
+                    hu: {
+                        title:        'wEFRF — Ökológiai Rezonancia és Fajaktivitás Időben',
+                        subtitle:     'Weighted Eco-Flow Resonance Function (Kiterjesztett: w_H + w_T)',
+                        wefrf_label:  'wEFRF (rezonancia)',
+                        activity:     'aktivitás (M_i)',
+                        x_label:      'Mintavétel dátuma',
+                        y_label:      'Érték',
+                        summary_head: 'wEFRF Összértékelés',
+                        species_head: 'Fajonkénti értékelés',
+                        wefrf_high:   'Magas rezonancia-értékek: a közösség stabil, a fajok közötti ökológiai kölcsönhatások intenzívek – a rendszer jó ökológiai állapotban van.',
+                        wefrf_mid:    'Közepes rezonancia: a rendszer átmeneti ökológiai állapotban van, mérsékelt kölcsönhatás-erősséggel – figyelemmel kísérése javasolt.',
+                        wefrf_low:    'Alacsony rezonancia: a közösség instabil vagy erősen terhelt környezetben működik – a fajközi kapcsolatok gyengültek, beavatkozás javasolt.',
+                        hab_oligotrophic: 'Oligotróf',
+                        hab_mesotrophic:  'Mezotróf',
+                        hab_eutrophic:    'Eutróf',
+                        hab_degraded:     'Degradált',
+                        hab_unknown:      'Ismeretlen',
+                    },
+                    en: {
+                        title:        'wEFRF — Ecological Resonance & Species Activity Over Time',
+                        subtitle:     'Weighted Eco-Flow Resonance Function (Extended: w_H + w_T)',
+                        wefrf_label:  'wEFRF (resonance)',
+                        activity:     'activity (M_i)',
+                        x_label:      'Sampling date',
+                        y_label:      'Value',
+                        summary_head: 'wEFRF Summary Assessment',
+                        species_head: 'Per-species assessment',
+                        wefrf_high:   'High resonance: community is stable with intense ecological interactions – system in good ecological state.',
+                        wefrf_mid:    'Moderate resonance: transitional ecological state with moderate interaction strength – monitoring recommended.',
+                        wefrf_low:    'Low resonance: community is unstable or under heavy environmental pressure – species interactions weakened, intervention advised.',
+                        hab_oligotrophic: 'Oligotrophic',
+                        hab_mesotrophic:  'Mesotrophic',
+                        hab_eutrophic:    'Eutrophic',
+                        hab_degraded:     'Degraded',
+                        hab_unknown:      'Unknown',
+                    }
+                };
+                return (L[lang] || L['hu'])[key] || key;
+            };
+
+            const SP_COLORS = [
+                { border:'rgba(20,184,166,0.9)',  bg:'rgba(20,184,166,0.12)'  },
+                { border:'rgba(251,146,60,0.9)',  bg:'rgba(251,146,60,0.12)'  },
+                { border:'rgba(34,197,94,0.9)',   bg:'rgba(34,197,94,0.12)'   },
+                { border:'rgba(168,85,247,0.9)',  bg:'rgba(168,85,247,0.12)'  },
+                { border:'rgba(244,63,94,0.9)',   bg:'rgba(244,63,94,0.12)'   },
+            ];
+
+            useEffect(() => {
+                if (!data || !data.wefrfTimeSeries || data.wefrfTimeSeries.length === 0) return;
+                if (!chartRef.current) return;
+                const ctx = chartRef.current.getContext('2d');
+                if (chartInst.current) chartInst.current.destroy();
+
+                const ts        = data.wefrfTimeSeries;
+                const labels    = ts.map(p => (p.date||'').slice(0,10));
+                const wefrfVals = ts.map(p => (p.wefrf !== null && isFinite(p.wefrf)) ? +p.wefrf.toFixed(4) : null);
+
+                const datasets = [{
+                    label:                tW('wefrf_label'),
+                    data:                 wefrfVals,
+                    borderColor:          'rgba(29,78,216,1)',
+                    backgroundColor:      'rgba(29,78,216,0.07)',
+                    borderWidth:          3,
+                    pointRadius:          6,
+                    pointHoverRadius:     10,
+                    pointBackgroundColor: wefrfVals.map(v => v===null?'#94a3b8': v>0.8?'#1d4ed8': v>0.4?'#3b82f6':'#93c5fd'),
+                    pointBorderColor:     '#ffffff',
+                    pointBorderWidth:     2,
+                    tension:              0.3,
+                    fill:                 true,
+                    spanGaps:             true,
+                    order:                0,
+                }];
+
+                const spSeries = data.wefrfSpeciesSeries || {};
+                Object.entries(spSeries).slice(0, 5).forEach(([spName, series], idx) => {
+                    const col       = SP_COLORS[idx];
+                    const shortName = spName.split(' ').slice(0,2).join(' ');
+                    const miVals    = labels.map(lbl => {
+                        const pt = series.find(s => (s.date||'').slice(0,10) === lbl);
+                        return pt ? +pt.Mi.toFixed(4) : 0;
+                    });
+                    datasets.push({
+                        label:                `${shortName} ${tW('activity')}`,
+                        data:                 miVals,
+                        borderColor:          col.border,
+                        backgroundColor:      col.bg,
+                        borderWidth:          1.8,
+                        borderDash:           [7, 4],
+                        pointRadius:          4,
+                        pointHoverRadius:     7,
+                        pointBackgroundColor: col.border,
+                        pointBorderColor:     '#ffffff',
+                        pointBorderWidth:     1.5,
+                        tension:              0.3,
+                        fill:                 false,
+                        spanGaps:             true,
+                        order:                idx + 1,
+                    });
+                });
+
+                const allVals = [
+                    ...wefrfVals.filter(v => v!==null && isFinite(v)),
+                    ...Object.values(spSeries).flatMap(s => s.map(p => p.Mi||0))
+                ];
+                const yMax = allVals.length > 0 ? Math.max(1.6, Math.max(...allVals)*1.18) : 1.6;
+
+                chartInst.current = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        interaction: { mode:'index', intersect:false },
+                        plugins: {
+                            legend: { position:'top', labels:{ padding:14, font:{size:11}, usePointStyle:true, pointStyleWidth:18 } },
+                            title:  { display:true, text: tW('title'), font:{size:13, weight:'bold'}, padding:{bottom:8} },
+                            tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw !== null ? (+c.raw).toFixed(4) : 'N/A'}` } }
+                        },
+                        scales: {
+                            x: {
+                                title:{ display:true, text:tW('x_label'), font:{size:11} },
+                                grid: { color:'rgba(148,163,184,0.18)' },
+                                ticks:{ maxRotation:45, font:{size:10} }
+                            },
+                            y: {
+                                title:{ display:true, text:tW('y_label'), font:{size:11} },
+                                suggestedMin:0, suggestedMax: yMax,
+                                grid:{ color:'rgba(148,163,184,0.14)' },
+                                ticks:{ font:{size:10} }
+                            }
+                        }
+                    }
+                });
+                return () => { if (chartInst.current) chartInst.current.destroy(); };
+            }, [data, lang]);
+
+            if (!data || !data.wefrfTimeSeries || data.wefrfTimeSeries.length === 0) return null;
+
+            const ws       = data.wefrfSummary;
+            const wts      = data.wefrfTimeSeries;
+            const spSeries = data.wefrfSpeciesSeries || {};
+
+            const validW   = wts.map(p=>p.wefrf).filter(v=>v!==null&&isFinite(v));
+            const avgW     = validW.length>0 ? validW.reduce((a,b)=>a+b,0)/validW.length : null;
+            const maxW     = validW.length>0 ? Math.max(...validW) : null;
+            const minW     = validW.length>0 ? Math.min(...validW) : null;
+
+            const level    = avgW===null ? 'mid' : avgW>0.8 ? 'high' : avgW>0.4 ? 'mid' : 'low';
+            const lastHab  = wts[wts.length-1]?.habitatClass || 'unknown';
+            const habKey   = `hab_${lastHab}`;
+
+            const PC = {
+                high:{ bg:'bg-emerald-50', brd:'border-emerald-400', hd:'text-emerald-800', badge:'bg-emerald-100 text-emerald-800 border-emerald-300', icon:'🟢' },
+                mid: { bg:'bg-amber-50',   brd:'border-amber-400',   hd:'text-amber-800',   badge:'bg-amber-100   text-amber-800   border-amber-300',   icon:'🟡' },
+                low: { bg:'bg-red-50',      brd:'border-red-400',     hd:'text-red-800',     badge:'bg-red-100     text-red-800     border-red-300',     icon:'🔴' },
+            };
+            const pc = PC[level];
+
+            // Habitat–Funkcionális szótárak
+            const HAB_MAP = { H_oli:'oligotróf tavi', H_rhe:'gyors folyóvízi (reofit)', H_spr:'forrásvízi', H_pot:'síkvidéki folyóvízi', H_mar:'mocsári/sekélyvízi', H_eut:'eutróf tavi', H_pol:'erősen szennyezett', H_bog:'tőzeglápi/savas', H_can:'csatorna', H_bra:'brakkvízi', H_hal:'szikes', H_unk:'ismeretlen' };
+            const FUNC_MAP = { T_key:'kulcsfaj', T_pro:'elsőd. termelő', T_omn:'omnivore', T_dec:'lebontó', T_inv:'invazív', T_eng:'mérnökfaj', T_unk:'ism. szerep' };
+
+            const genOneLiner = (spName, series) => {
+                if (!series||series.length===0) return '';
+                const last   = series[series.length-1];
+                const avgMi  = series.reduce((a,b)=>a+b.Mi,0)/series.length;
+                const wH     = last.wH||0.5, wT = last.wT||0.5;
+                const habStr = HAB_MAP[last.hCode]||last.hCode;
+                const funStr = FUNC_MAP[last.tCode]||last.tCode;
+                let trend    = series.length>=2
+                    ? (last.Mi>series[0].Mi*1.1?'növekvő aktivitással':last.Mi<series[0].Mi*0.9?'csökkenő aktivitással':'stabil aktivitással')
+                    : 'egyszeri méréssel';
+                const wHlbl  = wH>=0.90?'kiváló':'(jó/közepes/alacsony)'.split('/')[wH>=0.80?1:wH>=0.65?2:3]||'alacsony';
+                return `${habStr} élőhelyre jellemző ${funStr} – w_H=${wH.toFixed(2)}, w_T=${wT.toFixed(2)}, ${trend}; átlag M_i=${avgMi.toFixed(3)}.`;
+            };
+
+            return (
+                <div className="mt-10 page-break break-inside-avoid">
+                    {/* Fejléc */}
+                    <div className="flex flex-wrap items-center gap-3 border-b-2 border-blue-400 pb-2 mb-4">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-900 uppercase tracking-wide m-0">
+                                wEFRF — Weighted Eco-Flow Resonance Function
+                            </h2>
+                            <p className="text-xs text-slate-500 mt-0.5 font-mono">{tW('subtitle')}</p>
+                        </div>
+                        {avgW !== null && (
+                            <span className={`ml-auto text-sm font-black font-mono px-3 py-1.5 rounded-full border ${pc.badge}`}>
+                                {pc.icon} wEFRF̄ = {avgW.toFixed(4)}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Metrika sor */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        {[
+                            { label:'wEFRF átlag',   val: avgW!==null?avgW.toFixed(4):'—',            sub:'Idősor átlaga' },
+                            { label:'Maximum',        val: maxW!==null?maxW.toFixed(4):'—',            sub:'Csúcs rezonancia' },
+                            { label:'Minimum',        val: minW!==null?minW.toFixed(4):'—',            sub:'Legkisebb rezonancia' },
+                            { label:'Habitat osztály',val: tW(habKey),                                 sub:`wH súlyátlag alapján` },
+                        ].map(m=>(
+                            <div key={m.label} className="bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                                <div className="text-[10px] font-bold uppercase tracking-wide text-blue-700 mb-1">{m.label}</div>
+                                <div className="font-black text-base font-mono text-slate-800">{m.val}</div>
+                                <div className="text-[10px] text-slate-400 mt-0.5">{m.sub}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Fő diagram */}
+                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 mb-3" style={{height:'380px'}}>
+                        <canvas ref={chartRef} style={{width:'100%',height:'100%'}}></canvas>
+                    </div>
+                    <p className="text-[10px] text-slate-400 text-center mb-5">
+                        ● Minden mintavételi pont jelölve · Vastag kék = wEFRF rezonancia · Szaggatott = Top-5 faj M_i aktivitása (M_i = (w_mu·μ + w_K·K)·w_H·w_T)
+                    </p>
+
+                    {/* Fajonkénti értékelés */}
+                    {Object.keys(spSeries).length > 0 && (
+                        <div className="mb-4">
+                            <h4 className="font-bold text-slate-700 uppercase text-xs tracking-wider mb-3 flex items-center gap-2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Fajonkénti értékelés (M_i = morfológiai–habitat–funkcionális index)
+                            </h4>
+                            <div className="space-y-2">
+                                {Object.entries(spSeries).slice(0,5).map(([spName, series], idx) => {
+                                    const col     = SP_COLORS[idx];
+                                    const text    = genOneLiner(spName, series);
+                                    const lastPt  = series[series.length-1]||{};
+                                    const wH      = lastPt.wH||0.5;
+                                    const barClr  = wH>=0.85?'#22c55e':wH>=0.65?'#f59e0b':'#ef4444';
+                                    const avgMi   = series.length>0 ? series.reduce((a,b)=>a+b.Mi,0)/series.length : 0;
+                                    return (
+                                        <div key={spName} className="flex gap-3 items-start bg-white rounded-lg border border-slate-100 p-3 shadow-sm">
+                                            <div className="flex-shrink-0 mt-1.5">
+                                                <div className="w-3 h-3 rounded-full" style={{background:col.border}}></div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <span className="font-bold italic text-slate-800 text-sm">{spName}</span>
+                                                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{text}</p>
+                                            </div>
+                                            <div className="flex-shrink-0 flex flex-col items-end gap-0.5 min-w-[56px]">
+                                                <div className="text-[9px] text-slate-400 uppercase text-right">M_i átlag</div>
+                                                <div className="text-xs font-black font-mono" style={{color:col.border}}>{avgMi.toFixed(3)}</div>
+                                                <div className="text-[9px] text-slate-400 uppercase text-right">w_H</div>
+                                                <div className="text-xs font-black font-mono" style={{color:barClr}}>{wH.toFixed(2)}</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Összértékelés */}
+                    <div className={`p-4 rounded-xl border-2 ${pc.bg} ${pc.brd}`}>
+                        <h4 className={`font-bold text-xs uppercase tracking-wider mb-2 ${pc.hd}`}>
+                            {pc.icon} {tW('summary_head')}
+                        </h4>
+                        <p className={`text-sm leading-relaxed ${pc.hd}`}>{tW(`wefrf_${level}`)}</p>
+                        {avgW !== null && ws && (
+                            <p className={`text-xs mt-2 font-mono opacity-75 ${pc.hd}`}>
+                                wEFRF̄={avgW.toFixed(4)} · Habitat: {tW(habKey)}
+                                {ws.envFactor !== undefined && ` · Env. faktor: ${ws.envFactor.toFixed(3)}`}
+                                {ws.interactionSum !== undefined && ` · Σ interakció: ${ws.interactionSum.toFixed(4)}`}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        // ══════════════════════════════════════════════════════════════════════
+        // END WEFRFChart
+        // ══════════════════════════════════════════════════════════════════════
+
         const computeERNI = (taxaList, sensitivityDB) => {
             if (!taxaList || taxaList.length === 0) return { erniValue: null, nodes: [], edges: [] };
 
@@ -1148,7 +1441,7 @@
                 return { ...sm, ωosi: sampleOmega };
             });
 
-            // ── Summary statistics for Ω-OSI ─────────────────────────────────
+            // ── Summary statistics for Ω-ÖSI ─────────────────────────────────
             const validOmegaVals = samplesWithOmega
                 .map(s => s.ωosi)
                 .filter(v => v !== null && isFinite(v));
@@ -1165,17 +1458,65 @@
             } : null;
             // ──────────────────────────────────────────────────────────────────
 
+            // ══════════════════════════════════════════════════════════════════
+            // wEFRF — Weighted Eco-Flow Resonance Function per-sample
+            // ══════════════════════════════════════════════════════════════════
+            const _sensitivityDBforWEFRF = (speciesDb && speciesDb.sensitivityDB) ? speciesDb.sensitivityDB : {};
+            const wefrfSamples = samplesWithOmega.map(sm => {
+                const result = computeWEFRF(sm, _sensitivityDBforWEFRF);
+                return { ...sm, wefrfResult: result };
+            });
+
+            // wEFRF idősor: {date, wefrf, habitatClass}
+            const wefrfTimeSeries = wefrfSamples
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .map(sm => ({
+                    date:         sm.date,
+                    wefrf:        sm.wefrfResult.wefrf,
+                    habitatClass: sm.wefrfResult.habitatClass,
+                    envFactor:    sm.wefrfResult.envFactor,
+                    E1:           sm.wefrfResult.E1,
+                    E2:           sm.wefrfResult.E2
+                }));
+
+            // Top-5 domináns faj wEFRF idősorai (a képen látott szaggatott vonalak)
+            const _topSpeciesNames = (fullEcologicalAnalysis.dominant || []).map(sp => sp.name);
+            const wefrfSpeciesSeries = {};
+            _topSpeciesNames.forEach(spName => {
+                wefrfSpeciesSeries[spName] = wefrfSamples
+                    .sort((a, b) => new Date(a.date) - new Date(b.date))
+                    .map(sm => {
+                        const spDetail = (sm.wefrfResult.speciesDetails || []).find(d => d.name === spName);
+                        return {
+                            date:    sm.date,
+                            Mi:      spDetail ? spDetail.M_i   : 0,
+                            relA:    spDetail ? spDetail.relA  : 0,
+                            wH:      spDetail ? spDetail.wH    : 0,
+                            wT:      spDetail ? spDetail.wT    : 0,
+                            hCode:   spDetail ? spDetail.hCode : 'H_unk',
+                            tCode:   spDetail ? spDetail.tCode : 'T_unk',
+                        };
+                    });
+            });
+
+            // wEFRF összesítő (utolsó minta részletes eredménye reprezentatív fajokra)
+            const _lastSample      = wefrfSamples[wefrfSamples.length - 1] || wefrfSamples[0];
+            const wefrfSummary     = _lastSample ? _lastSample.wefrfResult : null;
+
             return {
                 n,
                 isHypothesis,
-                samples: samplesWithOmega,
+                samples: wefrfSamples,
                 speciesAnalysis,
                 aggregatedStats,
-                dominantAnalysis, 
+                dominantAnalysis,
                 allSpeciesAnalysis,
                 harmfulSpecies,
                 trophicStats,
                 omegaSummary,
+                wefrfTimeSeries,
+                wefrfSpeciesSeries,
+                wefrfSummary,
                 timestamp: new Date().toISOString()
             };
         }
@@ -1429,6 +1770,256 @@
                 dominant: dominantAnalysis,
                 all: allSpeciesAnalysis.sort((a,b) => b.relAbundance - a.relAbundance) // Return all, sorted
             };
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // wEFRF — Weighted Eco-Flow Resonance Function
+        // Kiterjesztett verzió: Habitat- és Funkcionális típussúlyokkal
+        // Forrás: wEFRF_diatomas-1.docx
+        //
+        // wEFRF(t) = [1 - Π_j(w_Ej · E_j)] · Σ_ij[ M_i · w_R · R_ij · A_i · A_j · M_j ]
+        // ahol: M_i = (w_mu·μ_i + w_K·K_i) · w_H(h_i) · w_T(t_i)
+        //
+        // Paraméterek (fix):
+        //   w_mu = 0.6, w_K = 0.4, w_R = 1.0
+        //   w_E1 = 0.7, w_E2 = 0.5
+        //   E_j(t) = normált környezeti stressz szint (0–1)
+        // ════════════════════════════════════════════════════════════════════════
+
+        // ── wEFRF Habitat-típus súlyok (w_H) ────────────────────────────────
+        // Diatóma-közösség szenzitivitása és referencia-állapot alapján
+        const WEFRF_HABITAT_DB = {
+            // Oligotróf / tiszta rendszerek
+            'Achnanthidium minutissimum':         { h: 'H_rhe', wH: 0.85 },
+            'Achnanthidium jackii':               { h: 'H_spr', wH: 0.95 },
+            'Achnanthidium pyrenaicum':            { h: 'H_rhe', wH: 0.85 },
+            'Achnanthidium biasolettianum':        { h: 'H_rhe', wH: 0.85 },
+            'Achnanthidium catenatum':             { h: 'H_oli', wH: 1.00 },
+            'Achnanthes lanceolata':               { h: 'H_pot', wH: 0.88 },
+            'Encyonema silesiacum':                { h: 'H_rhe', wH: 0.85 },
+            'Encyonema minutum':                   { h: 'H_pot', wH: 0.88 },
+            'Encyonema ventricosum':               { h: 'H_spr', wH: 0.95 },
+            'Gomphonema olivaceum':                { h: 'H_rhe', wH: 0.85 },
+            'Gomphonema tergestinum':              { h: 'H_rhe', wH: 0.85 },
+            'Gomphonema angustatum':               { h: 'H_pot', wH: 0.88 },
+            'Gomphonema angustum':                 { h: 'H_rhe', wH: 0.85 },
+            'Gomphonema parvulum':                 { h: 'H_eut', wH: 0.70 },
+            'Gomphonema truncatum':                { h: 'H_pot', wH: 0.88 },
+            'Cymbella excisa':                     { h: 'H_spr', wH: 0.95 },
+            'Cymbella helvetica':                  { h: 'H_spr', wH: 0.95 },
+            'Cymbella tumida':                     { h: 'H_pot', wH: 0.88 },
+            'Cymbella affinis':                    { h: 'H_rhe', wH: 0.85 },
+            'Navicula antonii':                    { h: 'H_pot', wH: 0.88 },
+            'Navicula cryptocephala':              { h: 'H_pot', wH: 0.88 },
+            'Navicula cryptotenella':              { h: 'H_rhe', wH: 0.85 },
+            'Navicula reichardtiana':              { h: 'H_pot', wH: 0.88 },
+            'Navicula tripunctata':                { h: 'H_pot', wH: 0.88 },
+            'Navicula lanceolata':                 { h: 'H_pot', wH: 0.88 },
+            'Navicula gregaria':                   { h: 'H_eut', wH: 0.70 },
+            'Navicula rostellata':                 { h: 'H_pot', wH: 0.88 },
+            'Nitzschia fonticola':                 { h: 'H_rhe', wH: 0.85 },
+            'Nitzschia dissipata':                 { h: 'H_pot', wH: 0.88 },
+            'Nitzschia linearis':                  { h: 'H_pot', wH: 0.88 },
+            'Nitzschia palea':                     { h: 'H_pol', wH: 0.20 },
+            'Nitzschia draveillensis':             { h: 'H_pol', wH: 0.20 },
+            'Nitzschia acicularis':                { h: 'H_eut', wH: 0.70 },
+            'Nitzschia amphibia':                  { h: 'H_pol', wH: 0.20 },
+            'Nitzschia capitellata':               { h: 'H_eut', wH: 0.70 },
+            'Diatoma vulgaris':                    { h: 'H_pot', wH: 0.88 },
+            'Diatoma moniliformis':                { h: 'H_rhe', wH: 0.85 },
+            'Diatoma mesodon':                     { h: 'H_spr', wH: 0.95 },
+            'Diatoma tenuis':                      { h: 'H_pot', wH: 0.88 },
+            'Cocconeis placentula':                { h: 'H_pot', wH: 0.88 },
+            'Cocconeis euglypta':                  { h: 'H_rhe', wH: 0.85 },
+            'Cocconeis pediculus':                 { h: 'H_pot', wH: 0.88 },
+            'Fragilaria capucina':                 { h: 'H_rhe', wH: 0.85 },
+            'Fragilaria gracilis':                 { h: 'H_oli', wH: 1.00 },
+            'Fragilaria ulna':                     { h: 'H_pot', wH: 0.88 },
+            'Fragilaria crotonensis':              { h: 'H_eut', wH: 0.70 },
+            'Ulnaria ulna':                        { h: 'H_pot', wH: 0.88 },
+            'Meridion circulare':                  { h: 'H_spr', wH: 0.95 },
+            'Rhoicosphenia abbreviata':            { h: 'H_pot', wH: 0.88 },
+            'Reimeria sinuata':                    { h: 'H_rhe', wH: 0.85 },
+            'Surirella brebissonii':               { h: 'H_pot', wH: 0.88 },
+            'Surirella ovata':                     { h: 'H_mar', wH: 0.85 },
+            'Sellaphora pupula':                   { h: 'H_eut', wH: 0.70 },
+            'Sellaphora seminulum':                { h: 'H_pol', wH: 0.20 },
+            'Amphora pediculus':                   { h: 'H_rhe', wH: 0.85 },
+            'Amphora ovalis':                      { h: 'H_pot', wH: 0.88 },
+            'Hippodonta capitata':                 { h: 'H_pot', wH: 0.88 },
+            'Planothidium frequentissimum':        { h: 'H_pot', wH: 0.88 },
+            'Planothidium lanceolatum':            { h: 'H_rhe', wH: 0.85 },
+            'Cyclotella meneghiniana':             { h: 'H_eut', wH: 0.70 },
+            'Cyclotella atomus':                   { h: 'H_eut', wH: 0.70 },
+            'Stephanodiscus hantzschii':           { h: 'H_eut', wH: 0.70 },
+            'Stephanodiscus minutulus':            { h: 'H_eut', wH: 0.70 },
+            'Aulacoseira granulata':               { h: 'H_eut', wH: 0.70 },
+            'Aulacoseira ambigua':                 { h: 'H_eut', wH: 0.70 },
+            'Diploneis oblongella':                { h: 'H_bog', wH: 0.80 },
+            'Eunotia bilunaris':                   { h: 'H_bog', wH: 0.80 },
+            'Eunotia exigua':                      { h: 'H_bog', wH: 0.80 },
+            'Eunotia minor':                       { h: 'H_bog', wH: 0.80 },
+            'Pinnularia viridis':                  { h: 'H_mar', wH: 0.85 },
+            'Pinnularia subcapitata':              { h: 'H_bog', wH: 0.80 },
+            'Caloneis bacillum':                   { h: 'H_pot', wH: 0.88 },
+            'Gyrosigma acuminatum':                { h: 'H_pot', wH: 0.88 },
+        };
+
+        // ── wEFRF Funkcionális típus súlyok (w_T) ───────────────────────────
+        // Diatóma ökológiai funkcionális szerep alapján
+        const WEFRF_FUNCTIONAL_DB = {
+            // Elsődleges termelők – fő diatóma szerep
+            'Achnanthidium minutissimum':         { t: 'T_pro', wT: 0.75 },
+            'Achnanthidium jackii':               { t: 'T_key', wT: 0.95 },  // szenzitív kulcsfaj
+            'Achnanthidium pyrenaicum':            { t: 'T_pro', wT: 0.75 },
+            'Achnanthidium biasolettianum':        { t: 'T_pro', wT: 0.75 },
+            'Achnanthidium catenatum':             { t: 'T_key', wT: 0.95 },
+            'Achnanthes lanceolata':               { t: 'T_pro', wT: 0.75 },
+            'Encyonema silesiacum':                { t: 'T_pro', wT: 0.75 },
+            'Encyonema minutum':                   { t: 'T_pro', wT: 0.75 },
+            'Encyonema ventricosum':               { t: 'T_key', wT: 0.95 },
+            'Gomphonema olivaceum':                { t: 'T_pro', wT: 0.75 },
+            'Gomphonema tergestinum':              { t: 'T_pro', wT: 0.75 },
+            'Gomphonema angustatum':               { t: 'T_pro', wT: 0.75 },
+            'Gomphonema angustum':                 { t: 'T_pro', wT: 0.75 },
+            'Gomphonema parvulum':                 { t: 'T_omn', wT: 0.60 },
+            'Gomphonema truncatum':                { t: 'T_pro', wT: 0.75 },
+            'Cymbella excisa':                     { t: 'T_key', wT: 0.95 },
+            'Cymbella helvetica':                  { t: 'T_key', wT: 0.95 },
+            'Cymbella tumida':                     { t: 'T_pro', wT: 0.75 },
+            'Cymbella affinis':                    { t: 'T_pro', wT: 0.75 },
+            'Navicula antonii':                    { t: 'T_pro', wT: 0.75 },
+            'Navicula cryptocephala':              { t: 'T_pro', wT: 0.75 },
+            'Navicula cryptotenella':              { t: 'T_pro', wT: 0.75 },
+            'Navicula reichardtiana':              { t: 'T_pro', wT: 0.75 },
+            'Navicula tripunctata':                { t: 'T_pro', wT: 0.75 },
+            'Navicula lanceolata':                 { t: 'T_pro', wT: 0.75 },
+            'Navicula gregaria':                   { t: 'T_omn', wT: 0.60 },
+            'Navicula rostellata':                 { t: 'T_pro', wT: 0.75 },
+            'Nitzschia fonticola':                 { t: 'T_pro', wT: 0.75 },
+            'Nitzschia dissipata':                 { t: 'T_pro', wT: 0.75 },
+            'Nitzschia linearis':                  { t: 'T_pro', wT: 0.75 },
+            'Nitzschia palea':                     { t: 'T_inv', wT: 0.10 }, // invazív–jellegű, erős szennyezéstűrő
+            'Nitzschia draveillensis':             { t: 'T_inv', wT: 0.10 },
+            'Nitzschia acicularis':                { t: 'T_omn', wT: 0.60 },
+            'Nitzschia amphibia':                  { t: 'T_dec', wT: 0.70 },
+            'Nitzschia capitellata':               { t: 'T_omn', wT: 0.60 },
+            'Diatoma vulgaris':                    { t: 'T_pro', wT: 0.75 },
+            'Diatoma moniliformis':                { t: 'T_pro', wT: 0.75 },
+            'Diatoma mesodon':                     { t: 'T_key', wT: 0.95 },
+            'Diatoma tenuis':                      { t: 'T_pro', wT: 0.75 },
+            'Cocconeis placentula':                { t: 'T_pro', wT: 0.75 },
+            'Cocconeis euglypta':                  { t: 'T_pro', wT: 0.75 },
+            'Cocconeis pediculus':                 { t: 'T_eng', wT: 0.88 }, // biofilm mérnök
+            'Fragilaria capucina':                 { t: 'T_pro', wT: 0.75 },
+            'Fragilaria gracilis':                 { t: 'T_key', wT: 0.95 },
+            'Fragilaria ulna':                     { t: 'T_pro', wT: 0.75 },
+            'Fragilaria crotonensis':              { t: 'T_pro', wT: 0.75 },
+            'Ulnaria ulna':                        { t: 'T_pro', wT: 0.75 },
+            'Meridion circulare':                  { t: 'T_key', wT: 0.95 },
+            'Rhoicosphenia abbreviata':            { t: 'T_pro', wT: 0.75 },
+            'Reimeria sinuata':                    { t: 'T_pro', wT: 0.75 },
+            'Surirella brebissonii':               { t: 'T_pro', wT: 0.75 },
+            'Surirella ovata':                     { t: 'T_pro', wT: 0.75 },
+            'Sellaphora pupula':                   { t: 'T_omn', wT: 0.60 },
+            'Sellaphora seminulum':                { t: 'T_dec', wT: 0.70 },
+            'Amphora pediculus':                   { t: 'T_pro', wT: 0.75 },
+            'Amphora ovalis':                      { t: 'T_pro', wT: 0.75 },
+            'Hippodonta capitata':                 { t: 'T_pro', wT: 0.75 },
+            'Planothidium frequentissimum':        { t: 'T_pro', wT: 0.75 },
+            'Planothidium lanceolatum':            { t: 'T_pro', wT: 0.75 },
+            'Cyclotella meneghiniana':             { t: 'T_pro', wT: 0.75 },
+            'Cyclotella atomus':                   { t: 'T_pro', wT: 0.75 },
+            'Stephanodiscus hantzschii':           { t: 'T_pro', wT: 0.75 },
+            'Stephanodiscus minutulus':            { t: 'T_pro', wT: 0.75 },
+            'Aulacoseira granulata':               { t: 'T_pro', wT: 0.75 },
+            'Aulacoseira ambigua':                 { t: 'T_pro', wT: 0.75 },
+            'Diploneis oblongella':                { t: 'T_key', wT: 0.95 },
+            'Eunotia bilunaris':                   { t: 'T_key', wT: 0.95 },
+            'Eunotia exigua':                      { t: 'T_key', wT: 0.95 },
+            'Eunotia minor':                       { t: 'T_key', wT: 0.95 },
+            'Pinnularia viridis':                  { t: 'T_pro', wT: 0.75 },
+            'Pinnularia subcapitata':              { t: 'T_key', wT: 0.95 },
+            'Caloneis bacillum':                   { t: 'T_pro', wT: 0.75 },
+            'Gyrosigma acuminatum':                { t: 'T_pro', wT: 0.75 },
+        };
+
+        // ── wEFRF számítás per-sample ────────────────────────────────────────
+        // Visszaad: wefrf (szám), speciesDetails (tömb), habitatClass (string)
+        function computeWEFRF(sample, sensitivityDB) {
+            // Fixen rögzített súlyok
+            const w_mu = 0.6, w_K = 0.4, w_R = 1.0;
+            const w_E1 = 0.7, w_E2 = 0.5;
+
+            const taxa  = sample.taxa || [];
+            const N     = sample.totalAbundance || 1;
+
+            if (taxa.length === 0) return { wefrf: null, speciesDetails: [], habitatClass: 'unknown' };
+
+            // ── Környezeti stresszorok E_j(t) ─────────────────────────────
+            // E1 = normált vezetőképesség (0–1), E2 = normált foszfát
+            const cond  = parseFloat(sample.env && sample.env.conductivity_uS_cm);
+            const po4   = parseFloat(sample.env && sample.env.phosphate_mg_L);
+            // Tipikus max értékek: cond 2000 µS/cm, po4 1.0 mg/L
+            const E1 = !isNaN(cond) ? Math.min(1, cond / 2000) : 0.3;
+            const E2 = !isNaN(po4)  ? Math.min(1, po4  / 1.0)  : 0.3;
+
+            // Ökológiai stressz faktor: [1 - Π(w_Ej · E_j)]
+            const envFactor = 1 - (w_E1 * E1) * (w_E2 * E2);
+
+            // ── M_i kiszámítása fajokra ────────────────────────────────────
+            const speciesDetails = taxa.map(tx => {
+                const name = tx.name.trim();
+                const relA = tx.count / N;          // A_i(t)
+
+                // μ_i: normált szenzitivitás (s/5)
+                const dbEntry = sensitivityDB[name] || null;
+                const sVal  = dbEntry ? dbEntry.s : 3.0;
+                const mu_i  = sVal / 5;
+
+                // K_i: kolonizációs potenciál – 1 - rel. abund. (ritkább = potenciálisan domináns)
+                const K_i   = Math.max(0, 1 - relA);
+
+                // w_H és w_T
+                const hEntry = WEFRF_HABITAT_DB[name]     || null;
+                const tEntry = WEFRF_FUNCTIONAL_DB[name]  || null;
+                const wH = hEntry ? hEntry.wH : 0.50;  // ismeretlen: 0.50
+                const wT = tEntry ? tEntry.wT : 0.50;
+                const hCode = hEntry ? hEntry.h : 'H_unk';
+                const tCode = tEntry ? tEntry.t : 'T_unk';
+
+                // M_i = (w_mu·μ_i + w_K·K_i) · w_H · w_T
+                const M_i = (w_mu * mu_i + w_K * K_i) * wH * wT;
+
+                return { name, relA, mu_i, K_i, wH, wT, M_i, hCode, tCode, sVal, inDB: !!dbEntry };
+            });
+
+            // ── Interakciós összeg Σ_ij M_i · w_R · R_ij · A_i · A_j · M_j ──
+            // R_ij = 1 ha eltérő genus, 0.5 ha azonos (kompetíció csökkenti a rezonanciát)
+            let interactionSum = 0;
+            for (let i = 0; i < speciesDetails.length; i++) {
+                for (let j = 0; j < speciesDetails.length; j++) {
+                    if (i === j) continue;
+                    const si = speciesDetails[i], sj = speciesDetails[j];
+                    const genusI = si.name.split(' ')[0];
+                    const genusJ = sj.name.split(' ')[0];
+                    const R_ij  = genusI === genusJ ? 0.5 : 1.0;
+                    interactionSum += si.M_i * w_R * R_ij * si.relA * sj.relA * sj.M_i;
+                }
+            }
+
+            // ── wEFRF végleges érték ───────────────────────────────────────
+            const wefrf = envFactor * interactionSum;
+
+            // ── Habitat osztályozás a wH átlag alapján ────────────────────
+            const avgWH = speciesDetails.reduce((a, b) => a + b.wH * b.relA, 0);
+            let habitatClass = 'unknown';
+            if      (avgWH >= 0.90) habitatClass = 'oligotrophic';
+            else if (avgWH >= 0.80) habitatClass = 'mesotrophic';
+            else if (avgWH >= 0.65) habitatClass = 'eutrophic';
+            else                    habitatClass = 'degraded';
+
+            return { wefrf, speciesDetails, habitatClass, envFactor, interactionSum, E1, E2 };
         }
 
 
@@ -3011,6 +3602,10 @@
                             </div>
                         )}
 
+                        {/* ── wEFRF: Weighted Eco-Flow Resonance Function ── */}
+                        <WEFRFChart data={data} lang={lang} />
+                        {/* ── END wEFRF ── */}
+
                         {/* ── ERNI: Eco-Rarity Network Index ── */}
                         {(() => {
                             // Collect all taxa from all samples (merged, summed)
@@ -3553,13 +4148,22 @@
                                 <li><strong>Index:</strong> Shannon (ln base), IPS (OMNIDIA compatible).</li>
                                 <li><strong>Stat Engine:</strong> Spearman Rank Correlation + Bootstrapping (1000 iter).</li>
                                 <li><strong>Competition Index (VI):</strong> VI_i = Σ(|Ai − Aj| / (Ai + Aj)).</li>
-                                <li><strong>Ω-ÖSI – Omega Ökológiai Stressz Index:</strong>{' '}
+                                <li><strong>Ω-ÖSI – Omega Ökológiai Stressz Index (ÖSI helyett):</strong>{' '}
                                     Ω_i = (1 − Σ_j[w_j · exp(−0.5·(x_i−μ_j)²/σ_j²) · Φ_j] + λ·H(X_i) + ξ·D_KL(P_i‖Q_i))
                                     / (mean(σ_j) + ε + γ·G_i + η·‖dx_i/dt‖).
                                     Paraméterek: x_i = rel. abundancia; μ_j = s/5; σ_j = max(0.1, v/5); w_j = Φ_j = 1;
                                     λ=0.15 (Shannon-súly); ξ=0.10 (KL-súly); γ=0.20 (gradiens-súly); η=0.10 (temporális súly); ε=1e-6;
                                     G_i = |s−3|/2; H = normált Shannon-entrópia; D_KL = KL-divergencia vs. egyenletes ref.;
                                     dx/dt = temporális abundancia-változás sebessége. Értelmezés: Ω &lt; 0.8 = alacsony stressz; 0.8–1.5 = közepes; &gt; 1.5 = magas.</li>
+                                <li><strong>wEFRF – Weighted Eco-Flow Resonance Function (Kiterjesztett):</strong>{' '}
+                                    wEFRF(t) = [1 − Π_j(w_Ej · E_j(t))] · Σ_ij[ M_i · w_R · R_ij · A_i(t) · A_j(t) · M_j ];
+                                    M_i = (w_mu·μ_i + w_K·K_i) · w_H(h_i) · w_T(t_i).
+                                    Fix: w_mu=0.6, w_K=0.4, w_R=1.0, w_E1=0.7, w_E2=0.5.
+                                    w_H = habitat-típus súly (0.20–1.00); w_T = funkcionális szerep súlya (0.10–1.00);
+                                    μ_i = s/5 (normált szenzitivitás); K_i = 1−rel.abund. (kolonizációs potenciál);
+                                    R_ij = 0.5 (azonos genus) / 1.0 (eltérő genus); E_j = normált env. stressz.
+                                    Értelmezés: &gt;0.8 = magas rezonancia / jó állapot; 0.4–0.8 = mérsékelt; &lt;0.4 = alacsony rezonancia.
+                                    Forrás: wEFRF_diatomas-1.docx (Kiterjesztett verzió: Habitat- és Típussúlyokkal).</li>
                             </ul>
                         </div>
 
@@ -4060,4 +4664,4 @@
         );
     </script>
 </body>
-</html>(
+</html>
